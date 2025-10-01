@@ -1,59 +1,49 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+// app/(tabs)/_layout.tsx
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Tabs } from "expo-router";
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+type RouteName = "index" | "recommend" | "mission" | "mypage";
 
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+const ICONS: Record<
+  RouteName,
+  readonly [/* outline */ string, /* filled */ string]
+> = {
+  index: ["home-outline", "home"],
+  recommend: ["thumbs-up-outline", "thumbs-up"],
+  mission: ["flag-outline", "flag"],
+  mypage: ["person-outline", "person"],
+} as const;
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
+      initialRouteName="index" // 첫 화면: 홈
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: "#111111",
+        tabBarInactiveTintColor: "#B0B0B0",
+        tabBarLabelStyle: { fontSize: 12 },
+        tabBarStyle: { height: 60, paddingBottom: 6, paddingTop: 6 },
+        tabBarIcon: ({ color, size, focused }) => {
+          const [outline, filled] = ICONS[route.name as RouteName] ?? [
+            "ellipse-outline",
+            "ellipse",
+          ];
+
+          return (
+            <Ionicons
+              name={(focused ? filled : outline) as any} // 리터럴 타입 보장, 안전하게 캐스팅
+              size={size ?? 22}
+              color={color}
+            />
+          );
+        },
+      })}
+    >
+      <Tabs.Screen name="index" options={{ title: "홈" }} />
+      <Tabs.Screen name="recommend" options={{ title: "추천" }} />
+      <Tabs.Screen name="mission" options={{ title: "미션" }} />
+      <Tabs.Screen name="mypage" options={{ title: "마이페이지" }} />
     </Tabs>
   );
 }
