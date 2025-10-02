@@ -1,8 +1,8 @@
 // app/_layout.tsx
-import "react-native-reanimated"; // 반드시 최상단, 한 번만
-import "../global.css";
+import 'react-native-reanimated' // 반드시 최상단, 한 번만
+import '../styles/global.css'
 
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router'
 
 export default function RootLayout() {
   return (
@@ -12,5 +12,5 @@ export default function RootLayout() {
       {/* 필요하면 모달 등 추가 */}
       {/* <Stack.Screen name="modal" options={{ presentation: "modal" }} /> */}
     </Stack>
-  );
+  )
 }
