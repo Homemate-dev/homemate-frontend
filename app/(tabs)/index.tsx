@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useMemo, useState } from 'react'
-import { Image, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Platform, Text, TouchableOpacity, View } from 'react-native'
 
 import Checkbox from '@/components/Checkbox'
+import TabSafeScroll from '@/components/TabSafeScroll'
 import { formatKoreanDate } from '@/libs/utils/date'
 
 import HomeCalendar from '../../components/HomeCalendar'
@@ -139,10 +140,7 @@ export default function HomeScreen() {
       {/* StatusBar 색상 지정 */}
       <StatusBar backgroundColor="#F8F8FA" />
 
-      <ScrollView
-        className="flex-1 bg-[#F8F8FA] px-5"
-        contentContainerStyle={{ paddingTop: androidTop, paddingBottom: 16 }}
-      >
+      <TabSafeScroll contentContainerStyle={{ paddingTop: androidTop }}>
         {/* 헤더 */}
         <View className="py-4 flex-row items-center justify-between">
           <Image
@@ -234,7 +232,7 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-      </ScrollView>
+      </TabSafeScroll>
     </>
   )
 }
