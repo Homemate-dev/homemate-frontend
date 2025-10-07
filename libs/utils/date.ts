@@ -6,6 +6,13 @@ export const toYMD = (d: Date): string => {
   return `${y}-${m}-${day}`
 }
 
+export const toYMD2 = (d: Date): string => {
+  const y = String(d.getFullYear()).slice(2) // '2025' → '25'
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}.${m}.${day}`
+}
+
 /** 날짜 또는 문자열에서 해당 월의 1일(YYYY-MM-01)을 반환 */
 export const toFirstDayOfMonth = (input: string | Date): string => {
   if (typeof input === 'string') {

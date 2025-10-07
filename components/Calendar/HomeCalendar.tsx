@@ -104,7 +104,7 @@ export default function HomeCalendar({ onSelect }: Props) {
   }, [selectedDate])
 
   return (
-    <View style={{ borderRadius: 12 }}>
+    <View style={{ borderRadius: 12, overflow: 'hidden' }}>
       <View style={{ borderRadius: 12, overflow: 'hidden' }}>
         <Calendar
           key={calendarKey}

@@ -7,7 +7,7 @@ import Checkbox from '@/components/Checkbox'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { formatKoreanDate } from '@/libs/utils/date'
 
-import HomeCalendar from '../../components/HomeCalendar'
+import HomeCalendar from '../../components/Calendar/HomeCalendar'
 
 type ChoreItem = {
   id: number
@@ -201,7 +201,7 @@ export default function HomeScreen() {
               {choresOfDay.length === 0 ? (
                 <Text className="text-base">사용자님의 하루 집안일을 계획해보세요</Text>
               ) : (
-                choresOfDay.map((item, idx) => (
+                choresOfDay.map((item) => (
                   <View key={item.id} className="flex-row items-center justify-between mb-3">
                     <View className="flex-row gap-3 items-center">
                       <Text
