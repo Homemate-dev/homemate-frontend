@@ -135,6 +135,14 @@ export default function HomeScreen() {
     return Math.round((done / total) * 100)
   }, [choresOfDay])
 
+  //집안일 있는 날짜 배열 만들기
+  const dotDates = useMemo(() => {
+    const s = new Set<string>()
+    chores.forEach((c) => s.add(c.dueDate))
+
+    return Array.from(s)
+  }, [chores])
+
   return (
     <>
       {/* StatusBar 색상 지정 */}
@@ -163,8 +171,8 @@ export default function HomeScreen() {
           <View className="bg-[#DDF4F6] px-5 py-3 rounded-2xl">
             <View className="flex-row items-center justify-between">
               <View className="flex gap-2">
-                <Text className="font-semibold text-[18px]">안녕하세요, 사용자님!</Text>
-                <Text className="text-[14px]">
+                <Text className="font-semibold text-xl">안녕하세요, 사용자님!</Text>
+                <Text className="text-base">
                   오늘의 집안일을 <Text className="font-bold text-[#46A1A6]">{progress}%</Text>{' '}
                   완료했어요.
                 </Text>
@@ -187,25 +195,30 @@ export default function HomeScreen() {
           </View>
 
           {/* 캘린더 */}
-          <View className="">
-            <HomeCalendar onSelect={setSelectedDate} />
+          <View>
+            <HomeCalendar onSelect={setSelectedDate} dotDates={dotDates} />
           </View>
           {/* 할일 내역 */}
           <View className="flex">
             <View className="flex-row gap-2 items-center mb-3">
-              <Text className="text-[18px] font-bold">{formatKoreanDate(selectedDate)}</Text>
-              <Text className="text-[16px]">집안일</Text>
+              <Text className="text-xl font-bold">{formatKoreanDate(selectedDate)}</Text>
+              <Text className="text-lg">집안일</Text>
             </View>
 
             <View className="bg-white rounded-2xl p-5">
               {choresOfDay.length === 0 ? (
                 <Text className="text-base">사용자님의 하루 집안일을 계획해보세요</Text>
               ) : (
-                choresOfDay.map((item) => (
-                  <View key={item.id} className="flex-row items-center justify-between mb-3">
+                choresOfDay.map((item, index) => (
+                  <View
+                    key={item.id}
+                    className={`flex-row items-center justify-between ${
+                      choresOfDay.length === 1 || index === choresOfDay.length - 1 ? '' : 'mb-3'
+                    }`}
+                  >
                     <View className="flex-row gap-3 items-center">
                       <Text
-                        className={`rounded-[6px] px-2 py-1 text-xs ${
+                        className={`rounded-[6px] px-2 py-[2px] text-sm ${
                           item.status === 'COMPLETED'
                             ? 'bg-[#CDCFD2] text-[#9B9FA6] '
                             : 'bg-[#DDF4F6] text-[#46A1A6] '
