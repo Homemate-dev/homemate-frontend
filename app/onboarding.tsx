@@ -44,21 +44,61 @@ export default function OnboardingScreen() {
       title: '여러분의 갓생은 어떠신가요?',
       subtitle: '우리의 멋진 일상은\n깨끗한 집에서부터 시작해요',
       image: require('../assets/images/card/ironing1.png'),
+      showQuote: true,
+      imageStyle: {
+        width: wp('55%'),
+        height: hp('38%'),
+        position: 'absolute',
+        right: wp('5%'),
+        bottom: hp('2.5%'),
+      },
     },
     {
       id: 2,
       title: '홈메이트가 집안일을 추천해드려요',
       subtitle:
-        '여러분의 건강과 관련된 집안일 설정을\n위해 다양한 집안일을 추천해요.',
-      image: require('../assets/images/card/ironing1.png'),
+        '여러분의 건강과 관련된 집안일 설정을 위해\n다양한 집안일을 추천해요.',
+      image: require('../assets/images/card/ironing2.png'),
+      showQuote: false,
+      imageStyle: {
+        width: wp('70%'),
+        height: hp('45%'),
+        position: 'relative',
+        right: 0,
+        alignSelf: 'center',
+        bottom: hp('-4%'),
+      },
     },
     {
       id: 3,
       title: '직접 집안일을 추가할 수 있어요',
-      subtitle:
-        '이미 알고 있는 일이 있다면 직접\n집안일 일정을 세우고 수정할 수 있어요.',
-      image: require('../assets/images/card/ironing1.png'),
-    },
+      subtitle: '이미 알고 있는 일이 있다면 직접\n집안일 일정을 세우고 수정할 수 있어요.',
+      image: require('../assets/images/card/ironing3.png'),
+      images: [
+      {
+        source: require('../assets/images/card/ironing3.png'),
+        style: {
+          width: wp('70%'),
+          height: hp('45%'),
+          position: 'relative',
+          right: 0,
+          alignSelf: 'center',
+          top: hp('-4%'),
+        },
+      },
+      {
+        source: require('../assets/images/card/ironing4.png'),
+        style: {
+          width: wp('70%'),
+          height: hp('45%'),
+          position: 'relative',
+          right: 0,
+          alignSelf: 'center',
+          bottom: hp('42.5%'),
+        },
+      },
+    ],
+  },
   ];
 
   const handleNext = () => {
@@ -101,56 +141,69 @@ export default function OnboardingScreen() {
               {/* 카드 */}
               <View style={styles.card}>
                 {/* 상단 문구 */}
-                <Text style={styles.quote}>
-                  “ 살림은 내 일상을{'\n'}잘 만들어가는 과정이다 ”
-                </Text>
+                {item.showQuote && (
+                  <>
+                    <Text style={styles.quote}>
+                      “ 살림은 내 일상을{'\n'}   잘 만들어가는 과정이다 ”
+                    </Text>
 
-                {/* 원형 그래프 + 이미지 (가로 배치) */}
-                <View style={styles.rowContainer}>
-                  {/* 원형 그래프 */}
-                  <View style={styles.circleContainer}>
-                    <Svg
-                      width={radius * 2 + strokeWidth}
-                      height={radius * 2 + strokeWidth}
-                    >
-                      <Circle
-                        cx={radius + strokeWidth / 2}
-                        cy={radius + strokeWidth / 2}
-                        r={radius}
-                        stroke="#B3F3F4"
-                        strokeWidth={strokeWidth}
-                        fill="none"
-                      />
-                      <AnimatedCircle
-                        cx={radius + strokeWidth / 2}
-                        cy={radius + strokeWidth / 2}
-                        r={radius}
-                        stroke="#3E7B7F"
-                        strokeWidth={strokeWidth}
-                        strokeDasharray={circumference}
-                        animatedProps={animatedProps}
-                        strokeLinecap="butt"
-                        rotation="-90"
-                        originX={radius + strokeWidth / 2}
-                        originY={radius + strokeWidth / 2}
-                        fill="none"
-                      />
-                    </Svg>
+                    <View style={styles.rowContainer}>
+                      {/* 원형 그래프 */}
+                      <View style={styles.circleContainer}>
+                        <Svg
+                          width={radius * 2 + strokeWidth}
+                          height={radius * 2 + strokeWidth}
+                        >
+                          <Circle
+                            cx={radius + strokeWidth / 2}
+                            cy={radius + strokeWidth / 2}
+                            r={radius}
+                            stroke="#B3F3F4"
+                            strokeWidth={strokeWidth}
+                            fill="none"
+                          />
+                          <AnimatedCircle
+                            cx={radius + strokeWidth / 2}
+                            cy={radius + strokeWidth / 2}
+                            r={radius}
+                            stroke="#3E7B7F"
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={circumference}
+                            animatedProps={animatedProps}
+                            strokeLinecap="butt"
+                            rotation="-90"
+                            originX={radius + strokeWidth / 2}
+                            originY={radius + strokeWidth / 2}
+                            fill="none"
+                          />
+                        </Svg>
 
-                    {/* 가운데 텍스트 */}
-                    <View style={styles.circleTextBox}>
-                      <Text style={styles.percentTop}>그렇다</Text>
-                      <Text style={styles.percentBottom}>{percentage}%</Text>
+                        <View style={styles.circleTextBox}>
+                          <Text style={styles.percentTop}>그렇다</Text>
+                          <Text style={styles.percentBottom}>{percentage}%</Text>
+                        </View>
+                      </View>
                     </View>
-                  </View>
-                 
-                </View>
-                 {/* 이미지 */}
-                  <Image
-                    source={item.image}
-                    style={styles.image}
-                    resizeMode="contain"
-                  />
+                  </>
+                )}
+
+              {/* 이미지 */}
+              {item.images
+                ? item.images.map((img: { source: any; style: any }, idx: number) => (
+                    <Image
+                      key={idx}
+                      source={img.source}
+                      style={img.style}
+                      resizeMode="contain"
+                    />
+                  ))
+                : (
+                    <Image
+                      source={item.image}
+                      style={item.imageStyle}
+                      resizeMode="contain"
+                    />
+                  )}
               </View>
             </View>
           )}
@@ -217,6 +270,7 @@ const styles = StyleSheet.create({
     marginBottom: hp('4%'),
     paddingHorizontal: wp('5%'),
     alignSelf: 'center',
+    overflow: 'hidden',
   },
   quote: {
     fontSize: hp('2%'),
@@ -252,13 +306,6 @@ const styles = StyleSheet.create({
     color: '#34797D',
     fontSize: hp('1.4%'),
     fontWeight: '600',
-  },
-  image: {
-    width: wp('55%'),
-    height: hp('38%'),
-    position: 'absolute',
-    right: wp('5%'),
-    bottom: hp('2.5%'),
   },
   paginationContainer: {
     position: 'absolute',
