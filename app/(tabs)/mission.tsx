@@ -1,38 +1,49 @@
 import { router } from 'expo-router'
+import { useState } from 'react'
 import { Image, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native'
 
 import BadgeCard from '@/components/Badge/BadgeCard'
 import TabSafeScroll from '@/components/TabSafeScroll'
 
 const mockMissions = [
-  { id: 'm1', title: '집안일 5개 완료하기', current: 1, target: 5 },
-  { id: 'm2', title: '설거지 10회 하기', current: 2, target: 10 },
-  { id: 'm3', title: '옷장 정리하기', current: 1, target: 1 },
+  { id: 1, title: '집안일 5개 완료하기', current: 1, target: 5 },
+  { id: 2, title: '설거지 10회 하기', current: 2, target: 10 },
+  { id: 3, title: '옷장 정리하기', current: 1, target: 1 },
 ]
 
 const mockBadges = [
   {
-    id: 'b1',
+    id: 1,
     title: '미션 7회 달성',
     current: 6,
-    goal: 7,
+    target: 7,
+    desc: '7개의 미션을 완료하면 받을 수 있는 도전 뱃지예요.',
+    icon: require('@/assets/images/chore-home.png'),
   },
   {
-    id: 'b2',
+    id: 2,
     title: '욕실 깔끔이',
     current: 28,
-    goal: 30,
+    target: 30,
+    desc: '욕실 청소 미션을 30회 완수하면 획득할 수 있는 청결의 상징 뱃지예요.',
+    icon: require('@/assets/images/chore-home.png'),
   },
   {
-    id: 'b3',
+    id: 3,
     title: '침실 반짝이',
     current: 89,
-    goal: 90,
+    target: 90,
+    desc: '침실 정리 미션을 90회 달성하면 얻을 수 있는 정리왕 뱃지예요.',
+    icon: require('@/assets/images/chore-home.png'),
   },
 ]
 
 export default function Mission() {
   const androidTop = Platform.OS === 'android' ? 50 : 0
+
+  // 뱃지 상세 보기
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const selected = mockBadges.find((badge) => badge.id === selectedId)
 
   // 미션 진행률
   const progress = (cur: number, tgt: number) =>
@@ -97,7 +108,7 @@ export default function Mission() {
               <View className="flex-row justify-between">
                 {mockBadges.map((b) => (
                   <View key={b.id} className="items-center">
-                    <TouchableOpacity>
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => setSelectedId(b.id)}>
                       <BadgeCard
                         icon={require('@/assets/images/chore-home.png')}
                         size={84}
@@ -106,8 +117,8 @@ export default function Mission() {
                     </TouchableOpacity>
                     <Text className="text-base text-[#4F5763] mt-2">{b.title}</Text>
                     <Text className="text-base text-[#B4B7BC] mt-2">
-                      <Text className="text-[#57C9D0] font-semibold">{b.current}회</Text> / {b.goal}
-                      회
+                      <Text className="text-[#57C9D0] font-semibold">{b.current}회</Text> /{' '}
+                      {b.target}회
                     </Text>
                   </View>
                 ))}
@@ -123,6 +134,9 @@ export default function Mission() {
           </View>
         </View>
       </TabSafeScroll>
+      {selected && (
+        <BadgeDetail badge={selected} variant="mission" onClose={() => setSelectedId(null)} />
+      )}
     </>
   )
 }
