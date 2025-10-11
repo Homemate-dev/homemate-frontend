@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
-import { Image, ImageSourcePropType, Modal, Pressable, StatusBar, Text, View } from 'react-native'
+import { Image, ImageSourcePropType, Modal, Pressable, Text, View } from 'react-native'
 
 export type Badge = {
   id: number
@@ -26,10 +26,9 @@ export default function BadgeDetail({ badge, variant, onClose }: Props) {
       transparent
       presentationStyle="overFullScreen"
       onRequestClose={onClose}
+      statusBarTranslucent // Android에서 상태바 위까지 모달 렌더
       hardwareAccelerated
     >
-      {/* 상태바 어둡게 (iOS/Android 모두 적용) */}
-      <StatusBar translucent backgroundColor="rgba(0,0,0,0.25)" />
       {/* 반투명 백드롭 */}
       <Pressable className="flex-1 inset-0 bg-black/25" onPress={onClose} />
 
@@ -57,11 +56,11 @@ export default function BadgeDetail({ badge, variant, onClose }: Props) {
             </Pressable>
           ) : (
             <>
-              <View className="flex-row">
-                <Text className="text-base font-semibold">달성도</Text>
+              <View className="flex-row mb-4">
+                <Text className="text-base font-semibold mr-2">달성도</Text>
                 <Text className="text-base text-[#B4B7BC]">
-                  <Text className="font-semibold text-[#57C9D0]">{badge.current}</Text> /{' '}
-                  {badge.target}
+                  <Text className="font-semibold text-[#57C9D0]">{badge.current}회</Text> /{' '}
+                  {badge.target}회
                 </Text>
               </View>
 

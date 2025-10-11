@@ -6,6 +6,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -51,7 +52,7 @@ export default function AddChoreModal() {
 
   return (
     <>
-      {/* <StatusBar backgroundColor="#F8F8FA" /> */}
+      <StatusBar backgroundColor="#F8F8FA" />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
