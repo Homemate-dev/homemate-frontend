@@ -226,13 +226,27 @@ export default function HomeScreen() {
                       >
                         매일
                       </Text>
-                      <Text
-                        className={`text-base ${
-                          item.status === 'COMPLETED' ? 'text-gray-400 line-through' : 'text-black'
-                        }`}
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/add-chore',
+                            params: {
+                              mode: 'edit',
+                            },
+                          })
+                        }
                       >
-                        {item.chore.title}
-                      </Text>
+                        <Text
+                          className={`text-base ${
+                            item.status === 'COMPLETED'
+                              ? 'text-gray-400 line-through'
+                              : 'text-black'
+                          }`}
+                        >
+                          {item.chore.title}
+                        </Text>
+                      </TouchableOpacity>
                     </View>
                     <Checkbox
                       checked={item.status === 'COMPLETED'}
