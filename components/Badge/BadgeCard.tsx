@@ -1,6 +1,6 @@
 import { Image, ImageSourcePropType } from 'react-native'
 
-import GradientSurface from './GradientSurface'
+import GradientSurface from '../Badge/GradientSurface'
 
 type BadgeCardProps = {
   icon: ImageSourcePropType
