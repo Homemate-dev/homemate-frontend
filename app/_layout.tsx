@@ -14,6 +14,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
         <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="start" options={{ headerShown: false }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(modals)" options={{ headerShown: false }} />

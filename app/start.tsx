@@ -1,25 +1,25 @@
-import { useRouter } from 'expo-router';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import Constants from "expo-constants";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 
 export default function StartScreen() {
-  const router = useRouter();
+  const extra = Constants?.expoConfig?.extra ?? {};
+  console.log("TEST:", extra.KAKAO_REST_API_KEY, extra.KAKAO_REDIRECT_URI);
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.logo, { fontFamily: 'PoetsenOne_400Regular' }]}>HOMEMATE</Text>
+      <Text style={[styles.logo, { fontFamily: "PoetsenOne_400Regular" }]}>HOMEMATE</Text>
       <Text style={styles.subtitle}>주기적인 청소생활 시작</Text>
 
       <Image
-        source={require('../assets/images/start/mop.png')}
+        source={require("../assets/images/start/mop.png")}
         style={styles.image}
         resizeMode="contain"
       />
 
-      {/* 카카오 로그인 버튼 (동작 없음) */}
       <TouchableOpacity style={styles.kakaoButton}>
         <Image
-          source={require('../assets/images/icon/kakao.png')}
+          source={require("../assets/images/icon/kakao.png")}
           style={styles.kakaoIcon}
         />
         <Text style={styles.kakaoText}>카카오톡으로 로그인</Text>
