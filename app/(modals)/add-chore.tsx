@@ -1,17 +1,18 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { router } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
 import { useMemo, useState } from 'react'
 import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
-  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import DatePickerCalendar from '@/components/Calendar/DatePickerCalendar'
 import ChoreDropdown from '@/components/Dropdown/ChoreDropdown'
@@ -20,6 +21,8 @@ import Toggle from '@/components/Toggle'
 import { toYMD2 } from '@/libs/utils/date'
 
 export default function AddChoreModal() {
+  const androidTop = Platform.OS === 'android' ? 50 : 0
+
   const [inputValue, setInputValue] = useState('')
 
   const ymdToYYMMDD = (ymd: string) => `${ymd.slice(2, 4)}.${ymd.slice(5, 7)}.${ymd.slice(8, 10)}`
@@ -51,12 +54,13 @@ export default function AddChoreModal() {
   const repeatOptions = ['안 함', '매일', '1주마다', '2주마다', '매달', '3개월마다', '6개월마다']
 
   return (
-    <>
-      <StatusBar backgroundColor="#F8F8FA" />
+    <SafeAreaView className="flex-1 " style={{ backgroundColor: 'skyblue' }}>
+      <StatusBar style="dark" backgroundColor="#F8F8FA" />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1 bg-[#F8F8FA]"
+        style={{ paddingTop: androidTop }}
       >
         <View className="flex-1 relative px-5">
           <ScrollView className="flex-1 pt-6 bg-[#F8F8FA]">
@@ -248,6 +252,6 @@ export default function AddChoreModal() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
-    </>
+    </SafeAreaView>
   )
 }
