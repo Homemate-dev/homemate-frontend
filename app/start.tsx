@@ -1,20 +1,28 @@
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
-import { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function StartScreen() {
   const [authCode, setAuthCode] = useState<string | null>(null);
   const extra = Constants?.expoConfig?.extra ?? {};
 
   const KAKAO_REST_API_KEY = extra.KAKAO_REST_API_KEY;
-  const KAKAO_REDIRECT_URI = extra.KAKAO_REDIRECT_URI;
+  const KAKAO_REDIRECT_URI =
+    Platform.OS === "web"
+      ? "http://localhost:3000" 
+      : "homemate://oauth"; 
 
   const handleKakaoLogin = async () => {
     try {
-      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=http://localhost:3000&response_type=code`;
+      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(
+        KAKAO_REDIRECT_URI
+      )}&response_type=code`;
+
       const result = await WebBrowser.openAuthSessionAsync(kakaoAuthUrl, KAKAO_REDIRECT_URI);
 
       if (result.type === "success" && result.url) {
@@ -34,22 +42,21 @@ export default function StartScreen() {
     }
   };
 
+  useEffect(() => {
+    if (authCode) {
+      Linking.openURL("http://localhost:3000");
+    }
+  }, [authCode]);
+
   return (
     <View style={styles.container}>
       <Text style={[styles.logo, { fontFamily: "PoetsenOne_400Regular" }]}>HOMEMATE</Text>
       <Text style={styles.subtitle}>주기적인 청소생활 시작</Text>
 
-      <Image
-        source={require("../assets/images/start/mop.png")}
-        style={styles.image}
-        resizeMode="contain"
-      />
+      <Image source={require("../assets/images/start/mop.png")} style={styles.image} resizeMode="contain" />
 
       <TouchableOpacity style={styles.kakaoButton} onPress={handleKakaoLogin}>
-        <Image
-          source={require("../assets/images/icon/kakao.png")}
-          style={styles.kakaoIcon}
-        />
+        <Image source={require("../assets/images/icon/kakao.png")} style={styles.kakaoIcon} />
         <Text style={styles.kakaoText}>카카오톡으로 로그인</Text>
       </TouchableOpacity>
 
