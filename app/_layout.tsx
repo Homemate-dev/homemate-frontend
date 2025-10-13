@@ -23,7 +23,8 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+      <SafeAreaView edges={['bottom']} className="flex-1 bg-[#F8F8FA]">
+
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="start" options={{ headerShown: false }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />

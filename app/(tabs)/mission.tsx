@@ -2,8 +2,7 @@ import { router } from 'expo-router'
 import { useState } from 'react'
 import { Image, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native'
 
-import BadgeCard from '@/components/BadgeCard'
-import BadgeDetail from '@/components/BadgeDetail'
+import BadgeCard from '@/components/Badge/BadgeCard'
 import TabSafeScroll from '@/components/TabSafeScroll'
 
 const mockMissions = [

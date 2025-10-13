@@ -1,7 +1,7 @@
 import { BlurView } from 'expo-blur'
 import { Image, ImageSourcePropType, Platform, View } from 'react-native'
 
-import GradientSurface from './GradientSurface'
+import GradientSurface from '../Badge/GradientSurface'
 
 type BadgeCardProps = {
   icon: ImageSourcePropType
