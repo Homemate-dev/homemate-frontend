@@ -6,6 +6,7 @@ export default function ModalsLayout() {
       screenOptions={{
         presentation: 'modal',
         headerShown: false,
+        contentStyle: { backgroundColor: '#F8F8FA' },
       }}
     />
   )
