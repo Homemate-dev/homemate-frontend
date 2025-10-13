@@ -144,9 +144,9 @@ export default function HomeScreen() {
   }, [chores])
 
   return (
-    <>
+    <View className="flex-1 bg-[#F8F8FA]">
       {/* StatusBar 색상 지정 */}
-      <StatusBar backgroundColor="#F8F8FA" />
+      <StatusBar style="dark" backgroundColor="#F8F8FA" />
 
       <TabSafeScroll contentContainerStyle={{ paddingTop: androidTop }}>
         {/* 헤더 */}
@@ -260,6 +260,6 @@ export default function HomeScreen() {
           </View>
         </View>
       </TabSafeScroll>
-    </>
+    </View>
   )
 }

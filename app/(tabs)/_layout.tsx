@@ -45,13 +45,14 @@ export default function TabsLayout() {
         tabBarActiveTintColor: '#57C9D0',
         tabBarInactiveTintColor: '#B4B7BC',
         tabBarLabelStyle: { fontSize: 12, fontWeight: 700, marginTop: 3 },
+        sceneContainerStyle: { backgroundColor: '#F8F8FA' },
         tabBarStyle: {
           height: Platform.OS === 'android' ? 72 : 60,
           paddingBottom: 6,
           paddingTop: 10,
           elevation: 0, // Android 기본 그림자 제거
           shadowOpacity: 0, // iOS 기본 그림자 제거
-          backgroundColor: 'transparent',
+          backgroundColor: '#F8F8FA',
           position: 'absolute',
           overflow: 'visible',
           borderTopWidth: 0,
