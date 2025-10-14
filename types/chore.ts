@@ -4,16 +4,6 @@
 
 export type RepeatType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
 
-export const REPEAT_OPTIONS = [
-  { label: '매일', type: 'DAILY', interval: 1 },
-  { label: '1주', type: 'WEEKLY', interval: 1 },
-  { label: '2주', type: 'WEEKLY', interval: 2 },
-  { label: '1개월', type: 'MONTHLY', interval: 1 },
-  { label: '3개월', type: 'MONTHLY', interval: 3 },
-  { label: '6개월', type: 'MONTHLY', interval: 6 },
-] as const
-export type RepeatOption = (typeof REPEAT_OPTIONS)[number]
-
 export type CreateChoreDTO = {
   title: string
   notification_yn: boolean // 알림 여부

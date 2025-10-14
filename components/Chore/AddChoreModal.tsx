@@ -17,12 +17,26 @@ import DatePickerCalendar from '@/components/Calendar/DatePickerCalendar'
 import ChoreDropdown from '@/components/Dropdown/ChoreDropdown'
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import Toggle from '@/components/Toggle'
+import useCreateChore from '@/libs/hooks/chore/useCreateChore'
+import useUpdateChore from '@/libs/hooks/chore/useUpdateChore'
 import { toYMD2 } from '@/libs/utils/date'
+import { toHHmm } from '@/libs/utils/time'
 
 import DeleteModal from '../DeleteModal'
 
 type Props = {
   mode: 'add' | 'edit'
+}
+
+function toRepeatFields(label: string | null) {
+  if (!label || label === '안 함') return { repeatType: 'NONE' as const, repeatInterval: 0 }
+  if (label === '매일') return { repeatType: 'DAILY' as const, repeatInterval: 1 }
+  if (label === '1주마다') return { repeatType: 'WEEKLY' as const, repeatInterval: 1 }
+  if (label === '2주마다') return { repeatType: 'WEEKLY' as const, repeatInterval: 2 }
+  if (label === '매달') return { repeatType: 'MONTHLY' as const, repeatInterval: 1 }
+  if (label === '3개월마다') return { repeatType: 'MONTHLY' as const, repeatInterval: 3 }
+  if (label === '6개월마다') return { repeatType: 'MONTHLY' as const, repeatInterval: 6 }
+  return { repeatType: 'NONE' as const, repeatInterval: 0 }
 }
 
 export default function AddChoreModal({ mode }: Props) {
@@ -44,11 +58,45 @@ export default function AddChoreModal({ mode }: Props) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
   const [notifyOn, setNotifyOn] = useState(false)
+  const [ampm, setAmpm] = useState<'오전' | '오후'>('오전')
+  const [hour12, setHour12] = useState<number>(9)
+  const [minute, setMinute] = useState<number>(0)
 
   // 삭제 버튼 클릭
   const [deleteOpen, setDeleteOpen] = useState(false)
 
   const maxLength = 20
+
+  // api 훅
+  const { mutate: createChore, isPending: creating } = useCreateChore()
+  const { mutate: updateChore, isPending: updating } = useUpdateChore()
+
+  const canSubmit =
+    Boolean(inputValue.trim()) &&
+    Boolean(space) &&
+    Boolean(startDate) &&
+    (!notifyOn || (ampm && hour12 && minute >= 0))
+
+  const onSubmit = () => {
+    if (!canSubmit) return
+
+    if (mode === 'add') {
+      const hhmm = toHHmm(ampm, hour12, minute)
+      const { repeatType, repeatInterval } = toRepeatFields(repeat)
+
+      createChore({
+        title: inputValue.trim(),
+        notification_yn: notifyOn,
+        notification_time: hhmm,
+        space: space!,
+        repeatType: repeatType,
+        repeatInterval: repeatInterval,
+        startDate: startDate!,
+        endDate: endDate ?? startDate!,
+      })
+    } else if (mode === 'edit') {
+    }
+  }
 
   const chores = [
     { id: 1, title: '이불 빨래하기' },
@@ -260,6 +308,14 @@ export default function AddChoreModal({ mode }: Props) {
 
                 {notifyOn && (
                   <TimeDropdown
+                    ampm={ampm}
+                    hour={hour12}
+                    minute={minute}
+                    onChange={({ ampm, hour, minute }) => {
+                      setAmpm(ampm)
+                      setHour12(hour)
+                      setMinute(minute)
+                    }}
                     activeDropdown={activeDropdown}
                     setActiveDropdown={setActiveDropdown}
                   />
@@ -268,7 +324,11 @@ export default function AddChoreModal({ mode }: Props) {
             </View>
           </ScrollView>
           {/* 등록 버튼 */}
-          <Pressable className="h-[52px] bg-[#57C9D0] rounded-xl flex items-center justify-center mb-3">
+          <Pressable
+            onPress={onSubmit}
+            disabled={!canSubmit || creating || updating}
+            className="h-[52px] bg-[#57C9D0] rounded-xl flex items-center justify-center mb-3"
+          >
             <Text className="text-lg font-semibold text-white">{btnLabel}</Text>
           </Pressable>
         </View>

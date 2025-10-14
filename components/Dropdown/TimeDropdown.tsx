@@ -1,25 +1,32 @@
-import { type Dispatch, type SetStateAction, useMemo, useState } from 'react'
+import { type Dispatch, type SetStateAction, useMemo } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 
 type DropdownId = 'ampm' | 'hour' | 'minute'
 
 type Props = {
+  ampm: '오전' | '오후'
+  hour: number
+  minute: number
+  onChange: (v: { ampm: '오전' | '오후'; hour: number; minute: number }) => void
   activeDropdown: string | null
   setActiveDropdown: Dispatch<SetStateAction<string | null>>
 }
 
-export default function TimeDropdown({ activeDropdown, setActiveDropdown }: Props) {
-  const [ampm, setAmpm] = useState<'오전' | '오후'>('오전')
-  const [hour, setHour] = useState('9')
-  const [minute, setMinute] = useState('10')
-
+export default function TimeDropdown({
+  ampm,
+  hour,
+  minute,
+  onChange,
+  activeDropdown,
+  setActiveDropdown,
+}: Props) {
   const toggleDropdown = (id: DropdownId) => {
     setActiveDropdown((prev) => (prev === id ? null : id))
   }
 
   const ampmOptions: ('오전' | '오후')[] = ['오전', '오후']
   const hourOptions = useMemo(
-    () => Array.from({ length: 12 }, (_, i) => String(i + 1)), // 1..12
+    () => Array.from({ length: 12 }, (_, i) => i + 1), // 1..12
     []
   )
   const minuteOptions = useMemo(
@@ -36,20 +43,23 @@ export default function TimeDropdown({ activeDropdown, setActiveDropdown }: Prop
         </Pressable>
         {activeDropdown === 'ampm' && (
           <View className="absolute left-0 top-[45px] z-50  w-[75px] border border-[#57C9D0] px-[10px] py-1 bg-white rounded-md">
-            {ampmOptions.map((opt) => (
-              <Pressable
-                key={opt}
-                onPress={() => {
-                  setAmpm(opt)
-                  setActiveDropdown(null)
-                }}
-                className="items-center justify-center px-1 py-1"
-              >
-                <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
-                  {opt}
-                </Text>
-              </Pressable>
-            ))}
+            {ampmOptions.map((opt) => {
+              const selected = opt === ampm
+              return (
+                <Pressable
+                  key={opt}
+                  onPress={() => {
+                    onChange({ ampm: opt, hour, minute })
+                    setActiveDropdown(null)
+                  }}
+                  className={`items-center justify-center px-1 py-1 rounded ${selected ? 'bg-[#EBF9F9]' : ''}`}
+                >
+                  <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
+                    {opt}
+                  </Text>
+                </Pressable>
+              )
+            })}
           </View>
         )}
       </View>
@@ -63,20 +73,23 @@ export default function TimeDropdown({ activeDropdown, setActiveDropdown }: Prop
 
           {activeDropdown === 'hour' && (
             <ScrollView className="absolute left-0 top-[45px] z-50  w-[75px] h-[152px] border border-[#57C9D0] px-[10px] py-1 bg-white rounded-md">
-              {hourOptions.map((opt) => (
-                <Pressable
-                  key={opt}
-                  onPress={() => {
-                    setHour(opt)
-                    setActiveDropdown(null)
-                  }}
-                  className="items-center justify-center px-1 py-1"
-                >
-                  <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
-                    {opt}
-                  </Text>
-                </Pressable>
-              ))}
+              {hourOptions.map((opt) => {
+                const selected = opt === hour
+                return (
+                  <Pressable
+                    key={opt}
+                    onPress={() => {
+                      onChange({ ampm, hour: opt, minute })
+                      setActiveDropdown(null)
+                    }}
+                    className={`items-center justify-center px-1 py-1 rounded ${selected ? 'bg-[#EBF9F9]' : ''}`}
+                  >
+                    <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
+                      {opt}
+                    </Text>
+                  </Pressable>
+                )
+              })}
             </ScrollView>
           )}
         </View>
@@ -87,24 +100,27 @@ export default function TimeDropdown({ activeDropdown, setActiveDropdown }: Prop
       <View className="flex-row items-center">
         <View className="bg-[#EBF9F9] px-[10px] py-1 w-[75px] h-[40px] rounded-[6px] items-center justify-center">
           <Pressable onPress={() => toggleDropdown('minute')}>
-            <Text className="text-[#46A1A6] text-base">{minute}</Text>
+            <Text className="text-[#46A1A6] text-base">{String(minute).padStart(2, '0')}</Text>
           </Pressable>
           {activeDropdown === 'minute' && (
             <ScrollView className="absolute left-0 top-[45px] z-50  w-[75px] h-[152px] border border-[#57C9D0] px-[10px] py-1 bg-white rounded-md">
-              {minuteOptions.map((opt) => (
-                <Pressable
-                  key={opt}
-                  onPress={() => {
-                    setMinute(opt)
-                    setActiveDropdown(null)
-                  }}
-                  className="items-center justify-center px-1 py-1"
-                >
-                  <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
-                    {opt}
-                  </Text>
-                </Pressable>
-              ))}
+              {minuteOptions.map((opt) => {
+                const selected = opt === String(minute)
+                return (
+                  <Pressable
+                    key={opt}
+                    onPress={() => {
+                      onChange({ ampm, hour, minute: Number(opt) })
+                      setActiveDropdown(null)
+                    }}
+                    className={`items-center justify-center px-1 py-1 rounded ${selected ? 'bg-[#EBF9F9]' : ''}`}
+                  >
+                    <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
+                      {opt}
+                    </Text>
+                  </Pressable>
+                )
+              })}
             </ScrollView>
           )}
         </View>
