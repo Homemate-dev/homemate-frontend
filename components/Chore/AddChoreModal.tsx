@@ -17,6 +17,7 @@ import DatePickerCalendar from '@/components/Calendar/DatePickerCalendar'
 import ChoreDropdown from '@/components/Dropdown/ChoreDropdown'
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import Toggle from '@/components/Toggle'
+import { toApiError } from '@/libs/api/error'
 import useCreateChore from '@/libs/hooks/chore/useCreateChore'
 import useUpdateChore from '@/libs/hooks/chore/useUpdateChore'
 import { toYMD2 } from '@/libs/utils/date'
@@ -84,16 +85,28 @@ export default function AddChoreModal({ mode }: Props) {
       const hhmm = toHHmm(ampm, hour12, minute)
       const { repeatType, repeatInterval } = toRepeatFields(repeat)
 
-      createChore({
-        title: inputValue.trim(),
-        notification_yn: notifyOn,
-        notification_time: hhmm,
-        space: space!,
-        repeatType: repeatType,
-        repeatInterval: repeatInterval,
-        startDate: startDate!,
-        endDate: endDate ?? startDate!,
-      })
+      createChore(
+        {
+          title: inputValue.trim(),
+          notification_yn: notifyOn,
+          notification_time: hhmm,
+          space: space!,
+          repeatType: repeatType,
+          repeatInterval: repeatInterval,
+          startDate: startDate!,
+          endDate: endDate ?? startDate!,
+        },
+        {
+          onSuccess: () => router.back(),
+          onError: (error) => {
+            const { code, message, details } = toApiError(error)
+            const uiMsg = details?.[0]?.message ?? message
+
+            // TODO: 프로젝트 토스트로 교체
+            console.warn('[createChore error]', code, uiMsg)
+          },
+        }
+      )
     } else if (mode === 'edit') {
     }
   }
