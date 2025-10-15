@@ -27,6 +27,7 @@ import DeleteModal from '../DeleteModal'
 
 type Props = {
   mode: 'add' | 'edit'
+  choreId?: number
 }
 
 function toRepeatFields(label: string | null) {
@@ -40,7 +41,7 @@ function toRepeatFields(label: string | null) {
   return { repeatType: 'NONE' as const, repeatInterval: 0 }
 }
 
-export default function AddChoreModal({ mode }: Props) {
+export default function AddChoreModal({ mode, choreId }: Props) {
   const [inputValue, setInputValue] = useState('')
 
   const ymdToYYMMDD = (ymd: string) => `${ymd.slice(2, 4)}.${ymd.slice(5, 7)}.${ymd.slice(8, 10)}`
@@ -81,10 +82,10 @@ export default function AddChoreModal({ mode }: Props) {
   const onSubmit = () => {
     if (!canSubmit) return
 
-    if (mode === 'add') {
-      const hhmm = toHHmm(ampm, hour12, minute)
-      const { repeatType, repeatInterval } = toRepeatFields(repeat)
+    const hhmm = toHHmm(ampm, hour12, minute)
+    const { repeatType, repeatInterval } = toRepeatFields(repeat)
 
+    if (mode === 'add') {
       createChore(
         {
           title: inputValue.trim(),
@@ -108,6 +109,34 @@ export default function AddChoreModal({ mode }: Props) {
         }
       )
     } else if (mode === 'edit') {
+      if (!choreId) return
+
+      updateChore(
+        {
+          choreId,
+          dto: {
+            title: inputValue.trim(),
+            notification_yn: notifyOn,
+            notification_time: hhmm,
+            space: space!,
+            repeatType,
+            repeatInterval,
+            startDate: startDate!,
+            endDate: endDate ?? startDate!,
+            isUpdateAll: false,
+          },
+        },
+        {
+          onSuccess: () => router.back(),
+          onError: (error) => {
+            const { code, message, details } = toApiError(error)
+            const uiMsg = details?.[0]?.message ?? message
+
+            // TODO: 프로젝트 토스트로 교체
+            console.warn('[updateChore error]', code, uiMsg)
+          },
+        }
+      )
     }
   }
 
