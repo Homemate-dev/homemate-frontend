@@ -5,7 +5,8 @@ import { Image, Platform, Text, TouchableOpacity, View } from 'react-native'
 
 import Checkbox from '@/components/Checkbox'
 import TabSafeScroll from '@/components/TabSafeScroll'
-import { formatKoreanDate } from '@/libs/utils/date'
+import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
+import { formatKoreanDate, getMonthRange } from '@/libs/utils/date'
 
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
 
@@ -108,6 +109,10 @@ export default function HomeScreen() {
 
   const [chores, setChores] = useState<ChoreItem[]>(dummyChoreList)
 
+  const [range, setRange] = useState(() => getMonthRange(selectedDate))
+
+  const { data: dotDates = [] } = useChoreCalendar(range.start, range.end)
+
   // 선택 날짜의 집안일만 필터
   const choresOfDay = useMemo(
     () => chores.filter((c) => c.dueDate === selectedDate),
@@ -134,14 +139,6 @@ export default function HomeScreen() {
     const done = choresOfDay.filter((c) => c.status === 'COMPLETED').length
     return Math.round((done / total) * 100)
   }, [choresOfDay])
-
-  //집안일 있는 날짜 배열 만들기
-  const dotDates = useMemo(() => {
-    const s = new Set<string>()
-    chores.forEach((c) => s.add(c.dueDate))
-
-    return Array.from(s)
-  }, [chores])
 
   return (
     <View className="flex-1 bg-[#F8F8FA]">
@@ -196,7 +193,11 @@ export default function HomeScreen() {
 
           {/* 캘린더 */}
           <View>
-            <HomeCalendar onSelect={setSelectedDate} dotDates={dotDates} />
+            <HomeCalendar
+              onSelect={setSelectedDate}
+              dotDates={dotDates}
+              onMonthChangeRange={(start, end) => setRange({ start, end })}
+            />
           </View>
           {/* 할일 내역 */}
           <View className="flex">
