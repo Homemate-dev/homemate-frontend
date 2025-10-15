@@ -131,8 +131,8 @@ export default function HomeCalendar({ onSelect, dotDates = [], onMonthChangeRan
           const first = `${d.year}-${String(d.month).padStart(2, '0')}-01`
           setCurrentMonthStr(first)
 
-          const last = new Date(d.year, d.month, 0) // 다음달 0일 = 말일
-          const pad = (n: number) => String(n).padStart(2, '0')
+          const last = new Date(d.year, d.month, 0) // 다음달 0일 = 말일 -> new Date(year, monthIndex, day)
+          const pad = (n: number) => String(n).padStart(2, '0') 
           const end = `${last.getFullYear()}-${pad(last.getMonth() + 1)}-${pad(last.getDate())}`
 
           onMonthChangeRange?.(first, end)
