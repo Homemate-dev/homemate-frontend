@@ -75,6 +75,8 @@ export type responseChoreByDate = {
   choreId: number
   titleSnapshot: string
   dueDate: string
+  repeatType: RepeatType
+  repeatInterval: number
   notificationTime: string
   status: statusType
   completedAt: string | null

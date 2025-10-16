@@ -5,93 +5,12 @@ import { Image, Platform, Text, TouchableOpacity, View } from 'react-native'
 
 import Checkbox from '@/components/Checkbox'
 import TabSafeScroll from '@/components/TabSafeScroll'
+import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
+import { useChoreByDate } from '@/libs/hooks/chore/useChoreByDate'
 import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
 import { formatKoreanDate, getMonthRange } from '@/libs/utils/date'
 
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
-
-type ChoreItem = {
-  id: number
-  choreId: number
-  dueDate: string
-  status: 'PENDING' | 'COMPLETED'
-  completedAt: string | null
-  chore: {
-    title: string
-    notification_yn: boolean
-  }
-}
-
-export const dummyChoreList: ChoreItem[] = [
-  {
-    id: 1,
-    choreId: 1,
-    dueDate: '2025-10-02',
-    status: 'PENDING',
-    completedAt: null,
-    chore: {
-      title: '옷장 제습제 교체하기',
-      notification_yn: true,
-    },
-  },
-
-  {
-    id: 2,
-    choreId: 2,
-    dueDate: '2025-10-05',
-    status: 'COMPLETED',
-    completedAt: '2025-10-05T11:40:00',
-    chore: {
-      title: '화분 물주기',
-      notification_yn: false,
-    },
-  },
-  {
-    id: 3,
-    choreId: 3,
-    dueDate: '2025-10-05',
-    status: 'PENDING',
-    completedAt: null,
-    chore: {
-      title: '욕실 청소하기',
-      notification_yn: true,
-    },
-  },
-  {
-    id: 4,
-    choreId: 4,
-    dueDate: '2025-10-05',
-    status: 'PENDING',
-    completedAt: null,
-    chore: {
-      title: '냉장고 정리하기',
-      notification_yn: false,
-    },
-  },
-  {
-    id: 5,
-    choreId: 5,
-    dueDate: '2025-10-05',
-    status: 'COMPLETED',
-    completedAt: '2025-10-05T14:00:00',
-    chore: {
-      title: '거실 정리하기',
-      notification_yn: true,
-    },
-  },
-
-  {
-    id: 6,
-    choreId: 6,
-    dueDate: '2025-10-07',
-    status: 'PENDING',
-    completedAt: null,
-    chore: {
-      title: '창문 닦기',
-      notification_yn: true,
-    },
-  },
-]
 
 export default function HomeScreen() {
   const androidTop = Platform.OS === 'android' ? 50 : 0
@@ -106,18 +25,11 @@ export default function HomeScreen() {
   }, [])
 
   const [selectedDate, setSelectedDate] = useState<string>(todayStr)
-
-  const [chores, setChores] = useState<ChoreItem[]>(dummyChoreList)
-
   const [range, setRange] = useState(() => getMonthRange(selectedDate))
 
+  // api
   const { data: dotDates = [] } = useChoreCalendar(range.start, range.end)
-
-  // 선택 날짜의 집안일만 필터
-  const choresOfDay = useMemo(
-    () => chores.filter((c) => c.dueDate === selectedDate),
-    [chores, selectedDate]
-  )
+  const { data: choresList = [], isLoading, isError } = useChoreByDate(selectedDate)
 
   const toggleChore = (id: number) => {
     setChores((prev) =>
@@ -132,13 +44,14 @@ export default function HomeScreen() {
       )
     )
   }
+
   // 선택 날짜 기준 진행률
   const progress = useMemo(() => {
-    const total = choresOfDay.length
+    const total = choresList.length
     if (!total) return 0
-    const done = choresOfDay.filter((c) => c.status === 'COMPLETED').length
+    const done = choresList.filter((c) => c.status === 'COMPLETED').length
     return Math.round((done / total) * 100)
-  }, [choresOfDay])
+  }, [choresList])
 
   return (
     <View className="flex-1 bg-[#F8F8FA]">
@@ -207,55 +120,62 @@ export default function HomeScreen() {
             </View>
 
             <View className="bg-white rounded-2xl p-5">
-              {choresOfDay.length === 0 ? (
+              {isLoading && <Text className="text-base">집안일 내역을 불러오는 중입니다.</Text>}
+              {isError && <Text className="text-base">집안일 내역 불러오기에 실패했습니다.</Text>}
+              {!isLoading && !isError && choresList.length === 0 ? (
                 <Text className="text-base">사용자님의 하루 집안일을 계획해보세요</Text>
               ) : (
-                choresOfDay.map((item, index) => (
-                  <View
-                    key={item.id}
-                    className={`flex-row items-center justify-between ${
-                      choresOfDay.length === 1 || index === choresOfDay.length - 1 ? '' : 'mb-3'
-                    }`}
-                  >
-                    <View className="flex-row gap-3 items-center">
-                      <Text
-                        className={`rounded-[6px] px-2 py-[2px] text-sm ${
-                          item.status === 'COMPLETED'
-                            ? 'bg-[#CDCFD2] text-[#9B9FA6] '
-                            : 'bg-[#DDF4F6] text-[#46A1A6] '
-                        }  `}
-                      >
-                        매일
-                      </Text>
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() =>
-                          router.push({
-                            pathname: '/add-chore',
-                            params: {
-                              mode: 'edit',
-                            },
-                          })
-                        }
-                      >
+                choresList.map((item, index) => {
+                  const key = getRepeatKey(item.repeatType, item.repeatInterval)
+                  const repeat = REPEAT_STYLE[key] ?? REPEAT_STYLE['NONE-0']
+
+                  return (
+                    <View
+                      key={item.id}
+                      className={`flex-row items-center justify-between ${
+                        choresList.length === 1 || index === choresList.length - 1 ? '' : 'mb-3'
+                      }`}
+                    >
+                      <View className="flex-row gap-3 items-center">
                         <Text
-                          className={`text-base ${
+                          className={`rounded-[6px] px-2 py-[2px] text-sm ${
                             item.status === 'COMPLETED'
-                              ? 'text-gray-400 line-through'
-                              : 'text-black'
-                          }`}
+                              ? 'bg-[#CDCFD2] text-[#9B9FA6] '
+                              : repeat.color
+                          }  `}
                         >
-                          {item.chore.title}
+                          {repeat.label}
                         </Text>
-                      </TouchableOpacity>
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          onPress={() =>
+                            router.push({
+                              pathname: '/add-chore',
+                              params: {
+                                mode: 'edit',
+                              },
+                            })
+                          }
+                        >
+                          <Text
+                            className={`text-base ${
+                              item.status === 'COMPLETED'
+                                ? 'text-gray-400 line-through'
+                                : 'text-black'
+                            }`}
+                          >
+                            {item.titleSnapshot}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      <Checkbox
+                        checked={item.status === 'COMPLETED'}
+                        onChange={() => toggleChore(item.id)}
+                        size={20}
+                      />
                     </View>
-                    <Checkbox
-                      checked={item.status === 'COMPLETED'}
-                      onChange={() => toggleChore(item.id)}
-                      size={20}
-                    />
-                  </View>
-                ))
+                  )
+                })
               )}
             </View>
           </View>

@@ -21,6 +21,7 @@ import { toApiError } from '@/libs/api/error'
 import useCreateChore from '@/libs/hooks/chore/useCreateChore'
 import useUpdateChore from '@/libs/hooks/chore/useUpdateChore'
 import { toYMD2 } from '@/libs/utils/date'
+import { toRepeatFields } from '@/libs/utils/repeat'
 import { toHHmm } from '@/libs/utils/time'
 
 import DeleteModal from '../DeleteModal'
@@ -28,17 +29,6 @@ import DeleteModal from '../DeleteModal'
 type Props = {
   mode: 'add' | 'edit'
   choreId?: number
-}
-
-function toRepeatFields(label: string | null) {
-  if (!label || label === '안 함') return { repeatType: 'NONE' as const, repeatInterval: 0 }
-  if (label === '매일') return { repeatType: 'DAILY' as const, repeatInterval: 1 }
-  if (label === '1주마다') return { repeatType: 'WEEKLY' as const, repeatInterval: 1 }
-  if (label === '2주마다') return { repeatType: 'WEEKLY' as const, repeatInterval: 2 }
-  if (label === '매달') return { repeatType: 'MONTHLY' as const, repeatInterval: 1 }
-  if (label === '3개월마다') return { repeatType: 'MONTHLY' as const, repeatInterval: 3 }
-  if (label === '6개월마다') return { repeatType: 'MONTHLY' as const, repeatInterval: 6 }
-  return { repeatType: 'NONE' as const, repeatInterval: 0 }
 }
 
 export default function AddChoreModal({ mode, choreId }: Props) {
