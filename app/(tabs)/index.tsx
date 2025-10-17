@@ -8,6 +8,7 @@ import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import { useChoreByDate } from '@/libs/hooks/chore/useChoreByDate'
 import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
+import { usePatchChoreStatus } from '@/libs/hooks/chore/usePatchChoreStatus'
 import { formatKoreanDate, getMonthRange } from '@/libs/utils/date'
 
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
@@ -30,20 +31,7 @@ export default function HomeScreen() {
   // api
   const { data: dotDates = [] } = useChoreCalendar(range.start, range.end)
   const { data: choresList = [], isLoading, isError } = useChoreByDate(selectedDate)
-
-  const toggleChore = (id: number) => {
-    setChores((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              status: item.status === 'PENDING' ? 'COMPLETED' : 'PENDING',
-              completedAt: item.status === 'PENDING' ? new Date().toISOString() : null,
-            }
-          : item
-      )
-    )
-  }
+  const { mutate: choreStatus } = usePatchChoreStatus(selectedDate)
 
   // 선택 날짜 기준 진행률
   const progress = useMemo(() => {
@@ -155,6 +143,7 @@ export default function HomeScreen() {
                                 mode: 'edit',
                                 instanceId: String(item.id),
                                 choreId: String(item.choreId),
+                                selectedDate,
                               },
                             })
                           }
@@ -172,7 +161,7 @@ export default function HomeScreen() {
                       </View>
                       <Checkbox
                         checked={item.status === 'COMPLETED'}
-                        onChange={() => toggleChore(item.id)}
+                        onChange={() => choreStatus(item.id)}
                         size={20}
                       />
                     </View>

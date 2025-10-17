@@ -1,10 +1,12 @@
-import { api } from "../axios";
-import { CHORE_ENDPOINTS } from "../endpoints";
+import { responseChoreByDate } from '@/types/chore'
 
-export async function getChoreByDate (date: string) {
-    const { data } = await api.get(CHORE_ENDPOINTS.LIST_BY_DATE, {
-        params: {date}
-    })
+import { api } from '../axios'
+import { CHORE_ENDPOINTS } from '../endpoints'
 
-    return data
+export async function getChoreByDate(date: string) {
+  const { data } = await api.get<responseChoreByDate[]>(CHORE_ENDPOINTS.LIST_BY_DATE, {
+    params: { date },
+  })
+
+  return data
 }

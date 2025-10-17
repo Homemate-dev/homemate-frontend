@@ -20,6 +20,7 @@ import Toggle from '@/components/Toggle'
 import { toApiError } from '@/libs/api/error'
 import { useChoreDetail } from '@/libs/hooks/chore/useChoreDetail'
 import useCreateChore from '@/libs/hooks/chore/useCreateChore'
+import { useDeleteChore } from '@/libs/hooks/chore/useDeleteChore'
 import useUpdateChore from '@/libs/hooks/chore/useUpdateChore'
 import { toYMD2 } from '@/libs/utils/date'
 import { toRepeatFields, toRepeatLabel } from '@/libs/utils/repeat'
@@ -33,7 +34,13 @@ export default function AddChoreModal() {
     mode: modeParam,
     instanceId: instanceIdParam,
     choreId: choreIdParam,
-  } = useLocalSearchParams<{ mode?: string; instanceId?: string; choreId?: string }>()
+    selectedDate: selectedDateParam,
+  } = useLocalSearchParams<{
+    mode?: string
+    instanceId?: string
+    choreId?: string
+    selectedDate?: string
+  }>()
 
   const isEdit = (modeParam ?? 'add') === 'edit'
   const instanceId = instanceIdParam ? Number(instanceIdParam) : undefined
@@ -70,6 +77,7 @@ export default function AddChoreModal() {
   // ---------- API 훅 ----------
   const { mutate: createChore, isPending: creating } = useCreateChore()
   const { mutate: updateChore, isPending: updating } = useUpdateChore()
+  const { mutate: deleteChore, isPending: deleting } = useDeleteChore()
 
   // add 모드면 0, edit 모드 + 값 있으면 해당 instanceId
   const instanceKey = isEdit && instanceId ? instanceId : 0
@@ -98,6 +106,7 @@ export default function AddChoreModal() {
     Boolean(startDate) &&
     (!notifyOn || (ampm && hour12 && minute >= 0))
 
+  // 등록 및 수정하기 핸들러
   const onSubmit = () => {
     if (!canSubmit) return
 
@@ -160,6 +169,39 @@ export default function AddChoreModal() {
     }
   }
 
+  // 삭제 핸들러
+  const handleDelete = (applyToAll: boolean) => {
+    if (!isEdit || !instanceId) return
+
+    if (!selectedDateParam) {
+      console.warn('선택된 날짜 누락-다시 시도해주세요')
+      return
+    }
+
+    deleteChore(
+      {
+        choreInstanceId: instanceId,
+        selectedDate: selectedDateParam,
+        applyToAll,
+      },
+
+      {
+        onSuccess: () => {
+          setDeleteOpen(false)
+          router.back()
+        },
+
+        onError: (error) => {
+          const { code, message, details } = toApiError(error)
+          const uiMsg = details?.[0]?.message ?? message
+
+          // TODO: 프로젝트 토스트로 교체
+          console.warn('[updateChore error]', code, uiMsg)
+        },
+      }
+    )
+  }
+
   const chores = [
     { id: 1, title: '이불 빨래하기' },
     { id: 2, title: '옷장 제습제 교체하기' },
@@ -203,11 +245,19 @@ export default function AddChoreModal() {
                   <TouchableOpacity
                     onPress={() => setDeleteOpen(true)}
                     className="absolute right-0"
+                    disabled={deleting}
                   >
                     <Text className="text-base text-[#57C9D0] font-semibold">삭제</Text>
                   </TouchableOpacity>
 
-                  <DeleteModal visible={deleteOpen} onClose={() => setDeleteOpen(false)} />
+                  <DeleteModal
+                    visible={deleteOpen}
+                    onClose={() => setDeleteOpen(false)}
+                    onDeleteOnly={() => handleDelete(false)}
+                    onDeleteAll={() => handleDelete(true)}
+                    loading={deleting} // 삭제 중이면 버튼 로딩/비활성화
+                    repeatType={detail?.repeatType}
+                  />
                 </>
               )}
             </View>

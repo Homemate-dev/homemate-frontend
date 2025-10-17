@@ -88,3 +88,19 @@ export type responseChoreByDate = {
  * 캘린더 집안일 유무 확인
  */
 export type ChoreCalendarDates = string[]
+
+/**
+ * 집안일 완료/해제
+ */
+
+export type ResponseChoreInstance = {
+  id: number
+  choreId: number
+  titleSnapshot: string
+  dueDate: string
+  notificationTime: string
+  choreStatus: statusType
+  completedAt: string | null
+  createdAt: string
+  updatedAt: string | null
+}
