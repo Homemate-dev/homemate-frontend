@@ -153,6 +153,8 @@ export default function HomeScreen() {
                               pathname: '/add-chore',
                               params: {
                                 mode: 'edit',
+                                instanceId: String(item.id),
+                                choreId: String(item.choreId),
                               },
                             })
                           }

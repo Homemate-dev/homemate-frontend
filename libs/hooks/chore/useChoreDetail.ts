@@ -7,7 +7,7 @@ export function useChoreDetail(choreInstanceId: number) {
   return useQuery<responseChoreDetail>({
     queryKey: ['chore', 'detail', choreInstanceId],
     queryFn: () => getChoreDetail(choreInstanceId),
-    enabled: !!choreInstanceId,
+    enabled: !!choreInstanceId, // 0이면 호출 안됨
     staleTime: 0,
   })
 }
