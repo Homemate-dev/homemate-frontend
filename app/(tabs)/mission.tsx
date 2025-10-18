@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Image, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native'
 
 import BadgeCard from '@/components/Badge/BadgeCard'
+import BadgeDetail from '@/components/BadgeDetail'
 import TabSafeScroll from '@/components/TabSafeScroll'
 
 const mockMissions = [

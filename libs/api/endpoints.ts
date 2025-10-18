@@ -92,8 +92,8 @@ export const NOTIFICATION_ENDPOINTS = {
 } as const
 
 export const MISSION_ENDPOINTS = {
-  /** 이 달의 미션 조회: GET ?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD */
-  LIST_BY_RANGE: '/missions', // GET (params: { startDate, endDate })
+  /** 이 달의 미션 조회: GET */
+  LIST_BY_RANGE: '/missions',
 } as const
 
 export const BADGE_ENDPOINTS = {
