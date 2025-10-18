@@ -1,16 +1,19 @@
 import { router } from 'expo-router'
 import { useState } from 'react'
-import { Image, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native'
+import {
+  ActivityIndicator,
+  Image,
+  Platform,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 
 import BadgeCard from '@/components/Badge/BadgeCard'
 import BadgeDetail from '@/components/BadgeDetail'
 import TabSafeScroll from '@/components/TabSafeScroll'
-
-const mockMissions = [
-  { id: 1, title: '집안일 5개 완료하기', current: 1, target: 5 },
-  { id: 2, title: '설거지 10회 하기', current: 2, target: 10 },
-  { id: 3, title: '옷장 정리하기', current: 1, target: 1 },
-]
+import { useMonthlyMissions } from '@/libs/hooks/mission/useMonthlyMissions'
 
 const mockBadges = [
   {
@@ -42,6 +45,9 @@ const mockBadges = [
 export default function Mission() {
   const androidTop = Platform.OS === 'android' ? 50 : 0
 
+  // 이달의 미션 api
+  const { data: missions, isLoading, isError } = useMonthlyMissions()
+
   // 뱃지 상세 보기
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const selected = mockBadges.find((badge) => badge.id === selectedId)
@@ -66,27 +72,46 @@ export default function Mission() {
             <Text className="text-xl font-bold mb-[10px]">이 달의 미션</Text>
 
             <View className="bg-white p-5 rounded-xl mb-[10px]">
-              {mockMissions.map((m, idx) => (
-                <View
-                  key={m.id}
-                  className={`${mockMissions.length === 1 || idx === mockMissions.length - 1 ? '' : 'mb-3'}`}
-                >
-                  <View className="flex-row items-center justify-between">
-                    <Text className="text-base">{m.title}</Text>
-                    <Text className="text-base text-[#B4B7BC]">
-                      <Text className="font-semibold text-[#57C9D0]">{m.current}개 </Text>/{' '}
-                      {m.target}개
-                    </Text>
-                  </View>
-
-                  <View className="mt-3 mb-2 h-[8px] w-full rounded-full bg-[#040F2014] overflow-hidden">
-                    <View
-                      className="h-full rounded-full bg-[#57C9D0]"
-                      style={{ width: `${progress(m.current, m.target)}%`, borderRadius: 9999 }}
-                    />
-                  </View>
+              {isLoading && (
+                <View className="py-6 items-center justify-center">
+                  <ActivityIndicator />
                 </View>
-              ))}
+              )}
+
+              {isError && !isLoading && (
+                <Text className="text-[#D64545]">이달의 미션을 불러오지 못했어요.</Text>
+              )}
+
+              {!isLoading && !isError && (missions?.length ?? 0) === 0 && (
+                <Text className="text-[#686F79]">아직 등록된 이달의 미션이 없어요.</Text>
+              )}
+
+              {!isLoading &&
+                !isError &&
+                missions?.map((m, idx) => (
+                  <View
+                    key={m.id}
+                    className={`${missions.length === 1 || idx === missions.length - 1 ? '' : 'mb-3'}`}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <Text className="text-base">{m.title}</Text>
+                      <Text className="text-base text-[#B4B7BC]">
+                        <Text className="font-semibold text-[#57C9D0]">{m.currentCount}개 </Text>/{' '}
+                        {m.targetCount}개
+                      </Text>
+                    </View>
+
+                    <View className="mt-3 mb-2 h-[8px] w-full rounded-full bg-[#040F2014] overflow-hidden">
+                      <View
+                        className="h-full rounded-full bg-[#57C9D0]"
+                        style={{
+                          width: `${progress(m.currentCount, m.targetCount)}%`,
+                          borderRadius: 9999,
+                        }}
+                      />
+                    </View>
+                  </View>
+                ))}
             </View>
 
             <View className="flex-row">
