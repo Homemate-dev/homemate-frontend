@@ -14,6 +14,7 @@ import BadgeCard from '@/components/Badge/BadgeCard'
 import BadgeDetail from '@/components/BadgeDetail'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { useMonthlyMissions } from '@/libs/hooks/mission/useMonthlyMissions'
+import { inferUnitFromTitle } from '@/libs/utils/mission'
 
 const mockBadges = [
   {
@@ -96,8 +97,12 @@ export default function Mission() {
                     <View className="flex-row items-center justify-between">
                       <Text className="text-base">{m.title}</Text>
                       <Text className="text-base text-[#B4B7BC]">
-                        <Text className="font-semibold text-[#57C9D0]">{m.currentCount}개 </Text>/{' '}
-                        {m.targetCount}개
+                        <Text className="font-semibold text-[#57C9D0]">
+                          {m.currentCount}
+                          {inferUnitFromTitle(m.title)}{' '}
+                        </Text>
+                        / {m.targetCount}
+                        {inferUnitFromTitle(m.title)}
                       </Text>
                     </View>
 
