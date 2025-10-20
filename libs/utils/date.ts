@@ -50,3 +50,17 @@ export function getMonthRange(yyyyMmDd: string) {
   const toStr = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
   return { start: toStr(first), end: toStr(last) }
 }
+
+function compareYMD(a: string, b: string) {
+  if (!a || !b) return 0
+
+  if (a === b) return 0
+
+  return a < b ? -1 : 1 // a가 더 이전이면 -1, 이후면 1
+}
+
+export function isDateCompare(start?: string | null, end?: string | null) {
+  if (!start || !end) return true // 둘 중 하나라도 없으면 OK (검증 불필요)
+
+  return compareYMD(start, end) <= 0
+}

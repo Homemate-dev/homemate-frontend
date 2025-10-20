@@ -22,7 +22,7 @@ import { useChoreDetail } from '@/libs/hooks/chore/useChoreDetail'
 import useCreateChore from '@/libs/hooks/chore/useCreateChore'
 import { useDeleteChore } from '@/libs/hooks/chore/useDeleteChore'
 import useUpdateChore from '@/libs/hooks/chore/useUpdateChore'
-import { toYMD2 } from '@/libs/utils/date'
+import { isDateCompare, toYMD2 } from '@/libs/utils/date'
 import { toRepeatFields, toRepeatLabel } from '@/libs/utils/repeat'
 import { toHHmm, toHHmmParts } from '@/libs/utils/time'
 
@@ -83,6 +83,9 @@ export default function AddChoreModal() {
   const instanceKey = isEdit && instanceId ? instanceId : 0
   const { data: detail, isLoading: loadingDetail } = useChoreDetail(instanceKey)
 
+  // 날짜 검증
+  const isDateRangeValid = isDateCompare(startDate, endDate)
+
   // 수정 모드 시, 데이터 채워주기
   useEffect(() => {
     if (!isEdit || !detail) return
@@ -104,6 +107,7 @@ export default function AddChoreModal() {
     Boolean(inputValue.trim()) &&
     Boolean(space) &&
     Boolean(startDate) &&
+    isDateRangeValid &&
     (!notifyOn || (ampm && hour12 && minute >= 0))
 
   // 등록 및 수정하기 핸들러
@@ -409,6 +413,11 @@ export default function AddChoreModal() {
                     </View>
                   )}
                 </View>
+                {!isDateRangeValid && (
+                  <Text className="text-sm text-[#FF0707]">
+                    완료일자는 시작일자보다 빠를 수 없습니다.
+                  </Text>
+                )}
 
                 <View className="h-[1px] bg-[#E6E7E9] my-3" />
 
