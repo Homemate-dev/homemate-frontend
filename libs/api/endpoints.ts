@@ -69,6 +69,15 @@ export const RECOMMEND_ENDPOINTS = {
 
   /** 선택한 집안일 등록 (공간 기준) */
   REGISTER_SPACE: (space: string) => `/recommend/spaces/${space}/register`, // POST
+
+  /** 공간 리스트 조회 */
+  SPACES: '/recommend/spaces', // GET
+
+  /** 카테고리 리스트 조회 */
+  CATEGORIES: '/recommend/categories', // GET
+
+  /** 랜덤 집안일 추천 조회 */
+  RANDOM: '/recommend/random', // GET
 } as const
 
 export const NOTIFICATION_ENDPOINTS = {
