@@ -103,12 +103,59 @@ export default function AddChoreModal() {
     setMinute(minute)
   }, [isEdit, detail])
 
-  const canSubmit =
+  // 수정 모드 시, 초기 값 기억하기
+  const initialValue = useMemo(() => {
+    if (!isEdit || !detail) return
+
+    return {
+      title: (detail.title ?? '').trim(),
+      notification_yn: !!detail.notification_yn,
+      notification_time: detail.notification_time ?? '09:00',
+      space: detail.space ?? null,
+      repeat: toRepeatLabel(detail.repeatType, detail.repeatInterval),
+      startDate: detail.startDate ?? null,
+      endDate: detail.endDate ?? detail.startDate ?? null, // null 허용
+    }
+  }, [isEdit, detail])
+
+  const currentValue = useMemo(() => {
+    const hhmm = toHHmm(ampm, hour12, minute)
+    return {
+      title: inputValue.trim(),
+      notification_yn: notifyOn,
+      notification_time: hhmm,
+      space,
+      repeat,
+      startDate,
+      endDate: endDate ?? startDate,
+    }
+  }, [inputValue, notifyOn, ampm, hour12, minute, space, repeat, startDate, endDate])
+
+  const isChanged = useMemo(() => {
+    if (!isEdit) return true // 추가 모드는 항상 변경으로 간주(버튼 활성 조건에서 막지 않음)
+    if (!initialValue) return false // detail 로딩 전엔 변경 아님(버튼 잠깐 비활성)
+    return (
+      initialValue.title !== currentValue.title ||
+      initialValue.notification_yn !== currentValue.notification_yn ||
+      initialValue.notification_time !== currentValue.notification_time ||
+      initialValue.space !== currentValue.space ||
+      initialValue.repeat !== currentValue.repeat ||
+      initialValue.startDate !== currentValue.startDate ||
+      initialValue.endDate !== currentValue.endDate
+    )
+  }, [isEdit, initialValue, currentValue])
+
+  const baseValid =
     Boolean(inputValue.trim()) &&
     Boolean(space) &&
     Boolean(startDate) &&
     isDateRangeValid &&
     (!notifyOn || (ampm && hour12 && minute >= 0))
+
+  const canSubmit = baseValid && (!isEdit || isChanged)
+
+  const submitDisabled =
+    creating || updating || (isEdit && (loadingDetail || !initialValue || !isChanged))
 
   // 등록 및 수정하기 핸들러
   const onSubmit = () => {
@@ -447,10 +494,19 @@ export default function AddChoreModal() {
           {/* 등록 버튼 */}
           <Pressable
             onPress={onSubmit}
-            disabled={!canSubmit || creating || updating || (isEdit && loadingDetail)}
-            className="h-[52px] bg-[#57C9D0] rounded-xl flex items-center justify-center mb-3"
+            disabled={submitDisabled}
+            className={`h-[52px] rounded-xl flex items-center justify-center mb-3 ${
+              // 수정모드면서 변경없을 때만 회색으로
+              isEdit && !isChanged ? 'bg-[#E6E7E9]' : 'bg-[#57C9D0]'
+            }`}
           >
-            <Text className="text-lg font-semibold text-white">{btnLabel}</Text>
+            <Text
+              className={`text-lg font-semibold ${
+                isEdit && !isChanged ? 'text-[#B4B7BC]' : 'text-white'
+              }`}
+            >
+              {btnLabel}
+            </Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>
