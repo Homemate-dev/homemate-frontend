@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native'
 
-import BadgeCard from '@/components/BadgeCard'
+import BadgeCard from '@/components/Badge/BadgeCard'
 import BadgeDetail from '@/components/BadgeDetail'
 
 export type BadgeTier = { name: string; count: number }
