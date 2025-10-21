@@ -1,0 +1,23 @@
+// 드롭다운 라벨 → API 필드 변환
+export function toRepeatFields(label: string | null) {
+  if (!label || label === '안 함') return { repeatType: 'NONE' as const, repeatInterval: 0 }
+  if (label === '매일') return { repeatType: 'DAILY' as const, repeatInterval: 1 }
+  if (label === '1주마다') return { repeatType: 'WEEKLY' as const, repeatInterval: 1 }
+  if (label === '2주마다') return { repeatType: 'WEEKLY' as const, repeatInterval: 2 }
+  if (label === '매달') return { repeatType: 'MONTHLY' as const, repeatInterval: 1 }
+  if (label === '3개월마다') return { repeatType: 'MONTHLY' as const, repeatInterval: 3 }
+  if (label === '6개월마다') return { repeatType: 'MONTHLY' as const, repeatInterval: 6 }
+  return { repeatType: 'NONE' as const, repeatInterval: 0 }
+}
+
+// API 필드 → 드롭다운 라벨 변환
+export function toRepeatLabel(type: string, interval: number) {
+  if (type === 'NONE') return '안 함'
+  if (type === 'DAILY' && interval === 1) return '매일'
+  if (type === 'WEEKLY' && interval === 1) return '1주마다'
+  if (type === 'WEEKLY' && interval === 2) return '2주마다'
+  if (type === 'MONTHLY' && interval === 1) return '매달'
+  if (type === 'MONTHLY' && interval === 3) return '3개월마다'
+  if (type === 'MONTHLY' && interval === 6) return '6개월마다'
+  return '-'
+}

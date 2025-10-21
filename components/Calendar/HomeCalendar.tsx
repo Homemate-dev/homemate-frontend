@@ -44,9 +44,10 @@ LocaleConfig.defaultLocale = 'ko'
 type Props = {
   onSelect?: (dateString: string) => void // 선택 날짜 부모로 올려줄 콜백
   dotDates?: string[]
+  onMonthChangeRange?: (start: string, end: string) => void
 }
 
-export default function HomeCalendar({ onSelect, dotDates = [] }: Props) {
+export default function HomeCalendar({ onSelect, dotDates = [], onMonthChangeRange }: Props) {
   // 오늘
   const todayStr = useMemo(() => toYMD(new Date()), [])
   // 선택된 날짜(초기: 오늘)
@@ -129,6 +130,12 @@ export default function HomeCalendar({ onSelect, dotDates = [] }: Props) {
         onMonthChange={(d) => {
           const first = `${d.year}-${String(d.month).padStart(2, '0')}-01`
           setCurrentMonthStr(first)
+
+          const last = new Date(d.year, d.month, 0) // 다음달 0일 = 말일 -> new Date(year, monthIndex, day)
+          const pad = (n: number) => String(n).padStart(2, '0') 
+          const end = `${last.getFullYear()}-${pad(last.getMonth() + 1)}-${pad(last.getDate())}`
+
+          onMonthChangeRange?.(first, end)
         }}
         onDayPress={(d) => {
           onSelect?.(d.dateString)

@@ -40,3 +40,13 @@ export const formatKoreanDateWithDay = (ymd: string): string => {
   const [, m, d] = ymd.split('-')
   return `${Number(m)}월 ${Number(d)}일 (${dayName})`
 }
+
+export function getMonthRange(yyyyMmDd: string) {
+  const y = Number(yyyyMmDd.slice(0, 4))
+  const m = Number(yyyyMmDd.slice(5, 7)) - 1
+  const first = new Date(y, m, 1)
+  const last = new Date(y, m + 1, 0)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const toStr = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  return { start: toStr(first), end: toStr(last) }
+}

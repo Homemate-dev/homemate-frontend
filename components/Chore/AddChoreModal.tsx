@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons'
-import { router } from 'expo-router'
-import { useMemo, useState } from 'react'
+import { router, useLocalSearchParams } from 'expo-router'
+import { useEffect, useMemo, useState } from 'react'
 import {
   KeyboardAvoidingView,
   Platform,
@@ -17,15 +17,36 @@ import DatePickerCalendar from '@/components/Calendar/DatePickerCalendar'
 import ChoreDropdown from '@/components/Dropdown/ChoreDropdown'
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import Toggle from '@/components/Toggle'
+import { toApiError } from '@/libs/api/error'
+import { useChoreDetail } from '@/libs/hooks/chore/useChoreDetail'
+import useCreateChore from '@/libs/hooks/chore/useCreateChore'
+import { useDeleteChore } from '@/libs/hooks/chore/useDeleteChore'
+import useUpdateChore from '@/libs/hooks/chore/useUpdateChore'
 import { toYMD2 } from '@/libs/utils/date'
+import { toRepeatFields, toRepeatLabel } from '@/libs/utils/repeat'
+import { toHHmm, toHHmmParts } from '@/libs/utils/time'
 
 import DeleteModal from '../DeleteModal'
 
-type Props = {
-  mode: 'add' | 'edit'
-}
+export default function AddChoreModal() {
+  // ---------- URL params ----------
+  const {
+    mode: modeParam,
+    instanceId: instanceIdParam,
+    choreId: choreIdParam,
+    selectedDate: selectedDateParam,
+  } = useLocalSearchParams<{
+    mode?: string
+    instanceId?: string
+    choreId?: string
+    selectedDate?: string
+  }>()
 
-export default function AddChoreModal({ mode }: Props) {
+  const isEdit = (modeParam ?? 'add') === 'edit'
+  const instanceId = instanceIdParam ? Number(instanceIdParam) : undefined
+  const choreId = choreIdParam ? Number(choreIdParam) : undefined
+
+  // ---------- local states ----------
   const [inputValue, setInputValue] = useState('')
 
   const ymdToYYMMDD = (ymd: string) => `${ymd.slice(2, 4)}.${ymd.slice(5, 7)}.${ymd.slice(8, 10)}`
@@ -44,11 +65,142 @@ export default function AddChoreModal({ mode }: Props) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
   const [notifyOn, setNotifyOn] = useState(false)
+  const [ampm, setAmpm] = useState<'오전' | '오후'>('오전')
+  const [hour12, setHour12] = useState<number>(9)
+  const [minute, setMinute] = useState<number>(0)
 
   // 삭제 버튼 클릭
   const [deleteOpen, setDeleteOpen] = useState(false)
 
   const maxLength = 20
+
+  // ---------- API 훅 ----------
+  const { mutate: createChore, isPending: creating } = useCreateChore()
+  const { mutate: updateChore, isPending: updating } = useUpdateChore()
+  const { mutate: deleteChore, isPending: deleting } = useDeleteChore()
+
+  // add 모드면 0, edit 모드 + 값 있으면 해당 instanceId
+  const instanceKey = isEdit && instanceId ? instanceId : 0
+  const { data: detail, isLoading: loadingDetail } = useChoreDetail(instanceKey)
+
+  // 수정 모드 시, 데이터 채워주기
+  useEffect(() => {
+    if (!isEdit || !detail) return
+
+    setInputValue(detail.title ?? '')
+    setNotifyOn(!!detail.notification_yn)
+    setRepeat(toRepeatLabel(detail.repeatType, detail.repeatInterval))
+    setSpace(detail.space ?? null)
+    setStartDate(detail.startDate ?? null)
+    setEndDate(detail.endDate ?? null)
+
+    const { ampm, hour12, minute } = toHHmmParts(detail.notification_time ?? '09:00')
+    setAmpm(ampm)
+    setHour12(hour12)
+    setMinute(minute)
+  }, [isEdit, detail])
+
+  const canSubmit =
+    Boolean(inputValue.trim()) &&
+    Boolean(space) &&
+    Boolean(startDate) &&
+    (!notifyOn || (ampm && hour12 && minute >= 0))
+
+  // 등록 및 수정하기 핸들러
+  const onSubmit = () => {
+    if (!canSubmit) return
+
+    const hhmm = toHHmm(ampm, hour12, minute)
+    const { repeatType, repeatInterval } = toRepeatFields(repeat)
+
+    if (!isEdit) {
+      createChore(
+        {
+          title: inputValue.trim(),
+          notification_yn: notifyOn,
+          notification_time: hhmm,
+          space: space!,
+          repeatType: repeatType,
+          repeatInterval: repeatInterval,
+          startDate: startDate!,
+          endDate: endDate ?? startDate!,
+        },
+        {
+          onSuccess: () => router.back(),
+          onError: (error) => {
+            const { code, message, details } = toApiError(error)
+            const uiMsg = details?.[0]?.message ?? message
+
+            // TODO: 프로젝트 토스트로 교체
+            console.warn('[createChore error]', code, uiMsg)
+          },
+        }
+      )
+    } else {
+      const choreIdForUpdate = choreId ?? detail?.choreId
+      if (!choreIdForUpdate) return
+
+      updateChore(
+        {
+          choreId: choreIdForUpdate,
+          dto: {
+            title: inputValue.trim(),
+            notification_yn: notifyOn,
+            notification_time: hhmm,
+            space: space!,
+            repeatType,
+            repeatInterval,
+            startDate: startDate!,
+            endDate: endDate ?? startDate!,
+            isUpdateAll: false,
+          },
+        },
+        {
+          onSuccess: () => router.back(),
+          onError: (error) => {
+            const { code, message, details } = toApiError(error)
+            const uiMsg = details?.[0]?.message ?? message
+
+            // TODO: 프로젝트 토스트로 교체
+            console.warn('[updateChore error]', code, uiMsg)
+          },
+        }
+      )
+    }
+  }
+
+  // 삭제 핸들러
+  const handleDelete = (applyToAll: boolean) => {
+    if (!isEdit || !instanceId) return
+
+    if (!selectedDateParam) {
+      console.warn('선택된 날짜 누락-다시 시도해주세요')
+      return
+    }
+
+    deleteChore(
+      {
+        choreInstanceId: instanceId,
+        selectedDate: selectedDateParam,
+        applyToAll,
+      },
+
+      {
+        onSuccess: () => {
+          setDeleteOpen(false)
+          router.back()
+        },
+
+        onError: (error) => {
+          const { code, message, details } = toApiError(error)
+          const uiMsg = details?.[0]?.message ?? message
+
+          // TODO: 프로젝트 토스트로 교체
+          console.warn('[updateChore error]', code, uiMsg)
+        },
+      }
+    )
+  }
 
   const chores = [
     { id: 1, title: '이불 빨래하기' },
@@ -59,8 +211,8 @@ export default function AddChoreModal({ mode }: Props) {
   const spaceOptions = ['주방', '욕실', '침실', '현관', '기타']
   const repeatOptions = ['안 함', '매일', '1주마다', '2주마다', '매달', '3개월마다', '6개월마다']
 
-  const headerTitle = mode === 'add' ? '집안일 추가' : '집안일 수정'
-  const btnLabel = mode === 'add' ? '등록하기' : '수정하기'
+  const headerTitle = isEdit ? '집안일 수정' : '집안일 추가'
+  const btnLabel = isEdit ? '수정하기' : '등록하기'
 
   return (
     <>
@@ -88,16 +240,24 @@ export default function AddChoreModal({ mode }: Props) {
               </TouchableOpacity>
               <Text className="text-[22px] font-semibold">{headerTitle}</Text>
 
-              {mode === 'edit' && (
+              {isEdit && (
                 <>
                   <TouchableOpacity
                     onPress={() => setDeleteOpen(true)}
                     className="absolute right-0"
+                    disabled={deleting}
                   >
                     <Text className="text-base text-[#57C9D0] font-semibold">삭제</Text>
                   </TouchableOpacity>
 
-                  <DeleteModal visible={deleteOpen} onClose={() => setDeleteOpen(false)} />
+                  <DeleteModal
+                    visible={deleteOpen}
+                    onClose={() => setDeleteOpen(false)}
+                    onDeleteOnly={() => handleDelete(false)}
+                    onDeleteAll={() => handleDelete(true)}
+                    loading={deleting} // 삭제 중이면 버튼 로딩/비활성화
+                    repeatType={detail?.repeatType}
+                  />
                 </>
               )}
             </View>
@@ -260,6 +420,14 @@ export default function AddChoreModal({ mode }: Props) {
 
                 {notifyOn && (
                   <TimeDropdown
+                    ampm={ampm}
+                    hour={hour12}
+                    minute={minute}
+                    onChange={({ ampm, hour, minute }) => {
+                      setAmpm(ampm)
+                      setHour12(hour)
+                      setMinute(minute)
+                    }}
                     activeDropdown={activeDropdown}
                     setActiveDropdown={setActiveDropdown}
                   />
@@ -268,7 +436,11 @@ export default function AddChoreModal({ mode }: Props) {
             </View>
           </ScrollView>
           {/* 등록 버튼 */}
-          <Pressable className="h-[52px] bg-[#57C9D0] rounded-xl flex items-center justify-center mb-3">
+          <Pressable
+            onPress={onSubmit}
+            disabled={!canSubmit || creating || updating || (isEdit && loadingDetail)}
+            className="h-[52px] bg-[#57C9D0] rounded-xl flex items-center justify-center mb-3"
+          >
             <Text className="text-lg font-semibold text-white">{btnLabel}</Text>
           </Pressable>
         </View>
