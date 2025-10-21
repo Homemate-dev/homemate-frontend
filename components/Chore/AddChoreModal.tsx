@@ -2,6 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -22,6 +23,7 @@ import { useChoreDetail } from '@/libs/hooks/chore/useChoreDetail'
 import useCreateChore from '@/libs/hooks/chore/useCreateChore'
 import { useDeleteChore } from '@/libs/hooks/chore/useDeleteChore'
 import useUpdateChore from '@/libs/hooks/chore/useUpdateChore'
+import useRandomChores from '@/libs/hooks/recommend/useRandomChores'
 import { isDateCompare, toYMD2 } from '@/libs/utils/date'
 import { toRepeatFields, toRepeatLabel } from '@/libs/utils/repeat'
 import { toHHmm, toHHmmParts } from '@/libs/utils/time'
@@ -78,6 +80,7 @@ export default function AddChoreModal() {
   const { mutate: createChore, isPending: creating } = useCreateChore()
   const { mutate: updateChore, isPending: updating } = useUpdateChore()
   const { mutate: deleteChore, isPending: deleting } = useDeleteChore()
+  const { data: randomChores, isLoading } = useRandomChores()
 
   // add 모드면 0, edit 모드 + 값 있으면 해당 instanceId
   const instanceKey = isEdit && instanceId ? instanceId : 0
@@ -253,12 +256,6 @@ export default function AddChoreModal() {
     )
   }
 
-  const chores = [
-    { id: 1, title: '이불 빨래하기' },
-    { id: 2, title: '옷장 제습제 교체하기' },
-    { id: 3, title: '배수구 트랩 청소' },
-  ]
-
   const spaceOptions = ['주방', '욕실', '침실', '현관', '기타']
   const repeatOptions = ['안 함', '매일', '1주마다', '2주마다', '매달', '3개월마다', '6개월마다']
 
@@ -330,22 +327,27 @@ export default function AddChoreModal() {
               </View>
 
               {/* 추천 집안일 */}
-
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                className="flex-row flex-wrap gap-2 mb-4"
-              >
-                {chores.map((item) => (
-                  <Pressable
-                    key={item.id}
-                    className="bg-[#DDF4F6] rounded-[6px] flex items-center justify-center px-3 py-[10px]"
-                    onPress={() => setInputValue(item.title)}
-                  >
-                    <Text className="text-[#46A1A6] text-base">{item.title}</Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
+              {isLoading ? (
+                <View className="py-3 items-center">
+                  <ActivityIndicator />
+                </View>
+              ) : (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  className="flex-row flex-wrap gap-2"
+                >
+                  {randomChores?.map((item) => (
+                    <Pressable
+                      key={item.id}
+                      className="bg-[#DDF4F6] rounded-[6px] flex items-center justify-center px-3 py-[10px]"
+                      onPress={() => setInputValue(item.titleKo)}
+                    >
+                      <Text className="text-[#46A1A6] text-base">{item.titleKo}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              )}
 
               {/* 집안일 알림 설정 */}
               <View className="bg-white rounded-xl p-5 mb-4 relative">
