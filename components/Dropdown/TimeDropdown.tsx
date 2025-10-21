@@ -1,115 +1,124 @@
 import { type Dispatch, type SetStateAction, useMemo, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
-
-type DropdownId = 'ampm' | 'hour' | 'minute'
+import { heightPercentageToDP as wp } from 'react-native-responsive-screen'
 
 type Props = {
   activeDropdown: string | null
   setActiveDropdown: Dispatch<SetStateAction<string | null>>
+  styles: any
 }
 
-export default function TimeDropdown({ activeDropdown, setActiveDropdown }: Props) {
+export default function TimeDropdown({ activeDropdown, setActiveDropdown, styles }: Props) {
   const [ampm, setAmpm] = useState<'오전' | '오후'>('오전')
   const [hour, setHour] = useState('9')
   const [minute, setMinute] = useState('10')
 
-  const toggleDropdown = (id: DropdownId) => {
-    setActiveDropdown((prev) => (prev === id ? null : id))
-  }
+  // 임시 선택값 (확인 버튼 누르기 전까지 실제값 반영 X)
+  const [tempAmpm, setTempAmpm] = useState<'오전' | '오후'>(ampm)
+  const [tempHour, setTempHour] = useState(hour)
+  const [tempMinute, setTempMinute] = useState(minute)
 
   const ampmOptions: ('오전' | '오후')[] = ['오전', '오후']
-  const hourOptions = useMemo(
-    () => Array.from({ length: 12 }, (_, i) => String(i + 1)), // 1..12
-    []
-  )
+  const hourOptions = useMemo(() => Array.from({ length: 12 }, (_, i) => String(i + 1)), [])
   const minuteOptions = useMemo(
-    () => Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0')), // 00..55
+    () => Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0')),
     []
   )
+
+  // 하나라도 클릭 시 전체 열기
+  const handleToggle = () => {
+    setActiveDropdown((prev) => (prev ? null : 'all'))
+    setTempAmpm(ampm)
+    setTempHour(hour)
+    setTempMinute(minute)
+  }
+
+  // 확인 버튼 클릭 시 값 반영
+  const handleConfirm = () => {
+    setAmpm(tempAmpm)
+    setHour(tempHour)
+    setMinute(tempMinute)
+    setActiveDropdown(null)
+  }
+
+  const isOpen = activeDropdown === 'all'
 
   return (
-    <View className="flex-row items-center justify-center mt-4">
-      {/* 오전/오후 */}
-      <View className="relative bg-[#EBF9F9] px-[10px] py-1 w-[75px] h-[40px] rounded-[6px] items-center justify-center mr-[14px]">
-        <Pressable onPress={() => toggleDropdown('ampm')}>
-          <Text className="text-[#46A1A6] text-base">{ampm}</Text>
-        </Pressable>
-        {activeDropdown === 'ampm' && (
-          <View className="absolute left-0 top-[45px] z-50  w-[75px] border border-[#57C9D0] px-[10px] py-1 bg-white rounded-md">
-            {ampmOptions.map((opt) => (
-              <Pressable
-                key={opt}
-                onPress={() => {
-                  setAmpm(opt)
-                  setActiveDropdown(null)
-                }}
-                className="items-center justify-center px-1 py-1"
-              >
-                <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
-                  {opt}
-                </Text>
-              </Pressable>
-            ))}
+    <View style={styles.timeContainer}>
+      {/* 기본 선택 영역 */}
+      <Pressable onPress={handleToggle} style={styles.timeBox}>
+        <View style={styles.dropdownBox}>
+          <Text style={styles.dropdownText}>{ampm}</Text>
+        </View>
+
+        <View style={styles.timeUnit}>
+          <View style={styles.dropdownBox}>
+            <Text style={styles.dropdownText}>{hour}</Text>
           </View>
-        )}
-      </View>
+          <Text style={styles.unitLabel}>시</Text>
+        </View>
 
-      {/* 시 선택 */}
-      <View className="flex-row items-center mr-[5px]">
-        <View className="bg-[#EBF9F9] px-[10px] py-1 w-[75px] h-[40px] rounded-[6px] items-center justify-center">
-          <Pressable onPress={() => toggleDropdown('hour')}>
-            <Text className="text-[#46A1A6] text-base">{hour}</Text>
-          </Pressable>
+        <View style={styles.timeUnit}>
+          <View style={styles.dropdownBox}>
+            <Text style={styles.dropdownText}>{minute}</Text>
+          </View>
+          <Text style={styles.unitLabel}>분</Text>
+        </View>
+      </Pressable>
 
-          {activeDropdown === 'hour' && (
-            <ScrollView className="absolute left-0 top-[45px] z-50  w-[75px] h-[152px] border border-[#57C9D0] px-[10px] py-1 bg-white rounded-md">
+      {/* 클릭 시 전체 드롭다운 오픈 */}
+      {isOpen && (
+        <View style={styles.timeList}>
+          <View style={styles.timeLists}>
+            {/* 오전/오후 리스트 */}
+            <View style={styles.dropdownList}>
+              {ampmOptions.map((opt) => (
+                <Pressable key={opt} onPress={() => setTempAmpm(opt)}>
+                  <Text
+                    style={[styles.dropdownItem, { fontWeight: tempAmpm === opt ? '700' : '400' }]}
+                  >
+                    {opt}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* 시 리스트 */}
+            <ScrollView style={[styles.dropdownList, { marginRight: wp('4%') }]}>
               {hourOptions.map((opt) => (
-                <Pressable
-                  key={opt}
-                  onPress={() => {
-                    setHour(opt)
-                    setActiveDropdown(null)
-                  }}
-                  className="items-center justify-center px-1 py-1"
-                >
-                  <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
+                <Pressable key={opt} onPress={() => setTempHour(opt)}>
+                  <Text
+                    style={[styles.dropdownItem, { fontWeight: tempHour === opt ? '700' : '400' }]}
+                  >
                     {opt}
                   </Text>
                 </Pressable>
               ))}
             </ScrollView>
-          )}
-        </View>
-        <Text className="text-base ml-[5px]">시</Text>
-      </View>
 
-      {/* 분 선택 */}
-      <View className="flex-row items-center">
-        <View className="bg-[#EBF9F9] px-[10px] py-1 w-[75px] h-[40px] rounded-[6px] items-center justify-center">
-          <Pressable onPress={() => toggleDropdown('minute')}>
-            <Text className="text-[#46A1A6] text-base">{minute}</Text>
-          </Pressable>
-          {activeDropdown === 'minute' && (
-            <ScrollView className="absolute left-0 top-[45px] z-50  w-[75px] h-[152px] border border-[#57C9D0] px-[10px] py-1 bg-white rounded-md">
+            {/* 분 리스트 */}
+            <ScrollView style={styles.dropdownList}>
               {minuteOptions.map((opt) => (
-                <Pressable
-                  key={opt}
-                  onPress={() => {
-                    setMinute(opt)
-                    setActiveDropdown(null)
-                  }}
-                  className="items-center justify-center px-1 py-1"
-                >
-                  <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
+                <Pressable key={opt} onPress={() => setTempMinute(opt)}>
+                  <Text
+                    style={[
+                      styles.dropdownItem,
+                      { fontWeight: tempMinute === opt ? '700' : '400' },
+                    ]}
+                  >
                     {opt}
                   </Text>
                 </Pressable>
               ))}
             </ScrollView>
-          )}
+          </View>
+
+          {/* 확인 버튼 */}
+          <Pressable onPress={handleConfirm} style={styles.confirmButton}>
+            <Text style={styles.confirmText}>확인</Text>
+          </Pressable>
         </View>
-        <Text className="text-base ml-[5px]">분</Text>
-      </View>
+      )}
     </View>
   )
 }
