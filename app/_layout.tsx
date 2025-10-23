@@ -1,25 +1,42 @@
 import { Stack } from 'expo-router'
-import 'react-native-reanimated'
+import { ActivityIndicator, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 
-export default function RootLayout() {
-  useEffect(() => {
-    // 토큰 만료 시 토큰 제거 + 로그인 화면 이동
-    setAccessToken(null)
-    setOnUnauthorized(() => {
-      router.replace('/onboarding' as Href)
-    })
-  }, [])
+import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 
-  if (!fontsLoaded) return null
+function RootNavigator() {
+  const { token, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#57C9D0" />
+      </View>
+    )
+  }
 
   return (
+    <Stack screenOptions={{ headerShown: false }}>
+      {token ? (
+        <>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(modals)" />
+        </>
+      ) : (
+        <Stack.Screen name="(auth)" /> // ✅ login.tsx는 여기 포함되어야 함!
+      )}
+    </Stack>
+  )
+}
+
+export default function RootLayout() {
+  return (
     <SafeAreaProvider>
-      <SafeAreaView edges={['bottom']} className="flex-1 bg-[#F8F8FA]">
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(modals)" options={{ headerShown: false }} />
-        </Stack>
+      <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F8F8FA' }}>
+        {/* ✅ AuthProvider는 반드시 여기서 RootNavigator 전체를 감싸야 함 */}
+        <AuthProvider>
+          <RootNavigator />
+        </AuthProvider>
       </SafeAreaView>
     </SafeAreaProvider>
   )

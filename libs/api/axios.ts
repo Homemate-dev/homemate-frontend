@@ -47,8 +47,11 @@ api.interceptors.response.use(
     if (status === 401) {
       // 토큰 무효화
       accessToken = null
+
       // 전역 콜백 실행 (예: 로그인 화면 이동)
-      onUnauthorized?.()
+      if (onUnauthorized) {
+        onUnauthorized()
+      }
     }
     return Promise.reject(error)
   }
