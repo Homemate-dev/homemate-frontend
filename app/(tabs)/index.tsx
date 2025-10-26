@@ -2,7 +2,7 @@ import Constants from 'expo-constants'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useMemo, useState } from 'react'
-import { Image, Platform, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import Checkbox from '@/components/Checkbox'
 import TabSafeScroll from '@/components/TabSafeScroll'
@@ -35,9 +35,7 @@ export default function HomeScreen() {
           codeVerifier: KAKAO_CODE_VERIFIER,
         }),
       })
-
       const data = await response.json()
-
       if (data.accessToken) {
         await login(data.accessToken)
         window.history.replaceState({}, document.title, '/')
@@ -79,18 +77,26 @@ export default function HomeScreen() {
     return Math.round((done / total) * 100)
   }, [choresList])
 
-  return (
-    <View className="flex-1 bg-[#F8F8FA]">
-      <StatusBar style="dark" backgroundColor="#F8F8FA" />
+  const styleFromRepeatColor = (cls: string | undefined) => {
+    if (!cls) return {}
+    const bgMatch = cls.match(/bg-\[#([0-9A-Fa-f]{6})\]/)
+    const textMatch = cls.match(/text-\[#([0-9A-Fa-f]{6})\]/)
+    const style: any = {}
+    if (bgMatch) style.backgroundColor = `#${bgMatch[1]}`
+    if (textMatch) style.color = `#${textMatch[1]}`
+    return style
+  }
 
+  return (
+    <View style={styles.container}>
+      <StatusBar style="dark" backgroundColor="#F8F8FA" />
       <TabSafeScroll contentContainerStyle={{ paddingTop: androidTop }}>
-        <View className="py-4 flex-row items-center justify-between">
+        <View style={styles.headerRow}>
           <Image
             source={require('../../assets/images/logo/logo.png')}
             style={{ width: 125, height: 24 }}
             resizeMode="contain"
           />
-
           <TouchableOpacity onPress={() => router.push('/notifications')}>
             <Image
               source={require('../../assets/images/notification.png')}
@@ -100,48 +106,39 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        <View className="flex gap-4">
-          {/* 홈카드 */}
-          <View className="bg-[#DDF4F6] px-5 py-3 rounded-2xl">
-            <View className="flex-row items-center justify-between">
-              <View className="flex gap-2">
-                <Text className="font-semibold text-xl">안녕하세요, 사용자님!</Text>
-                <Text className="text-base">
-                  오늘의 집안일을 <Text className="font-bold text-[#46A1A6]">{progress}%</Text>{' '}
-                  완료했어요.
+        <View style={styles.contentWrap}>
+          <View style={styles.homeCard}>
+            <View style={styles.rowBetween}>
+              <View style={styles.colGap2}>
+                <Text style={styles.helloTitle}>안녕하세요, 사용자님!</Text>
+                <Text style={styles.baseText}>
+                  오늘의 집안일을 <Text style={styles.progressNum}>{progress}%</Text> 완료했어요.
                 </Text>
               </View>
-
               <Image
                 source={require('../../assets/images/card/card-img.png')}
                 style={{ width: 70, height: 70 }}
                 resizeMode="contain"
               />
             </View>
-
-            <View className="mt-3 mb-2 h-[6px] w-full rounded-full bg-[#F5FCFC] overflow-hidden">
-              <View
-                className="h-full rounded-full bg-[#57C9D0]"
-                style={{ width: `${progress}%`, borderRadius: 9999 }}
-              />
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${progress}%`, borderRadius: 9999 }]} />
             </View>
           </View>
 
-          {/* 캘린더 */}
           <HomeCalendar
             onSelect={setSelectedDate}
             dotDates={dotDates}
             onMonthChangeRange={(start, end) => setRange({ start, end })}
           />
 
-          {/* 할 일 목록 */}
-          <View className="flex">
-            <View className="flex-row gap-2 items-center mb-3">
-              <Text className="text-xl font-bold">{formatKoreanDate(selectedDate)}</Text>
-              <Text className="text-lg">집안일</Text>
+          <View style={styles.flex}>
+            <View style={styles.listHeaderRow}>
+              <Text style={styles.listHeaderTitle}>{formatKoreanDate(selectedDate)}</Text>
+              <Text style={styles.listHeaderSub}>집안일</Text>
             </View>
 
-            <View className="bg-white rounded-2xl p-5">
+            <View style={styles.listBox}>
               {isLoading && <Text>집안일 내역을 불러오는 중입니다.</Text>}
               {isError && <Text>집안일 내역 불러오기에 실패했습니다.</Text>}
               {!isLoading && !isError && choresList.length === 0 ? (
@@ -154,17 +151,16 @@ export default function HomeScreen() {
                   return (
                     <View
                       key={item.id}
-                      className={`flex-row items-center justify-between ${
-                        choresList.length === 1 || index === choresList.length - 1 ? '' : 'mb-3'
-                      }`}
+                      style={[styles.itemRow, index !== choresList.length - 1 && styles.mb12]}
                     >
-                      <View className="flex-row gap-3 items-center">
+                      <View style={styles.itemLeftRow}>
                         <Text
-                          className={`rounded-[6px] px-2 py-[2px] text-sm ${
+                          style={[
+                            styles.badgeText,
                             item.status === 'COMPLETED'
-                              ? 'bg-[#CDCFD2] text-[#9B9FA6]'
-                              : repeat.color
-                          }`}
+                              ? styles.badgeDone
+                              : styleFromRepeatColor(repeat.color),
+                          ]}
                         >
                           {repeat.label}
                         </Text>
@@ -183,11 +179,12 @@ export default function HomeScreen() {
                           }
                         >
                           <Text
-                            className={`text-base ${
+                            style={[
+                              styles.itemTitle,
                               item.status === 'COMPLETED'
-                                ? 'text-gray-400 line-through'
-                                : 'text-black'
-                            }`}
+                                ? styles.itemTitleDone
+                                : styles.itemTitleActive,
+                            ]}
                           >
                             {item.titleSnapshot}
                           </Text>
@@ -209,3 +206,48 @@ export default function HomeScreen() {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#F8F8FA' },
+  headerRow: {
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  contentWrap: { flexDirection: 'column', gap: 16 },
+  homeCard: {
+    backgroundColor: '#DDF4F6',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 16,
+  },
+  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  colGap2: { flexDirection: 'column', gap: 8 },
+  helloTitle: { fontWeight: '600', fontSize: 20 },
+  baseText: { fontSize: 16 },
+  progressNum: { fontWeight: '700', color: '#46A1A6' },
+  progressBar: {
+    marginTop: 12,
+    marginBottom: 8,
+    height: 6,
+    width: '100%',
+    borderRadius: 9999,
+    backgroundColor: '#F5FCFC',
+    overflow: 'hidden',
+  },
+  progressFill: { height: '100%', backgroundColor: '#57C9D0' },
+  flex: { flex: 1 },
+  listHeaderRow: { flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 12 },
+  listHeaderTitle: { fontSize: 20, fontWeight: '700' },
+  listHeaderSub: { fontSize: 18 },
+  listBox: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20 },
+  itemRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  mb12: { marginBottom: 12 },
+  itemLeftRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  badgeText: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontSize: 14 },
+  badgeDone: { backgroundColor: '#CDCFD2', color: '#9B9FA6' },
+  itemTitle: { fontSize: 16 },
+  itemTitleActive: { color: '#000000' },
+  itemTitleDone: { color: '#9CA3AF', textDecorationLine: 'line-through' },
+})

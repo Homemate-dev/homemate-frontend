@@ -8,6 +8,7 @@ import {
   Pressable,
   ScrollView,
   StatusBar,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -269,9 +270,10 @@ export default function AddChoreModal() {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1 bg-[#F8F8FA]"
+        style={styles.kbView}
       >
-        <View className="flex-1 relative px-5">
-          <ScrollView className="flex-1 pt-6 bg-[#F8F8FA]">
+        <View className="flex-1 relative px-5" style={styles.wrapper}>
+          <ScrollView className="flex-1 pt-6 bg-[#F8F8FA]" style={styles.scroll}>
             {/* 바깥 탭 닫기 오버레이 */}
             {(activeDropdown || openCalendar) && (
               <Pressable
@@ -280,22 +282,35 @@ export default function AddChoreModal() {
                   setOpenCalendar(null)
                 }}
                 className="absolute inset-0 z-40"
+                style={styles.fullscreenOverlay}
               />
             )}
-            <View className="flex-row items-center justify-center mb-6">
-              <TouchableOpacity onPress={() => router.back()} className="absolute left-0">
+            <View className="flex-row items-center justify-center mb-6" style={styles.headerRow}>
+              <TouchableOpacity
+                onPress={() => router.back()}
+                className="absolute left-0"
+                style={styles.headerBack}
+              >
                 <MaterialIcons name="chevron-left" size={24} color="#686F79" />
               </TouchableOpacity>
-              <Text className="text-[22px] font-semibold">{headerTitle}</Text>
+              <Text className="text-[22px] font-semibold" style={styles.headerTitle}>
+                {headerTitle}
+              </Text>
 
               {isEdit && (
                 <>
                   <TouchableOpacity
                     onPress={() => setDeleteOpen(true)}
                     className="absolute right-0"
+                    style={styles.headerRight}
                     disabled={deleting}
                   >
-                    <Text className="text-base text-[#57C9D0] font-semibold">삭제</Text>
+                    <Text
+                      className="text-base text-[#57C9D0] font-semibold"
+                      style={styles.deleteText}
+                    >
+                      삭제
+                    </Text>
                   </TouchableOpacity>
 
                   <DeleteModal
@@ -310,9 +325,12 @@ export default function AddChoreModal() {
               )}
             </View>
 
-            <View className="flex-1 ">
+            <View className="flex-1 " style={styles.flex1}>
               {/* 입력창 */}
-              <View className="flex-row items-center rounded-xl bg-white px-5 py-4 mb-4">
+              <View
+                className="flex-row items-center rounded-xl bg-white px-5 py-4 mb-4"
+                style={styles.inputRow}
+              >
                 <TextInput
                   placeholder="집안일을 입력해주세요"
                   placeholderTextColor="#9B9FA6"
@@ -320,15 +338,16 @@ export default function AddChoreModal() {
                   onChangeText={setInputValue}
                   maxLength={maxLength}
                   className="text-base flex-1 min-w-0 p-0 "
+                  style={styles.textInput}
                 />
-                <Text className="text-sm text-[#B4B7BC]">
+                <Text className="text-sm text-[#B4B7BC]" style={styles.counterText}>
                   {inputValue.length}자/{maxLength}자
                 </Text>
               </View>
 
               {/* 추천 집안일 */}
               {isLoading ? (
-                <View className="py-3 items-center">
+                <View className="py-3 items-center" style={styles.loadingRow}>
                   <ActivityIndicator />
                 </View>
               ) : (
@@ -336,24 +355,30 @@ export default function AddChoreModal() {
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   className="flex-row flex-wrap gap-2"
+                  contentContainerStyle={styles.chipsRow}
                 >
                   {randomChores?.map((item) => (
                     <Pressable
                       key={item.id}
                       className="bg-[#DDF4F6] rounded-[6px] flex items-center justify-center px-3 py-[10px]"
+                      style={styles.chip}
                       onPress={() => setInputValue(item.titleKo)}
                     >
-                      <Text className="text-[#46A1A6] text-base">{item.titleKo}</Text>
+                      <Text className="text-[#46A1A6] text-base" style={styles.chipText}>
+                        {item.titleKo}
+                      </Text>
                     </Pressable>
                   ))}
                 </ScrollView>
               )}
 
               {/* 집안일 알림 설정 */}
-              <View className="bg-white rounded-xl p-5 mb-4 relative">
+              <View className="bg-white rounded-xl p-5 mb-4 relative" style={styles.card}>
                 {/* 공간 */}
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-lg font-[500]">공간</Text>
+                <View className="flex-row items-center justify-between" style={styles.rowBetween}>
+                  <Text className="text-lg font-[500]" style={styles.label}>
+                    공간
+                  </Text>
                   <ChoreDropdown
                     id="space"
                     options={spaceOptions}
@@ -365,11 +390,13 @@ export default function AddChoreModal() {
                   />
                 </View>
 
-                <View className="h-[1px] bg-[#E6E7E9] my-3" />
+                <View className="h-[1px] bg-[#E6E7E9] my-3" style={styles.divider} />
 
                 {/* 반복 주기 */}
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-lg font-[500]">반복주기</Text>
+                <View className="flex-row items-center justify-between" style={styles.rowBetween}>
+                  <Text className="text-lg font-[500]" style={styles.label}>
+                    반복주기
+                  </Text>
                   <ChoreDropdown
                     id="repeat"
                     options={repeatOptions}
@@ -381,19 +408,27 @@ export default function AddChoreModal() {
                   />
                 </View>
 
-                <View className="h-[1px] bg-[#E6E7E9] my-3" />
+                <View className="h-[1px] bg-[#E6E7E9] my-3" style={styles.divider} />
 
                 {/* 시작 일자 */}
                 <View
                   className={`relative flex-row items-center justify-between ${openCalendar === 'start' ? 'z-50' : 'z-10'}`}
+                  style={[
+                    styles.rowBetween,
+                    openCalendar === 'start' ? styles.z50 : styles.z10,
+                    styles.relative,
+                  ]}
                 >
-                  <Text className="text-lg font-[500]">시작일자</Text>
+                  <Text className="text-lg font-[500]" style={styles.label}>
+                    시작일자
+                  </Text>
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => setOpenCalendar(openCalendar === 'start' ? null : 'start')}
                     className="relative bg-[#EBF9F9] py-1 px-[10px] rounded-[6px]"
+                    style={styles.dateBtn}
                   >
-                    <Text className="text-base text-[#46A1A6]">
+                    <Text className="text-base text-[#46A1A6]" style={styles.dateBtnText}>
                       {startDate ? ymdToYYMMDD(startDate) : todayStr}
                     </Text>
                   </TouchableOpacity>
@@ -401,15 +436,7 @@ export default function AddChoreModal() {
                   {openCalendar === 'start' && (
                     <View
                       className="absolute left-0 right-0 w-full top-full mt-2 z-50 rounded-2xl bg-white"
-                      style={{
-                        // iOS 그림자
-                        shadowColor: '#000',
-                        shadowOpacity: 0.15,
-                        shadowRadius: 8,
-                        shadowOffset: { width: 0, height: 0 },
-                        // Android 그림자
-                        elevation: 6,
-                      }}
+                      style={styles.calendarPopover}
                     >
                       <DatePickerCalendar
                         selectedDate={startDate ?? undefined}
@@ -422,19 +449,27 @@ export default function AddChoreModal() {
                   )}
                 </View>
 
-                <View className="h-[1px] bg-[#E6E7E9] my-3" />
+                <View className="h-[1px] bg-[#E6E7E9] my-3" style={styles.divider} />
 
                 {/* 완료 일자 */}
                 <View
                   className={`relative flex-row items-center justify-between ${openCalendar === 'end' ? 'z-50' : 'z-10'}`}
+                  style={[
+                    styles.rowBetween,
+                    openCalendar === 'end' ? styles.z50 : styles.z10,
+                    styles.relative,
+                  ]}
                 >
-                  <Text className="text-lg font-[500]">완료일자</Text>
+                  <Text className="text-lg font-[500]" style={styles.label}>
+                    완료일자
+                  </Text>
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => setOpenCalendar(openCalendar === 'end' ? null : 'end')}
                     className="relative bg-[#EBF9F9] py-1 px-[10px] rounded-[6px]"
+                    style={styles.dateBtn}
                   >
-                    <Text className="text-base text-[#46A1A6]">
+                    <Text className="text-base text-[#46A1A6]" style={styles.dateBtnText}>
                       {endDate ? ymdToYYMMDD(endDate) : todayStr}
                     </Text>
                   </TouchableOpacity>
@@ -442,15 +477,7 @@ export default function AddChoreModal() {
                   {openCalendar === 'end' && (
                     <View
                       className="absolute left-0 right-0 w-full top-full mt-2 z-50 rounded-2xl bg-white"
-                      style={{
-                        // iOS 그림자
-                        shadowColor: '#000',
-                        shadowOpacity: 0.15,
-                        shadowRadius: 8,
-                        shadowOffset: { width: 0, height: 0 },
-                        // Android 그림자
-                        elevation: 6,
-                      }}
+                      style={styles.calendarPopover}
                     >
                       <DatePickerCalendar
                         selectedDate={endDate ?? undefined}
@@ -463,16 +490,18 @@ export default function AddChoreModal() {
                   )}
                 </View>
                 {!isDateRangeValid && (
-                  <Text className="text-sm text-[#FF0707]">
+                  <Text className="text-sm text-[#FF0707]" style={styles.errorMsg}>
                     완료일자는 시작일자보다 빠를 수 없습니다.
                   </Text>
                 )}
 
-                <View className="h-[1px] bg-[#E6E7E9] my-3" />
+                <View className="h-[1px] bg-[#E6E7E9] my-3" style={styles.divider} />
 
                 {/* 알림 */}
-                <View className="flex-row items-center justify-between ">
-                  <Text className="text-lg font-[500]">알림</Text>
+                <View className="flex-row items-center justify-between " style={styles.rowBetween}>
+                  <Text className="text-lg font-[500]" style={styles.label}>
+                    알림
+                  </Text>
                   <Toggle value={notifyOn} onChange={setNotifyOn} />
                 </View>
 
@@ -501,11 +530,19 @@ export default function AddChoreModal() {
               // 수정모드면서 변경없을 때만 회색으로
               isEdit && !isChanged ? 'bg-[#E6E7E9]' : 'bg-[#57C9D0]'
             }`}
+            style={[
+              styles.submitBtn,
+              isEdit && !isChanged ? styles.submitBtnDisabled : styles.submitBtnActive,
+            ]}
           >
             <Text
               className={`text-lg font-semibold ${
                 isEdit && !isChanged ? 'text-[#B4B7BC]' : 'text-white'
               }`}
+              style={[
+                styles.submitText,
+                isEdit && !isChanged ? styles.submitTextDisabled : styles.submitTextActive,
+              ]}
             >
               {btnLabel}
             </Text>
@@ -515,3 +552,116 @@ export default function AddChoreModal() {
     </>
   )
 }
+
+const styles = StyleSheet.create({
+  kbView: { flex: 1, backgroundColor: '#F8F8FA' },
+  wrapper: { flex: 1, position: 'relative', paddingHorizontal: 20 },
+  scroll: { flex: 1, paddingTop: 24, backgroundColor: '#F8F8FA' },
+  scrollContent: {},
+
+  fullscreenOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 40,
+  },
+
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  headerBack: { position: 'absolute', left: 0 },
+  headerRight: { position: 'absolute', right: 0 },
+  headerTitle: { fontSize: 22, fontWeight: '600' },
+  deleteText: { fontSize: 16, color: '#57C9D0', fontWeight: '600' },
+
+  flex1: { flex: 1 },
+
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    marginBottom: 16,
+  },
+  textInput: {
+    fontSize: 16,
+    flex: 1,
+    minWidth: 0,
+    padding: 0,
+  },
+  counterText: { fontSize: 14, color: '#B4B7BC' },
+
+  loadingRow: { paddingVertical: 12, alignItems: 'center' },
+
+  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: {
+    backgroundColor: '#DDF4F6',
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  chipText: { color: '#46A1A6', fontSize: 16 },
+
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    position: 'relative',
+  },
+  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  label: { fontSize: 18, fontWeight: '500' },
+  divider: { height: 1, backgroundColor: '#E6E7E9', marginVertical: 12 },
+
+  relative: { position: 'relative' },
+  z10: { zIndex: 10 },
+  z50: { zIndex: 50 },
+
+  dateBtn: {
+    backgroundColor: '#EBF9F9',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+  },
+  dateBtnText: { fontSize: 16, color: '#46A1A6' },
+  calendarPopover: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    width: '100%',
+    top: '100%',
+    marginTop: 8,
+    zIndex: 50,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 6,
+  },
+
+  errorMsg: { fontSize: 12, color: '#FF0707' },
+
+  submitBtn: {
+    height: 52,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  submitBtnActive: { backgroundColor: '#57C9D0' },
+  submitBtnDisabled: { backgroundColor: '#E6E7E9' },
+  submitText: { fontSize: 18, fontWeight: '600' },
+  submitTextActive: { color: '#FFFFFF' },
+  submitTextDisabled: { color: '#B4B7BC' },
+})

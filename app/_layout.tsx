@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
-import { ActivityIndicator, View } from 'react-native'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
@@ -12,7 +12,7 @@ function RootNavigator() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#57C9D0" />
       </View>
     )
@@ -45,3 +45,12 @@ export default function RootLayout() {
     </SafeAreaProvider>
   )
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+})
