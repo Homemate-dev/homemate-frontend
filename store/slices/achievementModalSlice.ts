@@ -1,6 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
-
-import { PayloadAction } from './../../node_modules/@reduxjs/toolkit/src/createAction'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 import type { ImageSourcePropType } from 'react-native'
 
@@ -24,6 +22,7 @@ const initialState: AchievementModalState = {
 const achievementModalSlice = createSlice({
   name: 'achievementModal',
   initialState,
+  // 상태를 바꾸는 함수들
   reducers: {
     // 모달 열기 -> 보여줄 내용 전달
     openAchievementModal: (
