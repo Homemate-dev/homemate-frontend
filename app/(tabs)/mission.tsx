@@ -5,6 +5,7 @@ import {
   Image,
   Platform,
   StatusBar,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -45,15 +46,9 @@ const mockBadges = [
 
 export default function Mission() {
   const androidTop = Platform.OS === 'android' ? 50 : 0
-
-  // 이달의 미션 api
   const { data: missions, isLoading, isError } = useMonthlyMissions()
-
-  // 뱃지 상세 보기
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const selected = mockBadges.find((badge) => badge.id === selectedId)
-
-  // 미션 진행률
   const progress = (cur: number, tgt: number) =>
     tgt ? Math.min(100, Math.round((cur * 100) / tgt)) : 0
 
@@ -61,43 +56,37 @@ export default function Mission() {
     <>
       <StatusBar backgroundColor="#F8F8FA" />
       <TabSafeScroll contentContainerStyle={{ paddingTop: androidTop }}>
-        <View className="bg-[#F8F8FA]">
-          {/* 헤더 */}
-          <View className="items-center my-4">
-            <Text className="text-2xl font-semibold ">미션</Text>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.headerText}>미션</Text>
           </View>
 
-          {/* 이달의 미션 */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>이 달의 미션</Text>
 
-          <View className="flex mb-6">
-            <Text className="text-xl font-bold mb-[10px]">이 달의 미션</Text>
-
-            <View className="bg-white p-5 rounded-xl mb-[10px]">
+            <View style={styles.missionBox}>
               {isLoading && (
-                <View className="py-6 items-center justify-center">
+                <View style={styles.loadingBox}>
                   <ActivityIndicator />
                 </View>
               )}
 
               {isError && !isLoading && (
-                <Text className="text-[#D64545]">이달의 미션을 불러오지 못했어요.</Text>
+                <Text style={styles.errorText}>이달의 미션을 불러오지 못했어요.</Text>
               )}
 
               {!isLoading && !isError && (missions?.length ?? 0) === 0 && (
-                <Text className="text-[#686F79]">아직 등록된 이달의 미션이 없어요.</Text>
+                <Text style={styles.noMissionText}>아직 등록된 이달의 미션이 없어요.</Text>
               )}
 
               {!isLoading &&
                 !isError &&
                 missions?.map((m, idx) => (
-                  <View
-                    key={m.id}
-                    className={`${missions.length === 1 || idx === missions.length - 1 ? '' : 'mb-3'}`}
-                  >
-                    <View className="flex-row items-center justify-between">
-                      <Text className="text-base">{m.title}</Text>
-                      <Text className="text-base text-[#B4B7BC]">
-                        <Text className="font-semibold text-[#57C9D0]">
+                  <View key={m.id} style={idx !== missions.length - 1 && styles.mb12}>
+                    <View style={styles.missionRow}>
+                      <Text style={styles.missionTitle}>{m.title}</Text>
+                      <Text style={styles.missionCountText}>
+                        <Text style={styles.missionCurrent}>
                           {m.currentCount}
                           {inferUnitFromTitle(m.title)}{' '}
                         </Text>
@@ -106,39 +95,37 @@ export default function Mission() {
                       </Text>
                     </View>
 
-                    <View className="mt-3 mb-2 h-[8px] w-full rounded-full bg-[#040F2014] overflow-hidden">
+                    <View style={styles.progressBar}>
                       <View
-                        className="h-full rounded-full bg-[#57C9D0]"
-                        style={{
-                          width: `${progress(m.currentCount, m.targetCount)}%`,
-                          borderRadius: 9999,
-                        }}
+                        style={[
+                          styles.progressFill,
+                          { width: `${progress(m.currentCount, m.targetCount)}%` },
+                        ]}
                       />
                     </View>
                   </View>
                 ))}
             </View>
 
-            <View className="flex-row">
-              <Text className="mr-1">⭐</Text>
-              <View className="flex-row items-center">
-                <Text className="text-sm text-[#686F79]">추천 카테고리에서 추가해보세요!</Text>
+            <View style={styles.tipRow}>
+              <Text style={styles.star}>⭐</Text>
+              <View style={styles.tipInner}>
+                <Text style={styles.tipText}>추천 카테고리에서 추가해보세요!</Text>
                 <Image
                   source={require('../../assets/images/arrow/right-inactive.png')}
-                  className="w-4 h-4"
+                  style={styles.tipArrow}
                   resizeMode="contain"
                 />
               </View>
             </View>
           </View>
 
-          {/* 곧 획듣하는 뱃지 */}
           <View>
-            <Text className="text-xl font-bold mb-[10px]">곧 획득하는 뱃지</Text>
-            <View className="bg-white p-5 rounded-xl mb-[12px]">
-              <View className="flex-row justify-between">
+            <Text style={styles.sectionTitle}>곧 획득하는 뱃지</Text>
+            <View style={styles.badgeBox}>
+              <View style={styles.badgeRow}>
                 {mockBadges.map((b) => (
-                  <View key={b.id} className="items-center">
+                  <View key={b.id} style={styles.badgeItem}>
                     <TouchableOpacity activeOpacity={0.8} onPress={() => setSelectedId(b.id)}>
                       <BadgeCard
                         icon={require('@/assets/images/chore-home.png')}
@@ -146,21 +133,17 @@ export default function Mission() {
                         iconSize={82}
                       />
                     </TouchableOpacity>
-                    <Text className="text-base text-[#4F5763] mt-2">{b.title}</Text>
-                    <Text className="text-base text-[#B4B7BC] mt-2">
-                      <Text className="text-[#57C9D0] font-semibold">{b.current}회</Text> /{' '}
-                      {b.target}회
+                    <Text style={styles.badgeTitle}>{b.title}</Text>
+                    <Text style={styles.badgeCount}>
+                      <Text style={styles.badgeCurrent}>{b.current}회</Text> / {b.target}회
                     </Text>
                   </View>
                 ))}
               </View>
             </View>
 
-            <TouchableOpacity
-              onPress={() => router.push('/mybadges')}
-              className="h-[52px] bg-[#DDF4F6] items-center justify-center rounded-xl"
-            >
-              <Text className="text-[#46A1A6] text-lg font-semibold">뱃지 더보기</Text>
+            <TouchableOpacity onPress={() => router.push('/mybadges')} style={styles.moreBtn}>
+              <Text style={styles.moreText}>뱃지 더보기</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -171,3 +154,49 @@ export default function Mission() {
     </>
   )
 }
+
+const styles = StyleSheet.create({
+  container: { backgroundColor: '#F8F8FA' },
+  header: { alignItems: 'center', marginVertical: 16 },
+  headerText: { fontSize: 24, fontWeight: '600' },
+  section: { marginBottom: 24 },
+  sectionTitle: { fontSize: 20, fontWeight: '700', marginBottom: 10 },
+  missionBox: { backgroundColor: '#FFFFFF', padding: 20, borderRadius: 12, marginBottom: 10 },
+  loadingBox: { paddingVertical: 24, alignItems: 'center', justifyContent: 'center' },
+  errorText: { color: '#D64545' },
+  noMissionText: { color: '#686F79' },
+  mb12: { marginBottom: 12 },
+  missionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  missionTitle: { fontSize: 16 },
+  missionCountText: { fontSize: 16, color: '#B4B7BC' },
+  missionCurrent: { fontWeight: '600', color: '#57C9D0' },
+  progressBar: {
+    marginTop: 12,
+    marginBottom: 8,
+    height: 8,
+    width: '100%',
+    borderRadius: 9999,
+    backgroundColor: '#040F2014',
+    overflow: 'hidden',
+  },
+  progressFill: { height: '100%', borderRadius: 9999, backgroundColor: '#57C9D0' },
+  tipRow: { flexDirection: 'row', alignItems: 'center' },
+  star: { marginRight: 4 },
+  tipInner: { flexDirection: 'row', alignItems: 'center' },
+  tipText: { fontSize: 14, color: '#686F79' },
+  tipArrow: { width: 16, height: 16 },
+  badgeBox: { backgroundColor: '#FFFFFF', padding: 20, borderRadius: 12, marginBottom: 12 },
+  badgeRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  badgeItem: { alignItems: 'center' },
+  badgeTitle: { fontSize: 16, color: '#4F5763', marginTop: 8 },
+  badgeCount: { fontSize: 16, color: '#B4B7BC', marginTop: 8 },
+  badgeCurrent: { color: '#57C9D0', fontWeight: '600' },
+  moreBtn: {
+    height: 52,
+    backgroundColor: '#DDF4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+  },
+  moreText: { color: '#46A1A6', fontSize: 18, fontWeight: '600' },
+})

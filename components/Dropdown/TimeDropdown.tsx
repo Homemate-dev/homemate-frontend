@@ -1,5 +1,5 @@
 import { type Dispatch, type SetStateAction, useMemo } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 type DropdownId = 'ampm' | 'hour' | 'minute'
 
@@ -35,14 +35,14 @@ export default function TimeDropdown({
   )
 
   return (
-    <View className="flex-row items-center justify-center mt-4">
+    <View style={styles.container}>
       {/* 오전/오후 */}
-      <View className="relative bg-[#EBF9F9] px-[10px] py-1 w-[75px] h-[40px] rounded-[6px] items-center justify-center mr-[14px]">
+      <View style={[styles.box, styles.mr14]}>
         <Pressable onPress={() => toggleDropdown('ampm')}>
-          <Text className="text-[#46A1A6] text-base">{ampm}</Text>
+          <Text style={styles.boxText}>{ampm}</Text>
         </Pressable>
         {activeDropdown === 'ampm' && (
-          <View className="absolute left-0 top-[45px] z-50  w-[75px] border border-[#57C9D0] px-[10px] py-1 bg-white rounded-md">
+          <View style={[styles.dropdownPanel, styles.w75]}>
             {ampmOptions.map((opt) => {
               const selected = opt === ampm
               return (
@@ -52,9 +52,9 @@ export default function TimeDropdown({
                     onChange({ ampm: opt, hour, minute })
                     setActiveDropdown(null)
                   }}
-                  className={`items-center justify-center px-1 py-1 rounded ${selected ? 'bg-[#EBF9F9]' : ''}`}
+                  style={[styles.optionRow, selected && styles.optionSelected]}
                 >
-                  <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
+                  <Text style={styles.optionText} numberOfLines={1}>
                     {opt}
                   </Text>
                 </Pressable>
@@ -65,14 +65,14 @@ export default function TimeDropdown({
       </View>
 
       {/* 시 선택 */}
-      <View className="flex-row items-center mr-[5px]">
-        <View className="bg-[#EBF9F9] px-[10px] py-1 w-[75px] h-[40px] rounded-[6px] items-center justify-center">
+      <View style={[styles.inlineRow, styles.mr5]}>
+        <View style={styles.box}>
           <Pressable onPress={() => toggleDropdown('hour')}>
-            <Text className="text-[#46A1A6] text-base">{hour}</Text>
+            <Text style={styles.boxText}>{hour}</Text>
           </Pressable>
 
           {activeDropdown === 'hour' && (
-            <ScrollView className="absolute left-0 top-[45px] z-50  w-[75px] h-[152px] border border-[#57C9D0] px-[10px] py-1 bg-white rounded-md">
+            <ScrollView style={[styles.dropdownScroll, styles.w75, styles.h152]}>
               {hourOptions.map((opt) => {
                 const selected = opt === hour
                 return (
@@ -82,9 +82,9 @@ export default function TimeDropdown({
                       onChange({ ampm, hour: opt, minute })
                       setActiveDropdown(null)
                     }}
-                    className={`items-center justify-center px-1 py-1 rounded ${selected ? 'bg-[#EBF9F9]' : ''}`}
+                    style={[styles.optionRow, selected && styles.optionSelected]}
                   >
-                    <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
+                    <Text style={styles.optionText} numberOfLines={1}>
                       {opt}
                     </Text>
                   </Pressable>
@@ -93,17 +93,17 @@ export default function TimeDropdown({
             </ScrollView>
           )}
         </View>
-        <Text className="text-base ml-[5px]">시</Text>
+        <Text style={[styles.unitText, styles.ml5]}>시</Text>
       </View>
 
       {/* 분 선택 */}
-      <View className="flex-row items-center">
-        <View className="bg-[#EBF9F9] px-[10px] py-1 w-[75px] h-[40px] rounded-[6px] items-center justify-center">
+      <View style={styles.inlineRow}>
+        <View style={styles.box}>
           <Pressable onPress={() => toggleDropdown('minute')}>
-            <Text className="text-[#46A1A6] text-base">{String(minute).padStart(2, '0')}</Text>
+            <Text style={styles.boxText}>{String(minute).padStart(2, '0')}</Text>
           </Pressable>
           {activeDropdown === 'minute' && (
-            <ScrollView className="absolute left-0 top-[45px] z-50  w-[75px] h-[152px] border border-[#57C9D0] px-[10px] py-1 bg-white rounded-md">
+            <ScrollView style={[styles.dropdownScroll, styles.w75, styles.h152]}>
               {minuteOptions.map((opt) => {
                 const selected = opt === String(minute)
                 return (
@@ -113,9 +113,9 @@ export default function TimeDropdown({
                       onChange({ ampm, hour, minute: Number(opt) })
                       setActiveDropdown(null)
                     }}
-                    className={`items-center justify-center px-1 py-1 rounded ${selected ? 'bg-[#EBF9F9]' : ''}`}
+                    style={[styles.optionRow, selected && styles.optionSelected]}
                   >
-                    <Text className="text-[#46A1A6] text-base" numberOfLines={1}>
+                    <Text style={styles.optionText} numberOfLines={1}>
                       {opt}
                     </Text>
                   </Pressable>
@@ -124,8 +124,74 @@ export default function TimeDropdown({
             </ScrollView>
           )}
         </View>
-        <Text className="text-base ml-[5px]">분</Text>
+        <Text style={[styles.unitText, styles.ml5]}>분</Text>
       </View>
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  inlineRow: { flexDirection: 'row', alignItems: 'center' },
+
+  box: {
+    position: 'relative',
+    backgroundColor: '#EBF9F9',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    width: 75,
+    height: 40,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boxText: { color: '#46A1A6', fontSize: 16 },
+
+  dropdownPanel: {
+    position: 'absolute',
+    left: 0,
+    top: 45,
+    zIndex: 50,
+    borderWidth: 1,
+    borderColor: '#57C9D0',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 6,
+  },
+  dropdownScroll: {
+    position: 'absolute',
+    left: 0,
+    top: 45,
+    zIndex: 50,
+    borderWidth: 1,
+    borderColor: '#57C9D0',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 6,
+  },
+
+  optionRow: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  optionSelected: { backgroundColor: '#EBF9F9' },
+  optionText: { color: '#46A1A6', fontSize: 16 },
+
+  unitText: { fontSize: 16 },
+  ml5: { marginLeft: 5 },
+  mr5: { marginRight: 5 },
+  mr14: { marginRight: 14 },
+
+  w75: { width: 75 },
+  h152: { height: 152 },
+})
