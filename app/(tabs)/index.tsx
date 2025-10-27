@@ -4,6 +4,8 @@ import { StatusBar } from 'expo-status-bar'
 import { useEffect, useMemo, useState } from 'react'
 import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
+import HomeCalendar from '../../components/Calendar/HomeCalendar'
+
 import Checkbox from '@/components/Checkbox'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
@@ -13,49 +15,18 @@ import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
 import { usePatchChoreStatus } from '@/libs/hooks/chore/usePatchChoreStatus'
 import { formatKoreanDate, getMonthRange } from '@/libs/utils/date'
 
-import HomeCalendar from '../../components/Calendar/HomeCalendar'
-
 export default function HomeScreen() {
   const router = useRouter()
-  const { login } = useAuth()
+  const { token } = useAuth()
+  useEffect(() => {
+    if (!token) {
+      router.replace('/login')
+    }
+  }, [token, router])
+
   const androidTop = Platform.OS === 'android' ? 50 : 0
 
   const extra = Constants.expoConfig?.extra ?? {}
-  const KAKAO_REDIRECT_URI = extra.KAKAO_REDIRECT_URI ?? ''
-  const KAKAO_CODE_VERIFIER = extra.KAKAO_CODE_VERIFIER ?? ''
-
-  const fetchKakaoToken = async (code: string) => {
-    try {
-      const response = await fetch(`https://homemate.io.kr/api/auth/login/kakao`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          authorizationCode: code,
-          redirectUri: KAKAO_REDIRECT_URI,
-          codeVerifier: KAKAO_CODE_VERIFIER,
-        }),
-      })
-      const data = await response.json()
-      if (data.accessToken) {
-        await login(data.accessToken)
-        window.history.replaceState({}, document.title, '/')
-      } else {
-        console.warn('accessToken이 응답에 없습니다:', data)
-      }
-    } catch (error) {
-      console.error('카카오 로그인 중 오류 발생:', error)
-    }
-  }
-
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      const params = new URLSearchParams(window.location.search)
-      const code = params.get('code')
-      if (code) {
-        fetchKakaoToken(code)
-      }
-    }
-  }, [])
 
   const todayStr = useMemo(() => {
     const t = new Date()

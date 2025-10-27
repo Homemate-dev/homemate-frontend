@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
-import { ActivityIndicator, StyleSheet, View } from 'react-native'
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
+import { ActivityIndicator, SafeAreaView, StyleSheet, View } from 'react-native'
 
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 
@@ -20,29 +19,20 @@ function RootNavigator() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {token ? (
-        <>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="(modals)" />
-        </>
-      ) : (
-        <Stack.Screen name="(auth)" />
-      )}
+      {token ? <Stack.Screen name="/index" /> : <Stack.Screen name="/login" />}
     </Stack>
   )
 }
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F8F8FA' }}>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <RootNavigator />
-          </AuthProvider>
-        </QueryClientProvider>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8FA' }}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <RootNavigator />
+        </AuthProvider>
+      </QueryClientProvider>
+    </SafeAreaView>
   )
 }
 
