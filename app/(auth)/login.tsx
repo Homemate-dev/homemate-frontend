@@ -1,8 +1,8 @@
-import Constants from 'expo-constants'
-import * as Linking from 'expo-linking'
-import { useRouter } from 'expo-router' // useRouter 추가
-import * as WebBrowser from 'expo-web-browser'
-import { useState } from 'react'
+import Constants from 'expo-constants';
+import * as Linking from 'expo-linking';
+import { useRouter } from 'expo-router'; // useRouter 추가
+import * as WebBrowser from 'expo-web-browser';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -11,14 +11,14 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native'
+} from 'react-native';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
-} from 'react-native-responsive-screen'
+} from 'react-native-responsive-screen';
 
-import { useAuth } from '@/contexts/AuthContext'
-import { setAccessToken } from '@/libs/api/axios'
+import { useAuth } from '@/contexts/AuthContext';
+import { setAccessToken } from '@/libs/api/axios';
 
 export default function Login() {
   const [authCode, setAuthCode] = useState<string | null>(null)
@@ -29,6 +29,8 @@ export default function Login() {
 
   const KAKAO_REST_API_KEY = '767c656f116d3d699c2b979f9c77f0a6'
   const KAKAO_REDIRECT_URI = 'http://localhost:3000'
+const codeVerifier = 'buxcAKiNFcQ8Kslcm5NrKq6pm8JgFULeujc2usyw0g4';
+const codeChallenge = 'jrHilj7qFqhxKHKKM8AoQsqociZfnv-QJQjXrSyT0jU';
 
   const fetchKakaoToken = async (code: string | string[]) => {
     const codeString = Array.isArray(code) ? code[0] : code
@@ -40,7 +42,8 @@ export default function Login() {
         body: JSON.stringify({
           authorizationCode: codeString,
           redirectUri: KAKAO_REDIRECT_URI,
-          codeVerifier: 'buxcAKiFCQ8k1smcNKr6pm83qFUEul8cj2uswyqg4',
+codeVerifier: 'buxcAKiNFcQ8Kslcm5NrKq6pm8JgFULeujc2usyw0g4',
+
         }),
       })
 
@@ -61,8 +64,7 @@ export default function Login() {
     console.log('Initiating Kakao login...')
     setLoading(true)
     try {
-      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`
-
+      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&code_challenge=${codeChallenge}&code_challenge_method=S256`;
       if (Platform.OS === 'web') {
         console.log('Web platform detected. Redirecting...')
         window.location.href = kakaoAuthUrl
