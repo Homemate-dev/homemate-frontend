@@ -1,37 +1,53 @@
-import Constants from 'expo-constants'
 import * as Linking from 'expo-linking'
+import { useRouter } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import { useState } from 'react'
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import {
+  ActivityIndicator,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from 'react-native-responsive-screen'
 
-import { useAuth } from '@/contexts/AuthContext'
+import { setAccessToken } from '@/libs/api/axios'
 
 export default function Login() {
-  const [authCode, setAuthCode] = useState<string | null>(null)
-  const extra = Constants?.expoConfig?.extra ?? {}
-  const { login } = useAuth()
+  const [loading, setLoading] = useState<boolean>(false)
+  const router = useRouter()
 
-  const KAKAO_REST_API_KEY = extra.KAKAO_REST_API_KEY || '767c656f116d3d699c2b979f9c77f0a6'
+  const KAKAO_REST_API_KEY = '767c656f116d3d699c2b979f9c77f0a6'
   const KAKAO_REDIRECT_URI = 'http://localhost:3000'
+  const codeVerifier = 'buxcAKiNFcQ8Kslcm5NrKq6pm8JgFULeujc2usyw0g4'
+  const codeChallenge = 'jrHilj7qFqhxKHKKM8AoQsqociZfnv-QJQjXrSyT0jU'
 
+  const fetchKakaoToken = async (code: string | string[]) => {
+    const codeString = Array.isArray(code) ? code[0] : code
 
-  const fetchKakaoToken = async (code: string) => {
     try {
       const response = await fetch(`https://homemate.io.kr/api/auth/login/kakao`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          authorizationCode: code,
+          authorizationCode: codeString,
           redirectUri: KAKAO_REDIRECT_URI,
-          codeVerifier: 'buxcAKiFCQ8k1smcNKr6pm83qFUEul8cj2uswyqg4',
+          codeVerifier: codeVerifier,
         }),
       })
 
       const data = await response.json()
 
       if (data.accessToken) {
-        await login(data.accessToken)
+        console.log('Received Access Token:', data.accessToken)
+        setAccessToken(data.accessToken)
+
+        router.replace('./index')
       }
     } catch (err) {
       console.error('로그인 중 오류 발생:', err)
@@ -39,24 +55,35 @@ export default function Login() {
   }
 
   const handleKakaoLogin = async () => {
+    console.log('Initiating Kakao login...')
+    setLoading(true)
     try {
-      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`
+      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&code_challenge=${codeChallenge}&code_challenge_method=S256`
 
       if (Platform.OS === 'web') {
+        console.log('Web platform detected. Redirecting...')
         window.location.href = kakaoAuthUrl
         return
       }
 
       const result = await WebBrowser.openAuthSessionAsync(kakaoAuthUrl, KAKAO_REDIRECT_URI)
+      console.log('WebBrowser result:', result)
+
       if (result.type === 'success' && result.url) {
         const parsed = Linking.parse(result.url)
         const code = parsed.queryParams?.code
-        if (code) fetchKakaoToken(code)
+        if (code) {
+          console.log('Authorization code:', code)
+          await fetchKakaoToken(code)
+        }
       } else {
         console.warn('로그인 취소 또는 실패:', result.type)
       }
     } catch (error) {
       console.error('Kakao 로그인 중 오류 발생:', error)
+      alert('카카오 로그인 중 오류가 발생했습니다. 다시 시도해주세요.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -71,10 +98,14 @@ export default function Login() {
         resizeMode="contain"
       />
 
-      <TouchableOpacity style={styles.kakaoButton} onPress={handleKakaoLogin}>
+      <TouchableOpacity style={styles.kakaoButton} onPress={handleKakaoLogin} disabled={loading}>
         <Image source={require('../../assets/images/icon/kakao.png')} style={styles.kakaoIcon} />
         <Text style={styles.kakaoText}>카카오톡으로 로그인</Text>
       </TouchableOpacity>
+
+      {loading && (
+        <ActivityIndicator size="large" color="#57C9D0" style={styles.loadingIndicator} />
+      )}
 
       <Text style={styles.footerText}>
         서비스 시작은 <Text style={styles.link}>서비스 이용약관{'\n'}</Text>
@@ -106,6 +137,9 @@ const styles = StyleSheet.create({
   },
   kakaoIcon: { width: 24, height: 24, marginRight: 8 },
   kakaoText: { fontSize: hp('2%'), color: '#FFFFFF', fontWeight: '600' },
+  loadingIndicator: {
+    marginTop: hp('2%'),
+  },
   footerText: {
     marginTop: hp('3%'),
     fontSize: hp('1.4%'),
