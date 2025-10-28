@@ -19,27 +19,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadToken = async () => {
       try {
-        const stored = await AsyncStorage.getItem('accessToken')
-        if (stored) {
-          setToken(stored)
-          setAccessToken(stored)
+        const storedToken = await AsyncStorage.getItem('accessToken')
+        if (storedToken) {
+          console.log('Loaded token from AsyncStorage:', storedToken)
+          setToken(storedToken)
+          setAccessToken(storedToken)
+        } else {
+          console.log('No token found in AsyncStorage.')
         }
       } catch (e) {
-        console.warn('토큰 불러오기 실패:', e)
+        console.warn('Error loading token:', e)
       } finally {
         setLoading(false)
       }
     }
+
     loadToken()
   }, [])
 
-  const login = async (newToken: string) => {
-    setToken(newToken)
-    setAccessToken(newToken)
-    await AsyncStorage.setItem('accessToken', newToken)
+  const login = async (token: string) => {
+    console.log('Storing token in AsyncStorage:', token)
+    await AsyncStorage.setItem('accessToken', token)
+
+    const storedToken = await AsyncStorage.getItem('accessToken')
+    console.log('Token after saving:', storedToken)
+
+    setAccessToken(token)
   }
 
   const logout = async () => {
+    console.log('Logging out...')
     setToken(null)
     setAccessToken(null)
     await AsyncStorage.removeItem('accessToken')
@@ -54,6 +63,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth는 AuthProvider 내부에서만 사용 가능합니다.')
+  if (!ctx) throw new Error('useAuth must be used within an AuthProvider')
   return ctx
 }

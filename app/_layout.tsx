@@ -20,14 +20,7 @@ function RootNavigator() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {token ? (
-        <>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="(modals)" />
-        </>
-      ) : (
-        <Stack.Screen name="(auth)" />
-      )}
+      {token ? <Stack.Screen name="(tabs)" /> : <Stack.Screen name="(auth)" />}
     </Stack>
   )
 }
