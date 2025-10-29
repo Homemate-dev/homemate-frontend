@@ -16,7 +16,6 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen'
 
-import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import Toggle from '@/components/Toggle'
 import { api, setAccessToken } from '@/libs/api/axios'
 import { fetchMyPage } from '@/libs/api/user'
@@ -30,7 +29,7 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true)
 
   const [isNotificationEnabled, setIsNotificationEnabled] = useState(false)
-  const [isHouseAlarm, setIsHouseAlarm] = useState(true)
+  const [isHouseAlarm, setIsHouseAlarm] = useState(false)
   const [isNoticeAlarm, setIsNoticeAlarm] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
@@ -43,6 +42,10 @@ export default function MyPage() {
 
         const myData = await fetchMyPage()
         setUser(myData)
+
+        setIsNotificationEnabled(myData.masterEnabled)
+        setIsHouseAlarm(myData.choreEnabled)
+        setIsNoticeAlarm(myData.noticeEnabled)
       } catch (error) {
         console.error('마이페이지 조회 실패:', error)
       } finally {
@@ -82,41 +85,37 @@ export default function MyPage() {
       <View style={styles.profileCard}>
         <Image
           source={
-            user.profileImage
-              ? { uri: user.profileImage }
+            user.profileImgUrl
+              ? { uri: user.profileImgUrl }
               : require('../../assets/images/icon/default_profile.png')
           }
           style={styles.profileImage}
         />
         <View>
-          <Text style={styles.userName}>{user.name}</Text>
+          <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
         </View>
       </View>
 
+    
       {/* 뱃지 영역 */}
       <View style={styles.badgeSection}>
         <View style={styles.badgeHeader}>
           <Text style={styles.sectionTitle}>나의 뱃지</Text>
           <View style={styles.badgeCountWrapper}>
-            <Text style={styles.badgeCount}>{user.badgeCount}개</Text>
-            <Text style={styles.badgeTotal}> / {user.badgeTotal}개</Text>
+            <Text style={styles.badgeCount}>0개</Text>
+            <Text style={styles.badgeTotal}> / 0개</Text>
             <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
           </View>
         </View>
         <View style={styles.badgeBarBackground}>
-          <View
-            style={[
-              styles.badgeBarFill,
-              { width: `${(user.badgeCount / user.badgeTotal) * 100}%` },
-            ]}
-          />
+          <View style={[styles.badgeBarFill, { width: '0%' }]} />
         </View>
       </View>
 
-      {/* 알림 설정 */}
+      {/* 알림 설정 (데이터만 반영) */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>알림</Text>
+          <Text style={styles.sectionTitle}>알림 설정</Text>
           <Toggle value={isNotificationEnabled} onChange={setIsNotificationEnabled} />
         </View>
 
@@ -132,14 +131,10 @@ export default function MyPage() {
 
         <View style={styles.divider} />
 
-        {/* 알림시간 설정 */}
-        <View style={[styles.timeSetting, activeDropdown && { height: hp('35%') }]}>
-          <Text style={styles.settingText}>알림시간 설정</Text>
-          <TimeDropdown
-            activeDropdown={activeDropdown}
-            setActiveDropdown={setActiveDropdown}
-            styles={styles}
-          />
+        <View style={styles.timeSetting}>
+          <Text style={styles.settingText}>
+            알림 시간: <Text style={{ color: '#57C9D0' }}>{user.notificationTime}</Text>
+          </Text>
         </View>
       </View>
 
@@ -169,10 +164,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F8FA',
     paddingHorizontal: wp('6%'),
-    overflow: 'visible',
   },
   header: {
-    fontSize: hp('2.2%'),
+    fontSize: hp('2.4%'),
     fontWeight: '700',
     textAlign: 'center',
     marginVertical: hp('2%'),
@@ -186,13 +180,22 @@ const styles = StyleSheet.create({
     gap: wp('4%'),
   },
   profileImage: {
-    width: wp('14%'),
-    height: wp('14%'),
+    width: wp('18%'),
+    height: wp('18%'),
     borderRadius: 999,
     backgroundColor: '#C8EDEE',
   },
-  userName: { fontSize: hp('2.2%'), color: '#FFFFFF', fontWeight: '600' },
-  userId: { fontSize: hp('1.6%'), color: '#FFFFFF', marginTop: hp('0.5%') },
+  userName: { fontSize: hp('2.4%'), color: '#FFFFFF', fontWeight: '700' },
+  userProvider: { fontSize: hp('1.6%'), color: '#D7FAFA' },
+
+  infoCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginTop: hp('2%'),
+    padding: hp('2%'),
+  },
+  infoText: { fontSize: hp('1.8%'), color: '#666', marginBottom: hp('0.5%') },
+
   badgeSection: {
     marginTop: hp('3%'),
     backgroundColor: '#FFFFFF',
@@ -205,14 +208,13 @@ const styles = StyleSheet.create({
   badgeTotal: { fontSize: hp('1.8%'), color: '#A1A1A1', marginRight: hp('1%') },
   badgeBarBackground: { height: hp('1%'), backgroundColor: '#E4E4E4', borderRadius: 100 },
   badgeBarFill: { height: '100%', backgroundColor: '#57C9D0', borderRadius: 100 },
-  sectionTitle: { fontSize: hp('2.2%'), fontWeight: '700' },
+
   section: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     paddingVertical: hp('2%'),
     paddingHorizontal: wp('5%'),
     marginTop: hp('2%'),
-    zIndex: 1,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -223,7 +225,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E6E7E9',
     paddingBottom: hp('2%'),
   },
-  divider: { borderBottomWidth: 1, borderBottomColor: '#E6E7E9' },
+  sectionTitle: { fontSize: hp('2.2%'), fontWeight: '700' },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -231,17 +233,9 @@ const styles = StyleSheet.create({
     paddingVertical: hp('1.5%'),
   },
   settingText: { fontSize: hp('1.8%'), color: '#686F79' },
-  timeSetting: {
-    marginTop: hp('1.5%'),
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    overflow: 'visible',
-  },
-  logoutBtn: { alignItems: 'center', marginTop: hp('2%') },
+  divider: { borderBottomWidth: 1, borderBottomColor: '#E6E7E9' },
+  timeSetting: { marginTop: hp('1.5%'), alignItems: 'center' },
+  logoutBtn: { alignItems: 'center', marginTop: hp('3%') },
   logoutText: { color: '#9B9FA6', fontSize: hp('1.8%') },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 })
