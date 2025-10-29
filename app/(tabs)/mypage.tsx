@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useState } from 'react'
 import {
+  ActivityIndicator,
   Image,
   LayoutAnimation,
   Platform,
@@ -17,19 +18,16 @@ import {
 
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import Toggle from '@/components/Toggle'
+import { api, setAccessToken } from '@/libs/api/axios'
+import { fetchMyPage } from '@/libs/api/user'
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true)
 }
 
 export default function MyPage() {
-  const user = {
-    name: '이름',
-    username: '@아이디',
-    badgeCount: 5,
-    badgeTotal: 35,
-    profileImage: require('../../assets/images/profile/profile-default.png'),
-  }
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   const [isNotificationEnabled, setIsNotificationEnabled] = useState(false)
   const [isHouseAlarm, setIsHouseAlarm] = useState(true)
@@ -37,8 +35,44 @@ export default function MyPage() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
   useEffect(() => {
+    const issueDevTokenAndFetch = async () => {
+      try {
+        const res = await api.post('/auth/dev/token/1')
+        const token = res.data.accessToken
+        setAccessToken(token)
+
+        const myData = await fetchMyPage()
+        setUser(myData)
+      } catch (error) {
+        console.error('마이페이지 조회 실패:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    issueDevTokenAndFetch()
+  }, [])
+
+  useEffect(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
   }, [activeDropdown])
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#57C9D0" />
+        <Text style={{ color: '#57C9D0', marginTop: 10 }}>불러오는 중...</Text>
+      </View>
+    )
+  }
+
+  if (!user) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>유저 정보를 불러올 수 없습니다.</Text>
+      </View>
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -46,10 +80,16 @@ export default function MyPage() {
 
       {/* 프로필 카드 */}
       <View style={styles.profileCard}>
-        <Image source={user.profileImage} style={styles.profileImage} />
+        <Image
+          source={
+            user.profileImage
+              ? { uri: user.profileImage }
+              : require('../../assets/images/icon/default_profile.png')
+          }
+          style={styles.profileImage}
+        />
         <View>
           <Text style={styles.userName}>{user.name}</Text>
-          <Text style={styles.userId}>{user.username}</Text>
         </View>
       </View>
 
@@ -191,113 +231,17 @@ const styles = StyleSheet.create({
     paddingVertical: hp('1.5%'),
   },
   settingText: { fontSize: hp('1.8%'), color: '#686F79' },
-
   timeSetting: {
     marginTop: hp('1.5%'),
     alignItems: 'center',
     justifyContent: 'flex-start',
     overflow: 'visible',
   },
-
   logoutBtn: { alignItems: 'center', marginTop: hp('2%') },
   logoutText: { color: '#9B9FA6', fontSize: hp('1.8%') },
-
-  timeContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    marginTop: hp('1.5%'),
-    width: '100%',
-  },
-  timeBox: {
-    display: 'flex',
-    flexDirection: 'row',
-    width: '100%',
-  },
-
-  timeUnit: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  unitLabel: {
-    fontSize: hp('1.8%'),
-    marginLeft: 6,
-    color: '#000',
-  },
-
-  dropdownBox: {
-    backgroundColor: '#EBF9F9',
-    borderRadius: 8,
-    width: wp('20%'),
-    height: hp('5%'),
-    alignItems: 'center',
+  loadingContainer: {
+    flex: 1,
     justifyContent: 'center',
-    marginHorizontal: 6,
-  },
-
-  dropdownText: {
-    color: '#46A1A6',
-    fontSize: hp('1.9%'),
-    fontWeight: '500',
-  },
-
-  dropdownGroup: {
-    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: hp('1.5%'),
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-  },
-
-  dropdownList: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#57C9D0',
-    borderRadius: 8,
-    width: wp('20%'),
-    height: hp('20%'),
-    marginHorizontal: 6,
-    flexGrow: 0,
-    flexShrink: 0,
-  },
-
-  dropdownItem: {
-    textAlign: 'center',
-    paddingVertical: 6,
-    fontSize: hp('1.8%'),
-    color: '#46A1A6',
-    fontWeight: '500',
-  },
-  timeList: {
-    width: '100%',
-    marginTop: hp('1.5%'),
-  },
-  timeLists: {
-    display: 'flex',
-    flexDirection: 'row',
-    width: '100%',
-  },
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: hp('1%'),
-  },
-  confirmButton: {
-    marginTop: hp('1.5%'),
-    backgroundColor: '#57C9D0',
-    borderRadius: 8,
-    paddingVertical: hp('1%'),
-    width: '100%',
-    alignSelf: 'center',
-  },
-
-  confirmText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: hp('2%'),
-    textAlign: 'center',
   },
 })
