@@ -1,7 +1,7 @@
 import { Image, Pressable } from 'react-native'
 
-const CHECKED = require('../assets/images/checkbox/checkbox-checked.png')
-const EMPTY = require('../assets/images/checkbox/checkbox-empty.png')
+const COMPLETED = require('../assets/images/checkbox/checkbox-checked.png')
+const PENDING = require('../assets/images/checkbox/checkbox-empty.png')
 
 type CheckboxProps = {
   checked: boolean
@@ -25,7 +25,7 @@ export default function Checkbox({
       accessibilityState={{ checked, disabled }}
     >
       <Image
-        source={checked ? CHECKED : EMPTY}
+        source={checked ? COMPLETED : PENDING}
         style={{ width: size, height: size }}
         resizeMode="contain"
       />

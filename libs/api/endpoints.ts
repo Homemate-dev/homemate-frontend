@@ -69,6 +69,15 @@ export const RECOMMEND_ENDPOINTS = {
 
   /** 선택한 집안일 등록 (공간 기준) */
   REGISTER_SPACE: (space: string) => `/recommend/spaces/${space}/register`, // POST
+
+  /** 공간 리스트 조회 */
+  SPACES: '/recommend/spaces', // GET
+
+  /** 카테고리 리스트 조회 */
+  CATEGORIES: '/recommend/categories', // GET
+
+  /** 랜덤 집안일 추천 조회 */
+  RANDOM: '/recommend/random', // GET
 } as const
 
 export const NOTIFICATION_ENDPOINTS = {
@@ -92,8 +101,8 @@ export const NOTIFICATION_ENDPOINTS = {
 } as const
 
 export const MISSION_ENDPOINTS = {
-  /** 이 달의 미션 조회: GET ?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD */
-  LIST_BY_RANGE: '/missions', // GET (params: { startDate, endDate })
+  /** 이 달의 미션 조회: GET */
+  LIST_BY_RANGE: '/missions',
 } as const
 
 export const BADGE_ENDPOINTS = {

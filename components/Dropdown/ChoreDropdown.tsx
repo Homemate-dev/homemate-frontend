@@ -1,4 +1,4 @@
-import { Image, Pressable, ScrollView, Text, View } from 'react-native'
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 type DropdownProps = {
   id: string
@@ -25,31 +25,20 @@ export default function ChoreDropdown({
   const close = () => setActiveDropdown(null)
 
   return (
-    <View className={`relative ${isOpen ? 'z-50' : ''}`}>
-      <Pressable onPress={toggle} className="flex-row items-center gap-2">
-        <Text className="text-[#686F79] text-base">
+    <View style={[styles.container, isOpen && styles.z50]}>
+      <Pressable onPress={toggle} style={styles.pressable}>
+        <Text style={styles.label}>
           {value != null && value !== '' ? value : (placeholder ?? '선택')}
         </Text>
         <Image
           source={require('../../assets/images/arrow/dropdown.png')}
-          className="w-3 h-[22px]"
+          style={styles.icon}
           resizeMode="contain"
         />
       </Pressable>
 
       {isOpen && (
-        <View
-          className="absolute right-0 top-6 z-50 w-[160px] rounded-xl bg-white px-4 py-4"
-          style={{
-            // iOS 그림자
-            shadowColor: '#000',
-            shadowOpacity: 0.15,
-            shadowRadius: 8,
-            shadowOffset: { width: 0, height: 0 },
-            // Android 그림자
-            elevation: 6,
-          }}
-        >
+        <View style={styles.dropdown}>
           <ScrollView showsVerticalScrollIndicator={false}>
             {options.map((opt, i) => (
               <Pressable
@@ -59,8 +48,8 @@ export default function ChoreDropdown({
                   close()
                 }}
               >
-                <Text className="text-base">{opt}</Text>
-                {i < options.length - 1 && <View className="h-[1px] bg-[#E6E7E9] mt-2 mb-2" />}
+                <Text style={styles.option}>{opt}</Text>
+                {i < options.length - 1 && <View style={styles.divider} />}
               </Pressable>
             ))}
           </ScrollView>
@@ -69,3 +58,52 @@ export default function ChoreDropdown({
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+  },
+  z50: {
+    zIndex: 50,
+  },
+  pressable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  label: {
+    color: '#686F79',
+    fontSize: 16,
+  },
+  icon: {
+    width: 12,
+    height: 22,
+  },
+  dropdown: {
+    position: 'absolute',
+    right: 0,
+    top: 24,
+    zIndex: 50,
+    width: 160,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    // iOS 그림자
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 0 },
+    // Android 그림자
+    elevation: 6,
+  },
+  option: {
+    fontSize: 16,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E6E7E9',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+})

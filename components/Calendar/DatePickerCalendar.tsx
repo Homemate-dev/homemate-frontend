@@ -1,12 +1,12 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { useMemo, useState } from 'react'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { Calendar, LocaleConfig } from 'react-native-calendars'
 import { MarkedDates } from 'react-native-calendars/src/types'
 
 import { toFirstDayOfMonth, toYMD } from '@/libs/utils/date'
 
-// ── 한국어 로케일
+// 한국어 로케일 설정
 LocaleConfig.locales['ko'] = {
   monthNames: [
     '1월',
@@ -48,13 +48,11 @@ type Props = {
 }
 
 export default function DatePickerCalendar({ selectedDate, onSelect }: Props) {
-  // 오늘 날짜 (YYYY-MM-DD)
   const todayStr = useMemo(() => toYMD(new Date()), [])
   const [currentMonthStr, setCurrentMonthStr] = useState(() =>
     toFirstDayOfMonth(selectedDate ?? todayStr)
   )
 
-  // markedDates: 선택된 날짜만 표시
   const markedDates = useMemo<MarkedDates>(() => {
     if (!selectedDate) return {}
     return {
@@ -76,12 +74,11 @@ export default function DatePickerCalendar({ selectedDate, onSelect }: Props) {
       todayTextColor: '#57C9D0',
       selectedDayBackgroundColor: '#57C9D0',
       selectedDayTextColor: '#fff',
-      // TS 타입엔 없는 확장 키
       'stylesheet.calendar.main': {
         week: {
           flexDirection: 'row',
           justifyContent: 'space-between',
-          marginVertical: 0, // 행 간격 압축
+          marginVertical: 0,
         },
       },
     }),
@@ -94,7 +91,7 @@ export default function DatePickerCalendar({ selectedDate, onSelect }: Props) {
   )
 
   return (
-    <View className="rounded-2xl overflow-hidden pb-3">
+    <View style={styles.container}>
       <Calendar
         key={calendarKey}
         current={currentMonthStr}
@@ -118,8 +115,8 @@ export default function DatePickerCalendar({ selectedDate, onSelect }: Props) {
           const y = date.getFullYear()
           const m = date.getMonth() + 1
           return (
-            <View className="flex-row items-center justify-between px-4 py-2">
-              <Text className="text-lg font-semibold text-[#040F20B2]">{`${y}년 ${m}월`}</Text>
+            <View style={styles.header}>
+              <Text style={styles.headerText}>{`${y}년 ${m}월`}</Text>
             </View>
           )
         }}
@@ -131,16 +128,10 @@ export default function DatePickerCalendar({ selectedDate, onSelect }: Props) {
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => onPress?.(date)}
-              className="flex-1 items-center justify-center"
+              style={styles.dayButton}
             >
-              <View
-                className={`flex items-center justify-center rounded-md ${
-                  marking?.selected ? 'bg-[#57C9D0]' : ''
-                } w-[32px] h-[32px]`}
-              >
-                <Text className="text-base font-[400]" style={{ color: textColor }}>
-                  {date?.day}
-                </Text>
+              <View style={[styles.dayCircle, marking?.selected && { backgroundColor: '#57C9D0' }]}>
+                <Text style={[styles.dayText, { color: textColor }]}>{date?.day}</Text>
               </View>
             </TouchableOpacity>
           )
@@ -149,3 +140,39 @@ export default function DatePickerCalendar({ selectedDate, onSelect }: Props) {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    paddingBottom: 12,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#040F20B2',
+  },
+  dayButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayText: {
+    fontSize: 16,
+    fontWeight: '400',
+  },
+})

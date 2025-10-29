@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
-import { Image, ImageSourcePropType, Modal, Pressable, Text, View } from 'react-native'
+import { Image, ImageSourcePropType, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
 export type Badge = {
   id: number
@@ -30,45 +30,36 @@ export default function BadgeDetail({ badge, variant, onClose }: Props) {
       hardwareAccelerated
     >
       {/* 반투명 백드롭 */}
-      <Pressable className="flex-1 inset-0 bg-black/25" onPress={onClose} />
+      <Pressable style={styles.backdrop} onPress={onClose} />
 
       {/* 중앙 카드 */}
-      <View className="absolute inset-0 px-5 items-center justify-center">
-        <View className="bg-white w-full rounded-2xl p-7 items-center justify-center">
+      <View style={styles.centerWrapper}>
+        <View style={styles.card}>
           {variant === 'mission' && (
-            <Pressable onPress={onClose} className="absolute top-4 right-4 p-1">
+            <Pressable onPress={onClose} style={styles.closeBtn}>
               <Ionicons name="close" size={20} />
             </Pressable>
           )}
-          <Text className="text-2xl font-semibold mb-2">{badge.title}</Text>
-          <Text className="text-base text-[#686F79] text-center max-w-[164px] mb-3">
-            {badge.desc}
-          </Text>
-          <View className={`${variant === 'mission' ? 'mb-[19px]' : 'mb-4'}`}>
-            <Image source={badge.icon} style={{ width: 124, height: 124 }} resizeMode="contain" />
+          <Text style={styles.title}>{badge.title}</Text>
+          <Text style={styles.desc}>{badge.desc}</Text>
+          <View style={variant === 'mission' ? styles.missionImageWrap : styles.mineImageWrap}>
+            <Image source={badge.icon} style={styles.image} resizeMode="contain" />
           </View>
           {variant === 'mission' ? (
-            <Pressable
-              onPress={() => router.push('/mybadges')}
-              className="bg-[#57C9D0] w-full items-center rounded-xl px-[59px] py-[15px]"
-            >
-              <Text className="text-base font-semibold text-white">뱃지 더보기</Text>
+            <Pressable onPress={() => router.push('/mybadges')} style={styles.button}>
+              <Text style={styles.buttonText}>뱃지 더보기</Text>
             </Pressable>
           ) : (
             <>
-              <View className="flex-row mb-4">
-                <Text className="text-base font-semibold mr-2">달성도</Text>
-                <Text className="text-base text-[#B4B7BC]">
-                  <Text className="font-semibold text-[#57C9D0]">{badge.current}회</Text> /{' '}
-                  {badge.target}회
+              <View style={styles.progressRow}>
+                <Text style={styles.progressLabel}>달성도</Text>
+                <Text style={styles.progressText}>
+                  <Text style={styles.progressValue}>{badge.current}회</Text> / {badge.target}회
                 </Text>
               </View>
 
-              <Pressable
-                onPress={onClose}
-                className="bg-[#57C9D0] w-full items-center rounded-xl px-[59px] py-[15px]"
-              >
-                <Text className="text-base font-semibold text-white">닫기</Text>
+              <Pressable onPress={onClose} style={styles.button}>
+                <Text style={styles.buttonText}>닫기</Text>
               </Pressable>
             </>
           )}
@@ -77,3 +68,78 @@ export default function BadgeDetail({ badge, variant, onClose }: Props) {
     </Modal>
   )
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+  centerWrapper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    width: '100%',
+    borderRadius: 16,
+    padding: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 4,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  desc: {
+    fontSize: 16,
+    color: '#686F79',
+    textAlign: 'center',
+    maxWidth: 164,
+    marginBottom: 12,
+  },
+  missionImageWrap: { marginBottom: 19 },
+  mineImageWrap: { marginBottom: 16 },
+  image: { width: 124, height: 124 },
+  button: {
+    backgroundColor: '#57C9D0',
+    width: '100%',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingVertical: 15,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  progressRow: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  progressLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  progressText: {
+    fontSize: 16,
+    color: '#B4B7BC',
+  },
+  progressValue: {
+    fontWeight: '600',
+    color: '#57C9D0',
+  },
+})

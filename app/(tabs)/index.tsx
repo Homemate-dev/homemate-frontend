@@ -1,162 +1,70 @@
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { useMemo, useState } from 'react'
-import { Image, Platform, Text, TouchableOpacity, View } from 'react-native'
+import { useEffect, useMemo, useState } from 'react'
+import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import Checkbox from '@/components/Checkbox'
 import TabSafeScroll from '@/components/TabSafeScroll'
-import { formatKoreanDate } from '@/libs/utils/date'
+import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
+import { useAuth } from '@/contexts/AuthContext'
+import { useChoreByDate } from '@/libs/hooks/chore/useChoreByDate'
+import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
+import { usePatchChoreStatus } from '@/libs/hooks/chore/usePatchChoreStatus'
+import { formatKoreanDate, getMonthRange } from '@/libs/utils/date'
 
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
 
-type ChoreItem = {
-  id: number
-  choreId: number
-  dueDate: string
-  status: 'PENDING' | 'COMPLETED'
-  completedAt: string | null
-  chore: {
-    title: string
-    notification_yn: boolean
-  }
-}
-
-export const dummyChoreList: ChoreItem[] = [
-  {
-    id: 1,
-    choreId: 1,
-    dueDate: '2025-10-02',
-    status: 'PENDING',
-    completedAt: null,
-    chore: {
-      title: '옷장 제습제 교체하기',
-      notification_yn: true,
-    },
-  },
-
-  {
-    id: 2,
-    choreId: 2,
-    dueDate: '2025-10-05',
-    status: 'COMPLETED',
-    completedAt: '2025-10-05T11:40:00',
-    chore: {
-      title: '화분 물주기',
-      notification_yn: false,
-    },
-  },
-  {
-    id: 3,
-    choreId: 3,
-    dueDate: '2025-10-05',
-    status: 'PENDING',
-    completedAt: null,
-    chore: {
-      title: '욕실 청소하기',
-      notification_yn: true,
-    },
-  },
-  {
-    id: 4,
-    choreId: 4,
-    dueDate: '2025-10-05',
-    status: 'PENDING',
-    completedAt: null,
-    chore: {
-      title: '냉장고 정리하기',
-      notification_yn: false,
-    },
-  },
-  {
-    id: 5,
-    choreId: 5,
-    dueDate: '2025-10-05',
-    status: 'COMPLETED',
-    completedAt: '2025-10-05T14:00:00',
-    chore: {
-      title: '거실 정리하기',
-      notification_yn: true,
-    },
-  },
-
-  {
-    id: 6,
-    choreId: 6,
-    dueDate: '2025-10-07',
-    status: 'PENDING',
-    completedAt: null,
-    chore: {
-      title: '창문 닦기',
-      notification_yn: true,
-    },
-  },
-]
-
 export default function HomeScreen() {
-  const androidTop = Platform.OS === 'android' ? 50 : 0
   const router = useRouter()
+  const { token } = useAuth()
+  useEffect(() => {
+    if (!token) {
+      router.replace('/onboarding')
+    }
+  }, [token, router])
+
+  const androidTop = Platform.OS === 'android' ? 50 : 0
 
   const todayStr = useMemo(() => {
     const t = new Date()
-    const yyyy = t.getFullYear()
-    const mm = String(t.getMonth() + 1).padStart(2, '0')
-    const dd = String(t.getDate()).padStart(2, '0')
-    return `${yyyy}-${mm}-${dd}`
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(
+      t.getDate()
+    ).padStart(2, '0')}`
   }, [])
 
-  const [selectedDate, setSelectedDate] = useState<string>(todayStr)
+  const [selectedDate, setSelectedDate] = useState(todayStr)
+  const [range, setRange] = useState(() => getMonthRange(selectedDate))
+  const { data: dotDates = [] } = useChoreCalendar(range.start, range.end)
+  const { data: choresList = [], isLoading, isError } = useChoreByDate(selectedDate)
+  const { mutate: choreStatus } = usePatchChoreStatus(selectedDate)
 
-  const [chores, setChores] = useState<ChoreItem[]>(dummyChoreList)
-
-  // 선택 날짜의 집안일만 필터
-  const choresOfDay = useMemo(
-    () => chores.filter((c) => c.dueDate === selectedDate),
-    [chores, selectedDate]
-  )
-
-  const toggleChore = (id: number) => {
-    setChores((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              status: item.status === 'PENDING' ? 'COMPLETED' : 'PENDING',
-              completedAt: item.status === 'PENDING' ? new Date().toISOString() : null,
-            }
-          : item
-      )
-    )
-  }
-  // 선택 날짜 기준 진행률
   const progress = useMemo(() => {
-    const total = choresOfDay.length
+    const total = choresList.length
     if (!total) return 0
-    const done = choresOfDay.filter((c) => c.status === 'COMPLETED').length
+    const done = choresList.filter((c) => c.status === 'COMPLETED').length
     return Math.round((done / total) * 100)
-  }, [choresOfDay])
+  }, [choresList])
 
-  //집안일 있는 날짜 배열 만들기
-  const dotDates = useMemo(() => {
-    const s = new Set<string>()
-    chores.forEach((c) => s.add(c.dueDate))
-
-    return Array.from(s)
-  }, [chores])
+  const styleFromRepeatColor = (cls: string | undefined) => {
+    if (!cls) return {}
+    const bgMatch = cls.match(/bg-\[#([0-9A-Fa-f]{6})\]/)
+    const textMatch = cls.match(/text-\[#([0-9A-Fa-f]{6})\]/)
+    const style: any = {}
+    if (bgMatch) style.backgroundColor = `#${bgMatch[1]}`
+    if (textMatch) style.color = `#${textMatch[1]}`
+    return style
+  }
 
   return (
-    <View className="flex-1 bg-[#F8F8FA]">
-      {/* StatusBar 색상 지정 */}
+    <View style={styles.container}>
       <StatusBar style="dark" backgroundColor="#F8F8FA" />
-
       <TabSafeScroll contentContainerStyle={{ paddingTop: androidTop }}>
-        {/* 헤더 */}
-        <View className="py-4 flex-row items-center justify-between">
+        <View style={styles.headerRow}>
           <Image
             source={require('../../assets/images/logo/logo.png')}
             style={{ width: 125, height: 24 }}
             resizeMode="contain"
           />
-
           <TouchableOpacity onPress={() => router.push('/notifications')}>
             <Image
               source={require('../../assets/images/notification.png')}
@@ -166,95 +74,98 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        <View className="flex gap-4">
-          {/* 홈카드 */}
-          <View className="bg-[#DDF4F6] px-5 py-3 rounded-2xl">
-            <View className="flex-row items-center justify-between">
-              <View className="flex gap-2">
-                <Text className="font-semibold text-xl">안녕하세요, 사용자님!</Text>
-                <Text className="text-base">
-                  오늘의 집안일을 <Text className="font-bold text-[#46A1A6]">{progress}%</Text>{' '}
-                  완료했어요.
+        <View style={styles.contentWrap}>
+          <View style={styles.homeCard}>
+            <View style={styles.rowBetween}>
+              <View style={styles.colGap2}>
+                <Text style={styles.helloTitle}>안녕하세요, 사용자님!</Text>
+                <Text style={styles.baseText}>
+                  오늘의 집안일을 <Text style={styles.progressNum}>{progress}%</Text> 완료했어요.
                 </Text>
               </View>
-
               <Image
                 source={require('../../assets/images/card/card-img.png')}
                 style={{ width: 70, height: 70 }}
                 resizeMode="contain"
               />
             </View>
-
-            {/* 진행 바 */}
-            <View className="mt-3 mb-2 h-[6px] w-full rounded-full bg-[#F5FCFC] overflow-hidden">
-              <View
-                className="h-full rounded-full bg-[#57C9D0]"
-                style={{ width: `${progress}%`, borderRadius: 9999 }}
-              />
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${progress}%`, borderRadius: 9999 }]} />
             </View>
           </View>
 
-          {/* 캘린더 */}
-          <View>
-            <HomeCalendar onSelect={setSelectedDate} dotDates={dotDates} />
-          </View>
-          {/* 할일 내역 */}
-          <View className="flex">
-            <View className="flex-row gap-2 items-center mb-3">
-              <Text className="text-xl font-bold">{formatKoreanDate(selectedDate)}</Text>
-              <Text className="text-lg">집안일</Text>
+          <HomeCalendar
+            onSelect={setSelectedDate}
+            dotDates={dotDates}
+            onMonthChangeRange={(start, end) => setRange({ start, end })}
+          />
+
+          <View style={styles.flex}>
+            <View style={styles.listHeaderRow}>
+              <Text style={styles.listHeaderTitle}>{formatKoreanDate(selectedDate)}</Text>
+              <Text style={styles.listHeaderSub}>집안일</Text>
             </View>
 
-            <View className="bg-white rounded-2xl p-5">
-              {choresOfDay.length === 0 ? (
-                <Text className="text-base">사용자님의 하루 집안일을 계획해보세요</Text>
+            <View style={styles.listBox}>
+              {isLoading && <Text>집안일 내역을 불러오는 중입니다.</Text>}
+              {isError && <Text>집안일 내역 불러오기에 실패했습니다.</Text>}
+              {!isLoading && !isError && choresList.length === 0 ? (
+                <Text>사용자님의 하루 집안일을 계획해보세요</Text>
               ) : (
-                choresOfDay.map((item, index) => (
-                  <View
-                    key={item.id}
-                    className={`flex-row items-center justify-between ${
-                      choresOfDay.length === 1 || index === choresOfDay.length - 1 ? '' : 'mb-3'
-                    }`}
-                  >
-                    <View className="flex-row gap-3 items-center">
-                      <Text
-                        className={`rounded-[6px] px-2 py-[2px] text-sm ${
-                          item.status === 'COMPLETED'
-                            ? 'bg-[#CDCFD2] text-[#9B9FA6] '
-                            : 'bg-[#DDF4F6] text-[#46A1A6] '
-                        }  `}
-                      >
-                        매일
-                      </Text>
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() =>
-                          router.push({
-                            pathname: '/add-chore',
-                            params: {
-                              mode: 'edit',
-                            },
-                          })
-                        }
-                      >
+                choresList.map((item, index) => {
+                  const key = getRepeatKey(item.repeatType, item.repeatInterval)
+                  const repeat = REPEAT_STYLE[key] ?? REPEAT_STYLE['NONE-0']
+
+                  return (
+                    <View
+                      key={item.id}
+                      style={[styles.itemRow, index !== choresList.length - 1 && styles.mb12]}
+                    >
+                      <View style={styles.itemLeftRow}>
                         <Text
-                          className={`text-base ${
+                          style={[
+                            styles.badgeText,
                             item.status === 'COMPLETED'
-                              ? 'text-gray-400 line-through'
-                              : 'text-black'
-                          }`}
+                              ? styles.badgeDone
+                              : styleFromRepeatColor(repeat.color),
+                          ]}
                         >
-                          {item.chore.title}
+                          {repeat.label}
                         </Text>
-                      </TouchableOpacity>
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          onPress={() =>
+                            router.push({
+                              pathname: '/add-chore',
+                              params: {
+                                mode: 'edit',
+                                instanceId: String(item.id),
+                                choreId: String(item.choreId),
+                                selectedDate,
+                              },
+                            })
+                          }
+                        >
+                          <Text
+                            style={[
+                              styles.itemTitle,
+                              item.status === 'COMPLETED'
+                                ? styles.itemTitleDone
+                                : styles.itemTitleActive,
+                            ]}
+                          >
+                            {item.titleSnapshot}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      <Checkbox
+                        checked={item.status === 'COMPLETED'}
+                        onChange={() => choreStatus(item.id)}
+                        size={20}
+                      />
                     </View>
-                    <Checkbox
-                      checked={item.status === 'COMPLETED'}
-                      onChange={() => toggleChore(item.id)}
-                      size={20}
-                    />
-                  </View>
-                ))
+                  )
+                })
               )}
             </View>
           </View>
@@ -263,3 +174,48 @@ export default function HomeScreen() {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#F8F8FA' },
+  headerRow: {
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  contentWrap: { flexDirection: 'column', gap: 16 },
+  homeCard: {
+    backgroundColor: '#DDF4F6',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 16,
+  },
+  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  colGap2: { flexDirection: 'column', gap: 8 },
+  helloTitle: { fontWeight: '600', fontSize: 20 },
+  baseText: { fontSize: 16 },
+  progressNum: { fontWeight: '700', color: '#46A1A6' },
+  progressBar: {
+    marginTop: 12,
+    marginBottom: 8,
+    height: 6,
+    width: '100%',
+    borderRadius: 9999,
+    backgroundColor: '#F5FCFC',
+    overflow: 'hidden',
+  },
+  progressFill: { height: '100%', backgroundColor: '#57C9D0' },
+  flex: { flex: 1 },
+  listHeaderRow: { flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 12 },
+  listHeaderTitle: { fontSize: 20, fontWeight: '700' },
+  listHeaderSub: { fontSize: 18 },
+  listBox: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20 },
+  itemRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  mb12: { marginBottom: 12 },
+  itemLeftRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  badgeText: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontSize: 14 },
+  badgeDone: { backgroundColor: '#CDCFD2', color: '#9B9FA6' },
+  itemTitle: { fontSize: 16 },
+  itemTitleActive: { color: '#000000' },
+  itemTitleDone: { color: '#9CA3AF', textDecorationLine: 'line-through' },
+})

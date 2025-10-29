@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Image, Text, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
+import { Image, StyleSheet, Text, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
 import { Calendar, LocaleConfig } from 'react-native-calendars'
 import { MarkedDates } from 'react-native-calendars/src/types'
 
@@ -42,22 +42,18 @@ LocaleConfig.locales['ko'] = {
 LocaleConfig.defaultLocale = 'ko'
 
 type Props = {
-  onSelect?: (dateString: string) => void // 선택 날짜 부모로 올려줄 콜백
+  onSelect?: (dateString: string) => void
   dotDates?: string[]
+  onMonthChangeRange?: (start: string, end: string) => void
 }
 
-export default function HomeCalendar({ onSelect, dotDates = [] }: Props) {
-  // 오늘
+export default function HomeCalendar({ onSelect, dotDates = [], onMonthChangeRange }: Props) {
   const todayStr = useMemo(() => toYMD(new Date()), [])
-  // 선택된 날짜(초기: 오늘)
   const [selectedDate, setSelectedDate] = useState<string>(todayStr)
-  // 보이는 달(초기: 오늘이 속한 달의 1일)
   const [currentMonthStr, setCurrentMonthStr] = useState<string>(() => toFirstDayOfMonth(todayStr))
 
-  // 점 표시할 날짜
   const dotSet = useMemo(() => new Set(dotDates), [dotDates])
 
-  // 테마
   const themeObj = useMemo(
     () => ({
       textDayFontSize: 16,
@@ -66,15 +62,9 @@ export default function HomeCalendar({ onSelect, dotDates = [] }: Props) {
       textMonthFontWeight: '700',
       monthTextColor: '#0F172A',
       arrowColor: '#57C9D0',
-      // 주(week) 줄
       'stylesheet.calendar.main': {
-        week: {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginVertical: 0,
-        },
+        week: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 0 },
       },
-      // 헤더 영역
       'stylesheet.calendar.header': {
         header: {
           flexDirection: 'row',
@@ -82,12 +72,7 @@ export default function HomeCalendar({ onSelect, dotDates = [] }: Props) {
           justifyContent: 'space-between',
           marginBottom: 16,
         },
-
-        dayHeader: {
-          fontSize: 14,
-          marginBottom: 16,
-          color: '#040F2080',
-        },
+        dayHeader: { fontSize: 14, marginBottom: 16, color: '#040F2080' },
       },
     }),
     []
@@ -98,17 +83,14 @@ export default function HomeCalendar({ onSelect, dotDates = [] }: Props) {
     [themeObj, currentMonthStr]
   )
 
-  // 오늘 버튼
   const goToday = () => {
-    setSelectedDate(todayStr) // 오늘 선택
+    setSelectedDate(todayStr)
     onSelect?.(todayStr)
-    setCurrentMonthStr(toFirstDayOfMonth(todayStr)) // 오늘의 달로 이동
+    setCurrentMonthStr(toFirstDayOfMonth(todayStr))
   }
 
-  // 오늘 버튼 노출: 선택된 날짜가 있고, 오늘이 아닐 때만
   const showTodayBtn = selectedDate !== '' && selectedDate !== todayStr
 
-  // 마킹: 선택된 날짜만 커스텀 스타일
   const markedDates = useMemo<MarkedDates>(() => {
     if (!selectedDate) return {}
     return {
@@ -122,13 +104,17 @@ export default function HomeCalendar({ onSelect, dotDates = [] }: Props) {
   }, [selectedDate])
 
   return (
-    <View className="rounded-2xl overflow-hidden">
+    <View style={styles.container}>
       <Calendar
         key={calendarKey}
         current={currentMonthStr}
         onMonthChange={(d) => {
           const first = `${d.year}-${String(d.month).padStart(2, '0')}-01`
           setCurrentMonthStr(first)
+          const last = new Date(d.year, d.month, 0)
+          const pad = (n: number) => String(n).padStart(2, '0')
+          const end = `${last.getFullYear()}-${pad(last.getMonth() + 1)}-${pad(last.getDate())}`
+          onMonthChangeRange?.(first, end)
         }}
         onDayPress={(d) => {
           onSelect?.(d.dateString)
@@ -139,78 +125,64 @@ export default function HomeCalendar({ onSelect, dotDates = [] }: Props) {
         theme={themeObj as any}
         enableSwipeMonths
         hideExtraDays
-        // PNG 화살표
         renderArrow={(direction) =>
           direction === 'left' ? (
             <Image
               source={require('../../assets/images/arrow/left.png')}
-              className="w-[14px] h-[14px]"
+              style={{ width: 14, height: 14 }}
               resizeMode="contain"
             />
           ) : (
             <Image
               source={require('../../assets/images/arrow/right.png')}
-              className="w-[14px] h-[14px]"
+              style={{ width: 14, height: 14 }}
               resizeMode="contain"
             />
           )
         }
-        // 달력 바깥 여백
-        className="p-5"
-        // 헤더
+        style={styles.calendarOuter}
         renderHeader={(date) => {
           const y = date.getFullYear()
           const m = date.getMonth() + 1
           return (
-            <View className="flex-row items-center justify-between gap-1">
-              <Text className="text-lg font-semibold text-[#040F20B2]">{`${y}년 ${m}월`}</Text>
+            <View style={styles.headerRow}>
+              <Text style={styles.headerTitle}>{`${y}년 ${m}월`}</Text>
               {showTodayBtn && (
-                <TouchableOpacity
-                  className="border border-[#57C9D0] rounded-md px-1 py-[2px]"
-                  onPress={goToday}
-                  activeOpacity={0.8}
-                >
-                  <Text className="text-[#57C9D0]">오늘</Text>
+                <TouchableOpacity onPress={goToday} activeOpacity={0.8} style={styles.todayBtn}>
+                  <Text style={styles.todayBtnText}>오늘</Text>
                 </TouchableOpacity>
               )}
             </View>
           )
         }}
-        // 데이 셀
         dayComponent={({ date, state, marking, onPress }) => {
           const d = date
           const isToday = d?.dateString === todayStr || state === 'today'
           const baseColor = '#040F20'
           const todayColor = '#57C9D0'
           const fallbackTextColor = isToday ? todayColor : baseColor
-
           const isSelected = d?.dateString === selectedDate
 
           return (
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => onPress?.(date)}
-              className="flex-1 w-full h-full items-center justify-center"
+              style={styles.dayBtn}
             >
-              <View
-                className="w-[90%] aspect-square rounded-lg items-center justify-center relative"
-                style={marking?.customStyles?.container}
-              >
+              <View style={[styles.dayCell, marking?.customStyles?.container]}>
                 <Text
-                  className="text-base font-normal"
-                  style={{
-                    includeFontPadding: false,
-                    textAlignVertical: 'center',
-                    color: fallbackTextColor,
-                    ...(marking?.customStyles?.text ?? {}),
-                  }}
+                  style={[
+                    styles.dayLabel,
+                    { color: fallbackTextColor },
+                    (marking?.customStyles?.text as TextStyle) ?? {},
+                  ]}
                 >
                   {d?.day}
                 </Text>
 
                 {d?.dateString && dotSet.has(d.dateString) && (
                   <View
-                    className={`w-[5px] h-[5px] rounded-full absolute bottom-[6px] ${isSelected ? 'bg-white' : 'bg-[#57C9D0]'}`}
+                    style={[styles.dot, { backgroundColor: isSelected ? '#FFFFFF' : '#57C9D0' }]}
                   />
                 )}
               </View>
@@ -221,3 +193,45 @@ export default function HomeCalendar({ onSelect, dotDates = [] }: Props) {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: { borderRadius: 16, overflow: 'hidden' },
+  calendarOuter: { padding: 20 },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 4,
+  },
+  headerTitle: { fontSize: 18, fontWeight: '600', color: '#040F20B2' },
+  todayBtn: {
+    borderWidth: 1,
+    borderColor: '#57C9D0',
+    borderRadius: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+  },
+  todayBtnText: { color: '#57C9D0' },
+  dayBtn: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayCell: {
+    width: '90%',
+    aspectRatio: 1,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  dayLabel: {
+    fontSize: 16,
+    fontWeight: '400',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+  },
+  dot: { width: 5, height: 5, borderRadius: 9999, position: 'absolute', bottom: 6 },
+})
