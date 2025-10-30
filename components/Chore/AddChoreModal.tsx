@@ -419,6 +419,7 @@ export default function AddChoreModal() {
                             setStartDate(d)
                             setOpenCalendar(null)
                           }}
+                          isOpen={openCalendar === 'start'}
                         />
                       </View>
                     </>
@@ -460,6 +461,7 @@ export default function AddChoreModal() {
                             setEndDate(d)
                             setOpenCalendar(null)
                           }}
+                          isOpen={openCalendar === 'end'}
                         />
                       </View>
                     </>
@@ -618,11 +620,13 @@ const styles = StyleSheet.create({
 
   calendarPopover: {
     position: 'absolute',
-    left: 0,
+    left: -13,
     right: 0,
-    width: '100%',
+    width: 340,
+    height: 267,
     top: '100%',
     marginTop: 8,
+    paddingTop: 4,
     zIndex: 2000,
     elevation: 1000,
     borderRadius: 16,

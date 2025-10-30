@@ -58,20 +58,25 @@ const shiftMonth = (ymdFirst: string, delta: number) => {
 type Props = {
   selectedDate?: string // YYYY-MM-DD
   onSelect?: (dateString: string) => void
+  isOpen?: boolean
 }
 
-export default function DatePickerCalendar({ selectedDate, onSelect }: Props) {
+export default function DatePickerCalendar({ selectedDate, onSelect, isOpen }: Props) {
   const todayStr = useMemo(() => toYMD(new Date()), [])
   const safeSelected = useMemo(
     () => (isYMD(selectedDate) ? selectedDate! : todayStr),
     [selectedDate, todayStr]
   )
 
-  // 🔹 화면에 보이는 "달"을 우리 쪽에서 100% 제어
   const [visibleMonth, setVisibleMonth] = useState(() => toFirstDayOfMonth(safeSelected))
+  const isTodaySelected = safeSelected === todayStr
+
+  // 모달이 열릴 때마다, 선택된 날짜의 달로 이동 + 선택 유지
   useEffect(() => {
-    setVisibleMonth(toFirstDayOfMonth(safeSelected))
-  }, [safeSelected])
+    if (isOpen) {
+      setVisibleMonth(toFirstDayOfMonth(safeSelected))
+    }
+  }, [isOpen, safeSelected])
 
   const markedDates = useMemo<MarkedDates>(
     () => ({
@@ -82,9 +87,10 @@ export default function DatePickerCalendar({ selectedDate, onSelect }: Props) {
 
   const themeObj = useMemo(
     () => ({
-      textDayFontSize: 16,
+      textDayFontSize: 14,
       textDayHeaderFontSize: 14,
-      textMonthFontSize: 18,
+      textMonthFontSize: 16,
+      textMonthFontWeight: '600',
       monthTextColor: '#0F172A',
       arrowColor: '#57C9D0',
       todayTextColor: '#57C9D0',
@@ -97,10 +103,16 @@ export default function DatePickerCalendar({ selectedDate, onSelect }: Props) {
     []
   )
 
+  const goToday = () => {
+    setVisibleMonth(toFirstDayOfMonth(todayStr)) // 오늘이 포함된 달로 이동
+    onSelect?.(todayStr) // 선택 날짜도 오늘로 갱신
+  }
+
   return (
     <View style={styles.container}>
       <Calendar
-        // ✅ initialDate 절대 넣지 말 것 (내부 상태와 충돌)
+        style={styles.calendarFull}
+        // initialDate 절대 넣지 말 것 (내부 상태와 충돌)
         current={visibleMonth}
         markedDates={markedDates}
         hideExtraDays
@@ -142,6 +154,11 @@ export default function DatePickerCalendar({ selectedDate, onSelect }: Props) {
           return (
             <View style={styles.header}>
               <Text style={styles.headerText}>{`${y}년 ${m}월`}</Text>
+              {!isTodaySelected && (
+                <TouchableOpacity onPress={goToday} activeOpacity={0.8} style={styles.todayBtn}>
+                  <Text style={styles.todayBtnText}>오늘</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )
         }}
@@ -167,7 +184,12 @@ export default function DatePickerCalendar({ selectedDate, onSelect }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { borderRadius: 16, overflow: 'hidden', paddingBottom: 12 },
+  container: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -177,6 +199,15 @@ const styles = StyleSheet.create({
   },
   headerText: { fontSize: 18, fontWeight: '600', color: '#040F20B2' },
   dayButton: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  todayBtn: {
+    borderWidth: 1,
+    borderColor: '#E6E7E9',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginLeft: 8,
+  },
+  todayBtnText: { color: '#81878F', fontSize: 12 },
   dayCircle: {
     width: 32,
     height: 32,
@@ -184,5 +215,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  calendarFull: {
+    width: 320,
+  },
+
   dayText: { fontSize: 16, fontWeight: '400' },
 })

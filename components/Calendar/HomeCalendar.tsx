@@ -59,7 +59,7 @@ export default function HomeCalendar({ onSelect, dotDates = [], onMonthChangeRan
       textDayFontSize: 14,
       textDayHeaderFontSize: 14,
       textMonthFontSize: 16,
-      textMonthFontWeight: '700',
+      textMonthFontWeight: '600',
       monthTextColor: '#0F172A',
       arrowColor: '#57C9D0',
       'stylesheet.calendar.main': {
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   todayBtn: {
     borderWidth: 1,
     borderColor: '#E6E7E9',
-    borderRadius: 6,
+    borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
     marginLeft: 5,
