@@ -1,4 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
 import {
   ActivityIndicator,
@@ -26,6 +28,7 @@ import {
   fetchNotificationTime,
   patchNotificationSetting,
   patchNotificationTime,
+  postLogout,
 } from '@/libs/api/user'
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -33,6 +36,8 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 export default function MyPage() {
+  const router = useRouter()
+
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -94,7 +99,6 @@ export default function MyPage() {
   const handleToggleChange = async (type: 'master' | 'chore' | 'notice', value: boolean) => {
     try {
       await patchNotificationSetting(type, value)
-
       if (type === 'master') setIsNotificationEnabled(value)
       if (type === 'chore') setIsHouseAlarm(value)
       if (type === 'notice') setIsNoticeAlarm(value)
@@ -106,11 +110,27 @@ export default function MyPage() {
   const handleConfirm = async () => {
     try {
       await patchNotificationTime(hour, minute, ampm)
-      alert('알림 시간이 변경되었습니다!')
+      alert('알림 시간이 변경되었습니다')
       setShowConfirm(false)
       setActiveDropdown(null)
     } catch (error) {
       alert('알림 시간 변경 중 오류가 발생했습니다.')
+    }
+  }
+
+  // 로그아웃 처리
+  const handleLogout = async () => {
+    try {
+      await postLogout()
+      await AsyncStorage.removeItem('accessToken')
+      await AsyncStorage.removeItem('refreshToken')
+
+      alert('로그아웃 되었습니다.')
+
+      router.replace('/login')
+    } catch (error) {
+      console.error('로그아웃 실패:', error)
+      alert('로그아웃 중 오류가 발생했습니다.')
     }
   }
 
@@ -244,7 +264,7 @@ export default function MyPage() {
       </View>
 
       {/* 로그아웃 */}
-      <TouchableOpacity style={styles.logoutBtn}>
+      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
         <Text style={styles.logoutText}>로그아웃</Text>
       </TouchableOpacity>
     </ScrollView>
