@@ -251,7 +251,7 @@ export default function MyPage() {
         </View>
       </View>
 
-      {/* 정책 섹션 (아래쪽) */}
+      {/* 정책 섹션  */}
       <View style={styles.sectionBelow}>
         <TouchableOpacity style={styles.settingRow} onPress={() => Linking.openURL(TERMS_URL)}>
           <Text style={styles.settingText}>이용 약관</Text>
