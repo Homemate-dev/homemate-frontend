@@ -107,8 +107,11 @@ export const MISSION_ENDPOINTS = {
 
 export const BADGE_ENDPOINTS = {
   /** 뱃지 획득 */
-  ACHIEVE: '', // POST
+  ACHIEVE: '',
 
   /** 뱃지 획득 조건부 상위 3개 리스트 조회 */
-  TOP3_CANDIDATES: '', // GET
+  TOP3_CANDIDATES: '/badge/closest', // GET
+
+  /** 획득한 벳지 목록 조회 */
+  GET_BADGES: '/badge/acquired', // GET
 } as const
