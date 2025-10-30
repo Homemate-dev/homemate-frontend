@@ -46,3 +46,8 @@ export const fetchNotificationTime = async () => {
   const res = await api.get('/users/me/notification-settings/time')
   return res.data
 }
+
+export const postLogout = async () => {
+  const res = await api.post('/auth/logout')
+  return res.data
+}
