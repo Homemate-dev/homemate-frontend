@@ -1,7 +1,16 @@
+
+import 'react-native-reanimated'
+import { Href, router, Stack } from 'expo-router'
+import { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Stack } from 'expo-router'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
+
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
+import { Provider as ReduxProvider } from 'react-redux'
+
+import { setAccessToken, setOnUnauthorized } from '@/libs/api/axios'
+import { queryClient } from '@/libs/queryClient'
+import { store } from '@/store'
 
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 
@@ -10,6 +19,7 @@ const queryClient = new QueryClient()
 function RootNavigator() {
   const { token, loading } = useAuth()
 
+  
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
