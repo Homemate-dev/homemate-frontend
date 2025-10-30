@@ -48,6 +48,9 @@ export default function AddChoreModal() {
   const isEdit = (modeParam ?? 'add') === 'edit'
   const instanceId = instanceIdParam ? Number(instanceIdParam) : undefined
 
+  // 안전 파싱: 백엔드가 true/'Y'/'1'/1 등으로 내려줄 수 있으니 통일
+  const toBool = (v: unknown) => v === true || v === 'Y' || v === 'y' || v === 1 || v === '1'
+
   const toYYMMDD = (s?: string | null) => {
     if (!s) return ''
     if (/^\d{2}\.\d{2}\.\d{2}$/.test(s)) return s
@@ -113,23 +116,26 @@ export default function AddChoreModal() {
   useEffect(() => {
     if (!isEdit || !detail) return
     setInputValue(detail.title ?? '')
-    setNotifyOn(!!detail.notificationYn)
+    setNotifyOn(toBool(detail.notificationYn)) // 안전 파싱으로 변경
     setRepeat(toRepeatLabel(detail.repeatType, detail.repeatInterval))
     setSpace(toSpaceUi(detail.space) ?? null)
     setStartDate(detail.startDate ?? null)
     setEndDate(detail.endDate ?? null)
+
     const parts = toHHmmParts(detail.notificationTime ?? '09:00')
     setAmpm(parts.ampm)
     setHour12(parts.hour12)
     setMinute(parts.minute)
   }, [isEdit, detail])
 
+  // 초기값(비교 기준) — 시간도 정규화하여 현재값과 포맷 일치
   const initialValue = useMemo(() => {
     if (!isEdit || !detail) return
+    const parts = toHHmmParts(detail.notificationTime ?? '09:00') // 정규화
     return {
       title: (detail.title ?? '').trim(),
-      notificationYn: !!detail.notificationYn,
-      notificationTime: detail.notificationTime ?? '09:00',
+      notificationYn: toBool(detail.notificationYn),
+      notificationTime: toHHmm(parts.ampm, parts.hour12, parts.minute), // "09:00" 포맷
       space: toSpaceUi(detail.space) ?? null,
       repeat: toRepeatLabel(detail.repeatType, detail.repeatInterval),
       startDate: detail.startDate ?? null,
@@ -137,6 +143,7 @@ export default function AddChoreModal() {
     }
   }, [isEdit, detail])
 
+  // 현재 입력값(정규화)
   const currentValue = useMemo(() => {
     const hhmm = toHHmm(ampm, hour12, minute)
     return {
@@ -150,18 +157,33 @@ export default function AddChoreModal() {
     }
   }, [inputValue, notifyOn, ampm, hour12, minute, space, repeat, startDate, endDate])
 
+  // 변경 여부 판정 — 알림 OFF면 시간 비교 제외, 날짜 fallback 규칙 통일
   const isChanged = useMemo(() => {
     if (!isEdit) return true
     if (!initialValue) return false
-    return (
-      initialValue.title !== currentValue.title ||
-      initialValue.notificationYn !== currentValue.notificationYn ||
-      initialValue.notificationTime !== currentValue.notificationTime ||
-      initialValue.space !== currentValue.space ||
-      initialValue.repeat !== currentValue.repeat ||
-      initialValue.startDate !== currentValue.startDate ||
-      initialValue.endDate !== currentValue.endDate
-    )
+
+    const same = (a: any, b: any) => String(a ?? '') === String(b ?? '')
+
+    if (!same(initialValue.title, currentValue.title)) return true
+    if (initialValue.notificationYn !== currentValue.notificationYn) return true
+
+    // 알림이 켜져 있을 때만 시간 비교
+    if (currentValue.notificationYn) {
+      if (!same(initialValue.notificationTime, currentValue.notificationTime)) return true
+    }
+
+    if (!same(initialValue.space, currentValue.space)) return true
+    if (!same(initialValue.repeat, currentValue.repeat)) return true
+
+    const initStart = initialValue.startDate ?? null
+    const currStart = currentValue.startDate ?? null
+    const initEnd = initialValue.endDate ?? initialValue.startDate ?? null
+    const currEnd = currentValue.endDate ?? currentValue.startDate ?? null
+
+    if (!same(initStart, currStart)) return true
+    if (!same(initEnd, currEnd)) return true
+
+    return false
   }, [isEdit, initialValue, currentValue])
 
   const baseValid =
@@ -325,7 +347,7 @@ export default function AddChoreModal() {
                   maxLength={maxLength}
                   style={[
                     styles.textInput,
-                    Platform.OS === 'web' && ({ outlineStyle: 'none' } as any), // ← 웹 전용
+                    Platform.OS === 'web' && ({ outlineStyle: 'none' } as any),
                   ]}
                 />
                 <Text style={styles.counterText}>
@@ -521,13 +543,13 @@ export default function AddChoreModal() {
             disabled={submitDisabled}
             style={[
               styles.submitBtn,
-              isEdit && !isChanged ? styles.submitBtnDisabled : styles.submitBtnActive,
+              submitDisabled ? styles.submitBtnDisabled : styles.submitBtnActive,
             ]}
           >
             <Text
               style={[
                 styles.submitText,
-                isEdit && !isChanged ? styles.submitTextDisabled : styles.submitTextActive,
+                submitDisabled ? styles.submitTextDisabled : styles.submitTextActive,
               ]}
             >
               {btnLabel}
