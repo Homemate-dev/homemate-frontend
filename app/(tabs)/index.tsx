@@ -34,7 +34,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const init = async () => {
-      const res = await api.post('/auth/dev/token/1')
+      const res = await api.post('/auth/dev/token/3')
       const token = res.data.accessToken
       setAccessToken(token)
 
@@ -62,16 +62,18 @@ export default function HomeScreen() {
 
   const handleAllowNotification = async () => {
     try {
+      const convertedHour = ampm === '오후' && hour < 12 ? hour + 12 : hour
+      const formattedTime = `${String(convertedHour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+
       await api.post('/users/me/notification-settings/first-setup', {
-        ampm,
-        hour,
-        minute,
+        notificationTime: formattedTime,
         masterEnabled: true,
         choreEnabled: true,
         noticeEnabled: true,
       })
 
       setShowSetupModal(false)
+      alert('알림 설정이 완료되었습니다!')
       router.replace('/')
     } catch (err) {
       console.error('최초 알림 설정 실패:', err)
