@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { api, setAccessToken } from '@/libs/api/axios'
-import { fetchNotifications } from '@/libs/api/notification'
+import { fetchNotifications, patchReadNotification } from '@/libs/api/notification'
 
 type Notification = {
   id: number
@@ -21,18 +21,15 @@ export default function Notifications() {
 
   const notifications = activeTab === 'chore' ? choreNotifications : noticeNotifications
   const setNotifications = activeTab === 'chore' ? setChoreNotifications : setNoticeNotifications
-
-  // 최대 30개까지만 표시
   const visibleNotifications = notifications.slice(0, 30)
   const unreadCount = notifications.filter((n) => !n.read).length
   const hasData = visibleNotifications.length > 0
 
-  // 상대 시간 포맷 함수
+  // 시간 포맷
   const formatRelativeTime = (dateString: string) => {
     const now = new Date()
     const date = new Date(dateString)
     const diff = (now.getTime() - date.getTime()) / 1000
-
     if (diff < 60) return '방금 전'
     if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
     if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
@@ -41,11 +38,16 @@ export default function Notifications() {
     return date.toLocaleDateString('ko-KR')
   }
 
-  // 클릭 시 읽음 처리 (회색 처리)
-  const handlePressNotification = (id: number) => {
-    setNotifications((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, read: true } : item))
-    )
+  // 읽음 처리
+  const handlePressNotification = async (id: number) => {
+    try {
+      await patchReadNotification(activeTab, id)
+      setNotifications((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, read: true } : item))
+      )
+    } catch (error) {
+      console.error('알림 읽음 처리 실패:', error)
+    }
   }
 
   // 알림 목록 조회
@@ -53,26 +55,23 @@ export default function Notifications() {
     const loadNotifications = async () => {
       try {
         setLoading(true)
-
-        // 토큰 발급
         const res = await api.post('/auth/dev/token/1')
         const token = res.data.accessToken
         await setAccessToken(token)
 
-        // 알림 API 호출
         const data = await fetchNotifications(activeTab)
         const formatted = data.map((item: any) => ({
           id: item.id,
           title: item.title || '알림',
           message: item.message || '',
           time: formatRelativeTime(item.scheduledAt),
-          read: false,
+          read: item.isRead ?? false,
         }))
 
         if (activeTab === 'chore') setChoreNotifications(formatted)
         else setNoticeNotifications(formatted)
       } catch (error: any) {
-        console.error('🚨 알림 조회 실패:', error.response?.data || error)
+        console.error('알림 조회 실패:', error.response?.data || error)
       } finally {
         setLoading(false)
       }
@@ -81,7 +80,6 @@ export default function Notifications() {
     loadNotifications()
   }, [activeTab])
 
-  // 알림 카드 렌더
   const renderItem = ({ item }: { item: Notification }) => (
     <TouchableOpacity
       onPress={() => handlePressNotification(item.id)}
@@ -98,7 +96,6 @@ export default function Notifications() {
 
   return (
     <View style={styles.container}>
-      {/* 헤더 */}
       <View style={styles.headerContainer}>
         <Text style={styles.header}>알림</Text>
       </View>
@@ -145,7 +142,6 @@ export default function Notifications() {
             <Text style={styles.unreadText}>
               읽지 않은 알림 <Text style={styles.unreadNumber}>{unreadCount}</Text>
             </Text>
-
             <FlatList
               data={visibleNotifications}
               keyExtractor={(item) => item.id.toString()}
