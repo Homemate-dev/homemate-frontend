@@ -5,6 +5,7 @@ import {
   Image,
   LayoutAnimation,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -16,9 +17,10 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen'
 
+import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import Toggle from '@/components/Toggle'
 import { api, setAccessToken } from '@/libs/api/axios'
-import { fetchMyPage } from '@/libs/api/user'
+import { fetchMyPage, patchNotificationSetting, patchNotificationTime } from '@/libs/api/user'
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true)
@@ -33,6 +35,11 @@ export default function MyPage() {
   const [isNoticeAlarm, setIsNoticeAlarm] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
+  const [ampm, setAmpm] = useState<'오전' | '오후'>('오전')
+  const [hour, setHour] = useState(9)
+  const [minute, setMinute] = useState(0)
+  const [showConfirm, setShowConfirm] = useState(false)
+
   useEffect(() => {
     const issueDevTokenAndFetch = async () => {
       try {
@@ -46,6 +53,17 @@ export default function MyPage() {
         setIsNotificationEnabled(myData.masterEnabled)
         setIsHouseAlarm(myData.choreEnabled)
         setIsNoticeAlarm(myData.noticeEnabled)
+
+        // 알림 시간 세팅
+        if (myData.notificationTime) {
+          const [hourStr, minuteStr] = myData.notificationTime.split(':')
+          const hourNum = parseInt(hourStr, 10)
+          const ampmValue = hourNum >= 12 ? '오후' : '오전'
+          const convertedHour = hourNum > 12 ? hourNum - 12 : hourNum
+          setAmpm(ampmValue)
+          setHour(convertedHour)
+          setMinute(parseInt(minuteStr, 10))
+        }
       } catch (error) {
         console.error('마이페이지 조회 실패:', error)
       } finally {
@@ -59,6 +77,29 @@ export default function MyPage() {
   useEffect(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
   }, [activeDropdown])
+
+  const handleToggleChange = async (type: 'master' | 'chore' | 'notice', value: boolean) => {
+    try {
+      await patchNotificationSetting(type, value)
+
+      if (type === 'master') setIsNotificationEnabled(value)
+      if (type === 'chore') setIsHouseAlarm(value)
+      if (type === 'notice') setIsNoticeAlarm(value)
+    } catch {
+      alert('알림 설정 변경 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleConfirm = async () => {
+    try {
+      await patchNotificationTime(hour, minute, ampm)
+      alert('알림 시간이 변경되었습니다!')
+      setShowConfirm(false)
+      setActiveDropdown(null)
+    } catch (error) {
+      alert('알림 시간 변경 중 오류가 발생했습니다.')
+    }
+  }
 
   if (loading) {
     return (
@@ -78,7 +119,7 @@ export default function MyPage() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.header}>마이페이지</Text>
 
       {/* 프로필 카드 */}
@@ -96,7 +137,6 @@ export default function MyPage() {
         </View>
       </View>
 
-    
       {/* 뱃지 영역 */}
       <View style={styles.badgeSection}>
         <View style={styles.badgeHeader}>
@@ -112,29 +152,57 @@ export default function MyPage() {
         </View>
       </View>
 
-      {/* 알림 설정 (데이터만 반영) */}
+      {/* 알림 설정 */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>알림 설정</Text>
-          <Toggle value={isNotificationEnabled} onChange={setIsNotificationEnabled} />
+          <Toggle value={isNotificationEnabled} onChange={(v) => handleToggleChange('master', v)} />
         </View>
 
         <View style={styles.settingRow}>
           <Text style={styles.settingText}>집안일 알림</Text>
-          <Toggle value={isHouseAlarm} onChange={setIsHouseAlarm} />
+          <Toggle value={isHouseAlarm} onChange={(v) => handleToggleChange('chore', v)} />
         </View>
 
         <View style={styles.settingRow}>
           <Text style={styles.settingText}>공지 알림</Text>
-          <Toggle value={isNoticeAlarm} onChange={setIsNoticeAlarm} />
+          <Toggle value={isNoticeAlarm} onChange={(v) => handleToggleChange('notice', v)} />
         </View>
 
         <View style={styles.divider} />
 
+        {/* 알림 시간 드롭다운 + 확인 버튼 */}
         <View style={styles.timeSetting}>
-          <Text style={styles.settingText}>
-            알림 시간: <Text style={{ color: '#57C9D0' }}>{user.notificationTime}</Text>
-          </Text>
+          <TouchableOpacity
+            onPress={() => setShowConfirm(true)}
+            activeOpacity={0.7}
+            style={{ alignItems: 'center' }}
+          >
+            <Text style={[styles.settingText, { marginBottom: 8 }]}>알림 시간 설정</Text>
+          </TouchableOpacity>
+
+          <TimeDropdown
+            ampm={ampm}
+            hour={hour}
+            minute={minute}
+            onChange={(v) => {
+              setAmpm(v.ampm)
+              setHour(v.hour)
+              setMinute(v.minute)
+              setShowConfirm(true)
+            }}
+            activeDropdown={activeDropdown}
+            setActiveDropdown={(v) => {
+              setActiveDropdown(v)
+              if (v) setShowConfirm(true)
+            }}
+          />
+
+          {showConfirm && (
+            <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
+              <Text style={styles.confirmText}>확인</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -155,16 +223,12 @@ export default function MyPage() {
       <TouchableOpacity style={styles.logoutBtn}>
         <Text style={styles.logoutText}>로그아웃</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F8FA',
-    paddingHorizontal: wp('6%'),
-  },
+  container: { flex: 1, backgroundColor: '#F8F8FA', paddingHorizontal: wp('6%') },
   header: {
     fontSize: hp('2.4%'),
     fontWeight: '700',
@@ -186,16 +250,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#C8EDEE',
   },
   userName: { fontSize: hp('2.4%'), color: '#FFFFFF', fontWeight: '700' },
-  userProvider: { fontSize: hp('1.6%'), color: '#D7FAFA' },
-
-  infoCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginTop: hp('2%'),
-    padding: hp('2%'),
-  },
-  infoText: { fontSize: hp('1.8%'), color: '#666', marginBottom: hp('0.5%') },
-
   badgeSection: {
     marginTop: hp('3%'),
     backgroundColor: '#FFFFFF',
@@ -208,7 +262,6 @@ const styles = StyleSheet.create({
   badgeTotal: { fontSize: hp('1.8%'), color: '#A1A1A1', marginRight: hp('1%') },
   badgeBarBackground: { height: hp('1%'), backgroundColor: '#E4E4E4', borderRadius: 100 },
   badgeBarFill: { height: '100%', backgroundColor: '#57C9D0', borderRadius: 100 },
-
   section: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -235,6 +288,15 @@ const styles = StyleSheet.create({
   settingText: { fontSize: hp('1.8%'), color: '#686F79' },
   divider: { borderBottomWidth: 1, borderBottomColor: '#E6E7E9' },
   timeSetting: { marginTop: hp('1.5%'), alignItems: 'center' },
+  confirmBtn: {
+    backgroundColor: '#57C9D0',
+    borderRadius: 12,
+    paddingVertical: hp('1.5%'),
+    width: '100%',
+    alignItems: 'center',
+    marginTop: hp('2%'),
+  },
+  confirmText: { color: '#FFFFFF', fontSize: hp('2%'), fontWeight: '700' },
   logoutBtn: { alignItems: 'center', marginTop: hp('3%') },
   logoutText: { color: '#9B9FA6', fontSize: hp('1.8%') },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
