@@ -246,11 +246,11 @@ export default function AddChoreModal() {
     }
   }
 
-  const handleDelete = (applyToAll: boolean) => {
+  const handleDelete = (applyToAfter: boolean) => {
     if (!isEdit || !instanceId) return
     if (!selectedDateParam) return
     deleteChore(
-      { choreInstanceId: instanceId, selectedDate: selectedDateParam, applyToAll },
+      { choreInstanceId: instanceId, selectedDate: selectedDateParam, applyToAfter },
       {
         onSuccess: () => {
           setDeleteOpen(false)
@@ -270,6 +270,7 @@ export default function AddChoreModal() {
   const headerTitle = isEdit ? '집안일 수정' : '집안일 추가'
   const btnLabel = isEdit ? '수정하기' : '등록하기'
 
+  // 전역 오버레이 없이도 스크롤 잠금은 유지
   const overlayOpen = Boolean(activeDropdown || openCalendar)
 
   return (
@@ -286,19 +287,6 @@ export default function AddChoreModal() {
             scrollEnabled={!overlayOpen}
             keyboardShouldPersistTaps="handled"
           >
-            {/* 오버레이: 드롭다운/캘린더 영역엔 터치 통과 */}
-            {overlayOpen && (
-              <View pointerEvents="box-none" style={styles.fullscreenOverlayWrapper}>
-                <Pressable
-                  onPress={() => {
-                    setActiveDropdown(null)
-                    setOpenCalendar(null)
-                  }}
-                  style={styles.fullscreenOverlay}
-                />
-              </View>
-            )}
-
             <View style={styles.headerRow}>
               <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
                 <MaterialIcons name="chevron-left" size={24} color="#686F79" />
@@ -395,6 +383,7 @@ export default function AddChoreModal() {
 
                 <View style={styles.divider} />
 
+                {/* 시작일자 */}
                 <View
                   style={[
                     styles.rowBetween,
@@ -415,20 +404,27 @@ export default function AddChoreModal() {
                   </TouchableOpacity>
 
                   {openCalendar === 'start' && (
-                    <View style={styles.calendarPopover}>
-                      <DatePickerCalendar
-                        selectedDate={safeYMD(startDate, todayYMD)}
-                        onSelect={(d) => {
-                          setStartDate(d)
-                          setOpenCalendar(null)
-                        }}
+                    <>
+                      <Pressable
+                        style={StyleSheet.absoluteFillObject}
+                        onPress={() => setOpenCalendar(null)}
                       />
-                    </View>
+                      <View style={styles.calendarPopover}>
+                        <DatePickerCalendar
+                          selectedDate={safeYMD(startDate, todayYMD)}
+                          onSelect={(d) => {
+                            setStartDate(d)
+                            setOpenCalendar(null)
+                          }}
+                        />
+                      </View>
+                    </>
                   )}
                 </View>
 
                 <View style={styles.divider} />
 
+                {/* 완료일자 */}
                 <View
                   style={[
                     styles.rowBetween,
@@ -449,15 +445,21 @@ export default function AddChoreModal() {
                   </TouchableOpacity>
 
                   {openCalendar === 'end' && (
-                    <View style={styles.calendarPopover}>
-                      <DatePickerCalendar
-                        selectedDate={safeYMD(endDate, safeYMD(startDate, todayYMD))}
-                        onSelect={(d) => {
-                          setEndDate(d)
-                          setOpenCalendar(null)
-                        }}
+                    <>
+                      <Pressable
+                        style={StyleSheet.absoluteFillObject}
+                        onPress={() => setOpenCalendar(null)}
                       />
-                    </View>
+                      <View style={styles.calendarPopover}>
+                        <DatePickerCalendar
+                          selectedDate={safeYMD(endDate, safeYMD(startDate, todayYMD))}
+                          onSelect={(d) => {
+                            setEndDate(d)
+                            setOpenCalendar(null)
+                          }}
+                        />
+                      </View>
+                    </>
                   )}
                 </View>
 
@@ -537,16 +539,6 @@ const styles = StyleSheet.create({
   wrapper: { flex: 1, position: 'relative', paddingHorizontal: 20 },
   scroll: { flex: 1, paddingTop: 24, backgroundColor: '#F8F8FA' },
 
-  // 오버레이: 드롭다운/캘린더보다 낮은 레이어
-  fullscreenOverlayWrapper: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 100,
-  },
-  fullscreenOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'transparent',
-  },
-
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -615,7 +607,6 @@ const styles = StyleSheet.create({
   },
   dateBtnText: { fontSize: 16, color: '#46A1A6' },
 
-  // 캘린더 팝오버: 오버레이보다 위, 안드로이드 elevation 포함
   calendarPopover: {
     position: 'absolute',
     left: 0,
