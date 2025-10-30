@@ -487,9 +487,7 @@ export default function MyBadges() {
         })}
       </ScrollView>
 
-      {selected && (
-        <BadgeDetail badge={selected} variant="mine" onClose={() => setSelectedId(null)} />
-      )}
+      {selected && <BadgeDetail badge={selected} onClose={() => setSelectedId(null)} />}
     </>
   )
 }

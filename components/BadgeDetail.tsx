@@ -1,5 +1,3 @@
-import { Ionicons } from '@expo/vector-icons'
-import { router } from 'expo-router'
 import { Image, ImageSourcePropType, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
 export type Badge = {
@@ -14,10 +12,9 @@ export type Badge = {
 type Props = {
   badge: Badge
   onClose: () => void
-  variant: 'mine' | 'mission'
 }
 
-export default function BadgeDetail({ badge, variant, onClose }: Props) {
+export default function BadgeDetail({ badge, onClose }: Props) {
   if (!badge) return null
 
   return (
@@ -35,34 +32,21 @@ export default function BadgeDetail({ badge, variant, onClose }: Props) {
       {/* 중앙 카드 */}
       <View style={styles.centerWrapper}>
         <View style={styles.card}>
-          {variant === 'mission' && (
-            <Pressable onPress={onClose} style={styles.closeBtn}>
-              <Ionicons name="close" size={20} />
-            </Pressable>
-          )}
           <Text style={styles.title}>{badge.title}</Text>
           <Text style={styles.desc}>{badge.desc}</Text>
-          <View style={variant === 'mission' ? styles.missionImageWrap : styles.mineImageWrap}>
+          <View style={styles.ImageWrap}>
             <Image source={badge.icon} style={styles.image} resizeMode="contain" />
           </View>
-          {variant === 'mission' ? (
-            <Pressable onPress={() => router.push('/mybadges')} style={styles.button}>
-              <Text style={styles.buttonText}>뱃지 더보기</Text>
-            </Pressable>
-          ) : (
-            <>
-              <View style={styles.progressRow}>
-                <Text style={styles.progressLabel}>달성도</Text>
-                <Text style={styles.progressText}>
-                  <Text style={styles.progressValue}>{badge.current}회</Text> / {badge.target}회
-                </Text>
-              </View>
+          <View style={styles.progressRow}>
+            <Text style={styles.progressLabel}>달성도</Text>
+            <Text style={styles.progressText}>
+              <Text style={styles.progressValue}>{badge.current}회</Text> / {badge.target}회
+            </Text>
+          </View>
 
-              <Pressable onPress={onClose} style={styles.button}>
-                <Text style={styles.buttonText}>닫기</Text>
-              </Pressable>
-            </>
-          )}
+          <Pressable onPress={onClose} style={styles.button}>
+            <Text style={styles.buttonText}>닫기</Text>
+          </Pressable>
         </View>
       </View>
     </Modal>
@@ -104,14 +88,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   desc: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#686F79',
     textAlign: 'center',
     maxWidth: 164,
     marginBottom: 12,
   },
-  missionImageWrap: { marginBottom: 19 },
-  mineImageWrap: { marginBottom: 16 },
+  ImageWrap: { marginBottom: 16 },
   image: { width: 124, height: 124 },
   button: {
     backgroundColor: '#57C9D0',
@@ -121,8 +104,8 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '500',
     color: '#FFFFFF',
   },
   progressRow: {
@@ -130,12 +113,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   progressLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     marginRight: 8,
   },
   progressText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#B4B7BC',
   },
   progressValue: {
