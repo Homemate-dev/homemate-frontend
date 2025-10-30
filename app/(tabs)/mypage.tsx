@@ -132,8 +132,19 @@ export default function MyPage() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>마이페이지</Text>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: Platform.OS === 'android' ? 100 : 90 }}
+    >
+      <View style={styles.headerWrapper}>
+        <Text style={styles.headerTitle}>마이페이지</Text>
+        <Ionicons
+          name="notifications-outline"
+          size={24}
+          color="#B4B7BC"
+          style={styles.headerIcon}
+        />
+      </View>
 
       {/* 프로필 카드 */}
       <View style={styles.profileCard}>
@@ -145,9 +156,9 @@ export default function MyPage() {
           }
           style={styles.profileImage}
         />
-        <View>
-          <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
-        </View>
+      </View>
+      <View>
+        <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
       </View>
 
       {/* 뱃지 영역 */}
@@ -241,12 +252,25 @@ export default function MyPage() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F8FA', paddingHorizontal: wp('6%') },
-  header: {
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F8FA',
+    paddingHorizontal: wp('6%'),
+    height: hp('100%'),
+  },
+  headerWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: hp('2%'),
+  },
+  headerTitle: {
     fontSize: hp('2.4%'),
     fontWeight: '700',
-    textAlign: 'center',
-    marginVertical: hp('2%'),
+  },
+  headerIcon: {
+    position: 'absolute',
+    right: 0,
   },
   profileCard: {
     backgroundColor: '#57C9D0',
