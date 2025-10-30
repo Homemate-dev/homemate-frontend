@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
 
-  option: { fontSize: 16 },
+  option: { fontSize: 14 },
   divider: {
     height: 1,
     backgroundColor: '#E6E7E9',
