@@ -20,7 +20,12 @@ import {
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import Toggle from '@/components/Toggle'
 import { api, setAccessToken } from '@/libs/api/axios'
-import { fetchMyPage, patchNotificationSetting, patchNotificationTime } from '@/libs/api/user'
+import {
+  fetchMyPage,
+  fetchNotificationTime,
+  patchNotificationSetting,
+  patchNotificationTime,
+} from '@/libs/api/user'
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true)
@@ -48,18 +53,20 @@ export default function MyPage() {
         setAccessToken(token)
 
         const myData = await fetchMyPage()
-        setUser(myData)
+        const notifTimeData = await fetchNotificationTime()
 
+        setUser(myData)
         setIsNotificationEnabled(myData.masterEnabled)
         setIsHouseAlarm(myData.choreEnabled)
         setIsNoticeAlarm(myData.noticeEnabled)
 
         // 알림 시간 세팅
-        if (myData.notificationTime) {
-          const [hourStr, minuteStr] = myData.notificationTime.split(':')
+        const time = notifTimeData?.notificationTime || myData.notificationTime
+        if (time) {
+          const [hourStr, minuteStr] = time.split(':')
           const hourNum = parseInt(hourStr, 10)
           const ampmValue = hourNum >= 12 ? '오후' : '오전'
-          const convertedHour = hourNum > 12 ? hourNum - 12 : hourNum
+          const convertedHour = hourNum > 12 ? hourNum - 12 : hourNum === 0 ? 12 : hourNum
           setAmpm(ampmValue)
           setHour(convertedHour)
           setMinute(parseInt(minuteStr, 10))
