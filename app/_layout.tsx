@@ -3,8 +3,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import axios from 'axios'
 import { Stack } from 'expo-router'
 import { useEffect, useState } from 'react'
+
+
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
+
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
+import { Provider as ReduxProvider } from 'react-redux'
+
+import { setAccessToken, setOnUnauthorized } from '@/libs/api/axios'
+import { queryClient } from '@/libs/queryClient'
+import { store } from '@/store'
 
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { setAccessToken } from '@/libs/api/axios'
@@ -13,6 +21,7 @@ const queryClient = new QueryClient()
 
 function RootNavigator() {
   const { token, loading } = useAuth()
+
 
   // 개발 모드에서 임시 토큰 발급/사용
   const [devToken, setDevToken] = useState<string | null>(null)
@@ -84,6 +93,8 @@ function RootNavigator() {
 
   // 컨텍스트 초기 로딩 or dev 토큰 발급 대기
   if (loading || booting) {
+
+ 
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#57C9D0" />

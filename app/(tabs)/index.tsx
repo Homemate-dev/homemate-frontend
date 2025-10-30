@@ -1,12 +1,22 @@
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useMemo, useState } from 'react'
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import {
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 
 import Checkbox from '@/components/Checkbox'
+import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
-import { useAuth } from '@/contexts/AuthContext'
+import { api, setAccessToken } from '@/libs/api/axios'
 import { useChoreByDate } from '@/libs/hooks/chore/useChoreByDate'
 import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
 import { usePatchChoreStatus } from '@/libs/hooks/chore/usePatchChoreStatus'
@@ -16,12 +26,59 @@ import HomeCalendar from '../../components/Calendar/HomeCalendar'
 
 export default function HomeScreen() {
   const router = useRouter()
-  const { token } = useAuth()
+  const [showSetupModal, setShowSetupModal] = useState(false)
+  const [ampm, setAmpm] = useState<'오전' | '오후'>('오후')
+  const [hour, setHour] = useState(7)
+  const [minute, setMinute] = useState(0)
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+
   useEffect(() => {
-    if (!token) {
-      router.replace('/onboarding')
+    const init = async () => {
+      const res = await api.post('/auth/dev/token/3')
+      const token = res.data.accessToken
+      setAccessToken(token)
+
+      const statusRes = await api.get('/users/me/notification-settings/first-setup-status')
+      const { firstSetupCompleted, notificationTime } = statusRes.data
+
+      if (!firstSetupCompleted) {
+        if (notificationTime) {
+          const [hourStr, minuteStr] = notificationTime.split(':')
+          const hourNum = parseInt(hourStr, 10)
+          const ampmValue = hourNum >= 12 ? '오후' : '오전'
+          const convertedHour = hourNum > 12 ? hourNum - 12 : hourNum
+
+          setAmpm(ampmValue)
+          setHour(convertedHour)
+          setMinute(parseInt(minuteStr, 10))
+        }
+
+        setShowSetupModal(true)
+      }
     }
-  }, [token, router])
+
+    init()
+  }, [])
+
+  const handleAllowNotification = async () => {
+    try {
+      const convertedHour = ampm === '오후' && hour < 12 ? hour + 12 : hour
+      const formattedTime = `${String(convertedHour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+
+      await api.post('/users/me/notification-settings/first-setup', {
+        notificationTime: formattedTime,
+        masterEnabled: true,
+        choreEnabled: true,
+        noticeEnabled: true,
+      })
+
+      setShowSetupModal(false)
+      alert('알림 설정이 완료되었습니다!')
+      router.replace('/')
+    } catch (err) {
+      console.error('최초 알림 설정 실패:', err)
+    }
+  }
 
   const androidTop = Platform.OS === 'android' ? 50 : 0
 
@@ -171,6 +228,50 @@ export default function HomeScreen() {
           </View>
         </View>
       </TabSafeScroll>
+
+      {/* 알림 최초 설정 모달 */}
+      <Modal visible={showSetupModal} transparent animationType="fade">
+        <View style={styles.overlay}>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              overflow: 'visible',
+            }}
+          >
+            <View style={styles.modalBox}>
+              <Text style={styles.modalTitle}>알림을 언제 보내드릴까요?</Text>
+              <Text style={styles.modalDesc}>
+                가입 시 한 번만 설정하면, {'\n'}
+                새로운 일정도 자동으로 그 시간에 알려드려요.
+              </Text>
+
+              <TimeDropdown
+                ampm={ampm}
+                hour={hour}
+                minute={minute}
+                onChange={(v) => {
+                  setAmpm(v.ampm)
+                  setHour(v.hour)
+                  setMinute(v.minute)
+                }}
+                activeDropdown={activeDropdown}
+                setActiveDropdown={setActiveDropdown}
+              />
+
+              <Text style={styles.modalDesc}>
+                알림 설정 및 시간은 {'\n'}
+                <Text style={styles.highlightText}>마이페이지</Text>에서 수정할 수 있어요.
+              </Text>
+
+              <TouchableOpacity onPress={handleAllowNotification} style={styles.allowBtn}>
+                <Text style={styles.allowText}>알림 허용하기</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
     </View>
   )
 }
@@ -218,4 +319,29 @@ const styles = StyleSheet.create({
   itemTitle: { fontSize: 16 },
   itemTitleActive: { color: '#000000' },
   itemTitleDone: { color: '#9CA3AF', textDecorationLine: 'line-through' },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    overflow: 'visible',
+    maxHeight: '80%',
+    zIndex: 999,
+  },
+  modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
+  modalDesc: { fontSize: 14, textAlign: 'center', marginVertical: 24 },
+  allowBtn: {
+    backgroundColor: '#57C9D0',
+    borderRadius: 12,
+    paddingVertical: 15,
+    width: '100%',
+  },
+  allowText: { color: '#fff', fontWeight: '700', textAlign: 'center' },
+  highlightText: { color: '#46A1A6' },
 })
