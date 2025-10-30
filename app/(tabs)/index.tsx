@@ -16,54 +16,62 @@ import Checkbox from '@/components/Checkbox'
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
-import { api, setAccessToken } from '@/libs/api/axios'
+import { useAuth } from '@/contexts/AuthContext'
+import { api } from '@/libs/api/axios'
 import { useChoreByDate } from '@/libs/hooks/chore/useChoreByDate'
 import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
 import { usePatchChoreStatus } from '@/libs/hooks/chore/usePatchChoreStatus'
+import { useMyPage } from '@/libs/hooks/mypage/user'
 import { formatKoreanDate, getMonthRange } from '@/libs/utils/date'
 
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
 
 export default function HomeScreen() {
   const router = useRouter()
+  const { token } = useAuth() // ✅ 토큰 준비 이후에만 초기화 로직 실행
   const [showSetupModal, setShowSetupModal] = useState(false)
   const [ampm, setAmpm] = useState<'오전' | '오후'>('오후')
   const [hour, setHour] = useState(7)
   const [minute, setMinute] = useState(0)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
+  // ✅ dev 토큰 발급/주입 제거. 토큰이 있을 때만 최초 설정 상태 조회
   useEffect(() => {
+    if (!token) return
+
     const init = async () => {
-      const res = await api.post('/auth/dev/token/3')
-      const token = res.data.accessToken
-      setAccessToken(token)
+      try {
+        const statusRes = await api.get('/users/me/notification-settings/first-setup-status')
+        const { firstSetupCompleted, notificationTime } = statusRes.data
 
-      const statusRes = await api.get('/users/me/notification-settings/first-setup-status')
-      const { firstSetupCompleted, notificationTime } = statusRes.data
+        if (!firstSetupCompleted) {
+          if (notificationTime) {
+            const [hourStr, minuteStr] = notificationTime.split(':')
+            const hourNum = parseInt(hourStr, 10)
+            const ampmValue = hourNum >= 12 ? '오후' : '오전'
+            const convertedHour = hourNum > 12 ? hourNum - 12 : hourNum
 
-      if (!firstSetupCompleted) {
-        if (notificationTime) {
-          const [hourStr, minuteStr] = notificationTime.split(':')
-          const hourNum = parseInt(hourStr, 10)
-          const ampmValue = hourNum >= 12 ? '오후' : '오전'
-          const convertedHour = hourNum > 12 ? hourNum - 12 : hourNum
-
-          setAmpm(ampmValue)
-          setHour(convertedHour)
-          setMinute(parseInt(minuteStr, 10))
+            setAmpm(ampmValue)
+            setHour(convertedHour)
+            setMinute(parseInt(minuteStr, 10))
+          }
+          setShowSetupModal(true)
         }
-
-        setShowSetupModal(true)
+      } catch (e) {
+        console.warn('[Init first-setup-status] failed:', e)
       }
     }
 
     init()
-  }, [])
+  }, [token])
 
   const handleAllowNotification = async () => {
     try {
       const convertedHour = ampm === '오후' && hour < 12 ? hour + 12 : hour
-      const formattedTime = `${String(convertedHour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+      const formattedTime = `${String(convertedHour).padStart(2, '0')}:${String(minute).padStart(
+        2,
+        '0'
+      )}`
 
       await api.post('/users/me/notification-settings/first-setup', {
         notificationTime: formattedTime,
@@ -91,9 +99,11 @@ export default function HomeScreen() {
 
   const [selectedDate, setSelectedDate] = useState(todayStr)
   const [range, setRange] = useState(() => getMonthRange(selectedDate))
+
   const { data: dotDates = [] } = useChoreCalendar(range.start, range.end)
   const { data: choresList = [], isLoading, isError } = useChoreByDate(selectedDate)
   const { mutate: choreStatus } = usePatchChoreStatus(selectedDate)
+  const { data: user } = useMyPage()
 
   const progress = useMemo(() => {
     const total = choresList.length
@@ -135,7 +145,7 @@ export default function HomeScreen() {
           <View style={styles.homeCard}>
             <View style={styles.rowBetween}>
               <View style={styles.colGap2}>
-                <Text style={styles.helloTitle}>안녕하세요, 사용자님!</Text>
+                <Text style={styles.helloTitle}>안녕하세요, {user?.nickname || '사용자'}님!</Text>
                 <Text style={styles.baseText}>
                   오늘의 집안일을 <Text style={styles.progressNum}>{progress}%</Text> 완료했어요.
                 </Text>
@@ -167,7 +177,9 @@ export default function HomeScreen() {
               {isLoading && <Text>집안일 내역을 불러오는 중입니다.</Text>}
               {isError && <Text>집안일 내역 불러오기에 실패했습니다.</Text>}
               {!isLoading && !isError && choresList.length === 0 ? (
-                <Text style={styles.itemTitle}>사용자님의 하루 집안일을 계획해보세요</Text>
+                <Text style={styles.itemTitle}>
+                  {user?.nickname || '사용자'}님의 하루 집안일을 계획해보세요
+                </Text>
               ) : (
                 choresList.map((item, index) => {
                   const key = getRepeatKey(item.repeatType, item.repeatInterval)
