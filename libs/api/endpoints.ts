@@ -35,7 +35,7 @@ export const CHORE_ENDPOINTS = {
   CREATE: '/chore', // POST
 
   /** 집안일 수정 (시작/종료 일자 등) */
-  UPDATE: (choreId: number) => `/chore/${choreId}`, // PUT
+  UPDATE: (choreInstanceId: number) => `/chore/${choreInstanceId}`, // PUT
 
   /** 집안일 완료/해제 (인스턴스 단위) */
   TOGGLE_COMPLETE: (choreInstanceId: number) => `/chore/${choreInstanceId}`, // PATCH
