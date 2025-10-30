@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Image,
   LayoutAnimation,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -44,6 +45,11 @@ export default function MyPage() {
   const [hour, setHour] = useState(9)
   const [minute, setMinute] = useState(0)
   const [showConfirm, setShowConfirm] = useState(false)
+
+  const TERMS_URL =
+    'https://classy-group-db3.notion.site/29aaba73bec680159850c0297ddcd13f?source=copy_link'
+  const PRIVACY_URL =
+    'https://classy-group-db3.notion.site/29aaba73bec6807fbb64c4b38eae9f7a?source=copy_link'
 
   useEffect(() => {
     const issueDevTokenAndFetch = async () => {
@@ -215,12 +221,12 @@ export default function MyPage() {
 
       {/* 정책 섹션 */}
       <View style={styles.section}>
-        <TouchableOpacity style={styles.settingRow}>
+        <TouchableOpacity style={styles.settingRow} onPress={() => Linking.openURL(TERMS_URL)}>
           <Text style={styles.settingText}>이용 약관</Text>
           <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
         </TouchableOpacity>
         <View style={styles.divider} />
-        <TouchableOpacity style={styles.settingRow}>
+        <TouchableOpacity style={styles.settingRow} onPress={() => Linking.openURL(PRIVACY_URL)}>
           <Text style={styles.settingText}>개인정보 처리방침</Text>
           <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
         </TouchableOpacity>
