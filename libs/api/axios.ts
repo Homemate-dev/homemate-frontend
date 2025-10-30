@@ -7,6 +7,9 @@ console.log('🌐 API Base URL:', process.env.EXPO_PUBLIC_API_BASE_URL)
 export const api = axios.create({
   baseURL: BASE_URL, // 모든 요청의 기본 주소
   timeout: 10000, // 10초 타임아웃
+  headers: {
+    'Content-Type': 'application/json',
+  },
 })
 
 // ─────────────────────────────────────────────────────────────

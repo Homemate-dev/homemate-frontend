@@ -1,4 +1,14 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useRef, useState } from 'react'
+import {
+  Image,
+  LayoutChangeEvent,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native'
 
 type DropdownProps = {
   id: string
@@ -9,6 +19,8 @@ type DropdownProps = {
   activeDropdown: string | null
   setActiveDropdown: (v: string | null) => void
 }
+
+type Anchor = { x: number; y: number; w: number; h: number } | null
 
 export default function ChoreDropdown({
   id,
@@ -21,85 +33,123 @@ export default function ChoreDropdown({
 }: DropdownProps) {
   const isOpen = activeDropdown === id
 
-  const toggle = () => setActiveDropdown(isOpen ? null : id)
+  const triggerRef = useRef<View>(null)
+  const [anchor, setAnchor] = useState<Anchor>(null)
+
   const close = () => setActiveDropdown(null)
 
-  return (
-    <View style={[styles.container, isOpen && styles.z50]}>
-      <Pressable onPress={toggle} style={styles.pressable}>
-        <Text style={styles.label}>
-          {value != null && value !== '' ? value : (placeholder ?? '선택')}
-        </Text>
-        <Image
-          source={require('../../assets/images/arrow/dropdown.png')}
-          style={styles.icon}
-          resizeMode="contain"
-        />
-      </Pressable>
+  const measureTrigger = () => {
+    const inst = triggerRef.current as any
+    if (inst && typeof inst.measureInWindow === 'function') {
+      inst.measureInWindow((x: number, y: number, w: number, h: number) => {
+        setAnchor({ x, y, w, h })
+      })
+    }
+  }
 
-      {isOpen && (
-        <View style={styles.dropdown}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {options.map((opt, i) => (
-              <Pressable
-                key={opt}
-                onPress={() => {
-                  onChange(opt)
-                  close()
-                }}
-              >
-                <Text style={styles.option}>{opt}</Text>
-                {i < options.length - 1 && <View style={styles.divider} />}
-              </Pressable>
-            ))}
-          </ScrollView>
+  const open = () => {
+    setActiveDropdown(id)
+    setTimeout(measureTrigger, 0)
+  }
+
+  const toggle = () => {
+    if (isOpen) close()
+    else open()
+  }
+
+  const onTriggerLayout = (_e: LayoutChangeEvent) => {
+    if (isOpen) setTimeout(measureTrigger, 0)
+  }
+
+  const MENU_WIDTH = 160
+  const menuStyle = () => {
+    if (!anchor) return { top: 0, left: 0, width: MENU_WIDTH }
+    const top = anchor.y + anchor.h + 8
+    const left = Math.max(8, anchor.x + anchor.w - MENU_WIDTH)
+    return { top, left, width: MENU_WIDTH }
+  }
+
+  return (
+    <>
+      <View ref={triggerRef} onLayout={onTriggerLayout}>
+        <Pressable onPress={toggle} style={styles.pressable}>
+          <Text style={styles.label}>
+            {value != null && value !== '' ? value : (placeholder ?? '선택')}
+          </Text>
+          <Image
+            source={require('../../assets/images/arrow/dropdown.png')}
+            style={styles.icon}
+            resizeMode="contain"
+          />
+        </Pressable>
+      </View>
+
+      {/* 최상위 레이어 Modal */}
+      <Modal visible={isOpen} transparent animationType="fade" onRequestClose={close}>
+        <View style={styles.modalRoot}>
+          <Pressable style={styles.backdrop} onPress={close} pointerEvents="box-only" />
+
+          <View style={[styles.dropdown, menuStyle()]} pointerEvents="auto">
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {options.map((opt, i) => (
+                <Pressable
+                  key={opt}
+                  onPress={() => {
+                    onChange(opt)
+                    close()
+                  }}
+                  style={styles.itemPressable}
+                >
+                  <Text style={styles.option}>{opt}</Text>
+                  {i < options.length - 1 && <View style={styles.divider} />}
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
         </View>
-      )}
-    </View>
+      </Modal>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    position: 'relative',
-  },
-  z50: {
-    zIndex: 50,
-  },
   pressable: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  label: {
-    color: '#686F79',
-    fontSize: 16,
+  itemPressable: {
+    paddingVertical: 2,
   },
-  icon: {
-    width: 12,
-    height: 22,
+  label: { color: '#686F79', fontSize: 16 },
+  icon: { width: 12, height: 22 },
+
+  modalRoot: {
+    ...StyleSheet.absoluteFillObject,
   },
+
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+    zIndex: 1,
+  },
+
   dropdown: {
     position: 'absolute',
-    right: 0,
-    top: 24,
-    zIndex: 50,
-    width: 160,
+    zIndex: 2,
+    elevation: 12,
     borderRadius: 12,
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    // iOS 그림자
+    // iOS shadow
     shadowColor: '#000',
     shadowOpacity: 0.15,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 0 },
-    // Android 그림자
-    elevation: 6,
   },
-  option: {
-    fontSize: 16,
-  },
+
+  option: { fontSize: 16 },
   divider: {
     height: 1,
     backgroundColor: '#E6E7E9',

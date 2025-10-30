@@ -35,7 +35,7 @@ export const CHORE_ENDPOINTS = {
   CREATE: '/chore', // POST
 
   /** 집안일 수정 (시작/종료 일자 등) */
-  UPDATE: (choreId: number) => `/chore/${choreId}`, // PUT
+  UPDATE: (choreInstanceId: number) => `/chore/${choreInstanceId}`, // PUT
 
   /** 집안일 완료/해제 (인스턴스 단위) */
   TOGGLE_COMPLETE: (choreInstanceId: number) => `/chore/${choreInstanceId}`, // PATCH
@@ -107,8 +107,11 @@ export const MISSION_ENDPOINTS = {
 
 export const BADGE_ENDPOINTS = {
   /** 뱃지 획득 */
-  ACHIEVE: '', // POST
+  ACHIEVE: '',
 
   /** 뱃지 획득 조건부 상위 3개 리스트 조회 */
-  TOP3_CANDIDATES: '', // GET
+  TOP3_CANDIDATES: '/badge/closest', // GET
+
+  /** 획득한 벳지 목록 조회 */
+  GET_BADGES: '/badge/acquired', // GET
 } as const

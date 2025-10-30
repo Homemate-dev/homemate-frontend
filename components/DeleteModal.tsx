@@ -34,6 +34,7 @@ export default function DeleteModal({
         style={styles.backdrop}
       />
       <View style={styles.sheet}>
+        <Text style={styles.sheetHandle} />
         {noneRepeat ? (
           <View style={styles.banner}>
             <Text style={styles.bannerText}>일정을 삭제하시겠습니까?</Text>
@@ -105,11 +106,19 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 12,
   },
+  sheetHandle: {
+    alignSelf: 'center',
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#E6E7E9',
+    marginBottom: 12,
+  },
 
   // banner for NONE
   banner: {
     width: '100%',
-    backgroundColor: '#DDF4F6',
+    backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,

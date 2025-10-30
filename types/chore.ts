@@ -6,8 +6,8 @@ export type RepeatType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
 
 export type CreateChoreDTO = {
   title: string
-  notification_yn: boolean // 알림 여부
-  notification_time: string
+  notificationYn: boolean // 알림 여부
+  notificationTime: string | null
   space: string
   repeatType: RepeatType
   repeatInterval: number
@@ -22,8 +22,8 @@ export type CreateChoreDTO = {
 export type ResponseChore = {
   id: number
   title: string
-  notification_yn: boolean
-  notification_time: string
+  notificationYn: boolean // 알림 여부
+  notificationTime: string | null
   space: string
   repeatType: RepeatType
   repeatInterval: number
@@ -41,7 +41,7 @@ export type ResponseChore = {
  */
 
 export type UpdateChoreDTO = CreateChoreDTO & {
-  isUpdateAll: boolean // true: 전체 일정 수정, false: 해당 인스턴스만
+  applyToAfter: boolean // true: 전체 일정 수정, false: 해당 인스턴스만
 }
 
 /**
@@ -51,8 +51,8 @@ export type UpdateChoreDTO = CreateChoreDTO & {
 export type responseChoreDetail = {
   choreId: number
   title: string
-  notification_yn: boolean
-  notification_time: string
+  notificationYn: boolean // 알림 여부
+  notificationTime: string | null
   space: string
   repeatType: RepeatType
   repeatInterval: number
@@ -103,4 +103,19 @@ export type ResponseChoreInstance = {
   completedAt: string | null
   createdAt: string
   updatedAt: string | null
+}
+
+/**
+ * 집안일 완료/해제 + 미션 결과 응답
+ * - missionResult가 없을 수도 있음 (빈 배열)
+ */
+export type ToggleResp = {
+  data: ResponseChoreInstance
+  missionResult?: {
+    id: number
+    title: string
+    targetCount: number
+    currentCount: number
+    completed: boolean
+  }[]
 }
