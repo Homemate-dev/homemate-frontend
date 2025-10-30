@@ -289,7 +289,7 @@ export default function AddChoreModal() {
           >
             <View style={styles.headerRow}>
               <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
-                <MaterialIcons name="chevron-left" size={24} color="#686F79" />
+                <MaterialIcons name="chevron-left" size={28} color="#686F79" />
               </TouchableOpacity>
               <Text style={styles.headerTitle}>{headerTitle}</Text>
 
@@ -323,7 +323,10 @@ export default function AddChoreModal() {
                   value={inputValue}
                   onChangeText={setInputValue}
                   maxLength={maxLength}
-                  style={styles.textInput}
+                  style={[
+                    styles.textInput,
+                    Platform.OS === 'web' && ({ outlineStyle: 'none' } as any), // ← 웹 전용
+                  ]}
                 />
                 <Text style={styles.counterText}>
                   {inputValue.length}자/{maxLength}자
@@ -548,7 +551,7 @@ const styles = StyleSheet.create({
   },
   headerBack: { position: 'absolute', left: 0 },
   headerRight: { position: 'absolute', right: 0 },
-  headerTitle: { fontSize: 22, fontWeight: '600', color: '#000' },
+  headerTitle: { fontSize: 20, fontWeight: '600', color: '#111111' },
   deleteText: { fontSize: 16, color: '#57C9D0', fontWeight: '600' },
 
   flex1: { flex: 1 },
@@ -560,10 +563,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  textInput: { fontSize: 16, flex: 1, minWidth: 0, padding: 0, color: '#000' },
-  counterText: { fontSize: 14, color: '#B4B7BC' },
+  textInput: {
+    fontSize: 14,
+    flex: 1,
+    minWidth: 0,
+    padding: 0,
+    color: '#000',
+  },
+  counterText: { fontSize: 12, color: '#B4B7BC' },
 
   loadingRow: { paddingVertical: 12, alignItems: 'center' },
 
@@ -579,10 +588,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    marginRight: 8,
-    marginBottom: 8,
+    marginLeft: 8,
+    marginBottom: 12,
   },
-  chipText: { color: '#46A1A6', fontSize: 16 },
+  chipText: { color: '#46A1A6', fontSize: 12, fontWeight: 500 },
 
   card: {
     backgroundColor: '#FFFFFF',
@@ -592,7 +601,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  label: { fontSize: 18, fontWeight: '500', color: '#000' },
+  label: { fontSize: 16, fontWeight: '500', color: '#363F4D' },
   divider: { height: 1, backgroundColor: '#E6E7E9', marginVertical: 12 },
 
   relative: { position: 'relative' },
@@ -605,7 +614,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 6,
   },
-  dateBtnText: { fontSize: 16, color: '#46A1A6' },
+  dateBtnText: { fontSize: 14, color: '#46A1A6' },
 
   calendarPopover: {
     position: 'absolute',
@@ -636,7 +645,7 @@ const styles = StyleSheet.create({
   },
   submitBtnActive: { backgroundColor: '#57C9D0' },
   submitBtnDisabled: { backgroundColor: '#E6E7E9' },
-  submitText: { fontSize: 18, fontWeight: '600' },
+  submitText: { fontSize: 16, fontWeight: '500' },
   submitTextActive: { color: '#FFFFFF' },
   submitTextDisabled: { color: '#B4B7BC' },
 })
