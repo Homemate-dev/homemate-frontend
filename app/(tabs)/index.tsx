@@ -110,7 +110,7 @@ export default function HomeScreen() {
               {isLoading && <Text>집안일 내역을 불러오는 중입니다.</Text>}
               {isError && <Text>집안일 내역 불러오기에 실패했습니다.</Text>}
               {!isLoading && !isError && choresList.length === 0 ? (
-                <Text>사용자님의 하루 집안일을 계획해보세요</Text>
+                <Text style={styles.itemTitle}>사용자님의 하루 집안일을 계획해보세요</Text>
               ) : (
                 choresList.map((item, index) => {
                   const key = getRepeatKey(item.repeatType, item.repeatInterval)
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   itemRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   mb12: { marginBottom: 12 },
   itemLeftRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  badgeText: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontSize: 14 },
+  badgeText: { borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3, fontSize: 14 },
   badgeDone: { backgroundColor: '#CDCFD2', color: '#9B9FA6' },
   itemTitle: { fontSize: 16 },
   itemTitleActive: { color: '#000000' },

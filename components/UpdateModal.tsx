@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
 
-    // ⬇️ 터치와 레이어 우선순위 보장
+    // 터치와 레이어 우선순위 보장
     zIndex: 1000,
     elevation: 20,
 

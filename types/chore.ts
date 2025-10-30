@@ -104,3 +104,18 @@ export type ResponseChoreInstance = {
   createdAt: string
   updatedAt: string | null
 }
+
+/**
+ * 집안일 완료/해제 + 미션 결과 응답
+ * - missionResult가 없을 수도 있음 (빈 배열)
+ */
+export type ToggleResp = {
+  data: ResponseChoreInstance
+  missionResult?: {
+    id: number
+    title: string
+    targetCount: number
+    currentCount: number
+    completed: boolean
+  }[]
+}
