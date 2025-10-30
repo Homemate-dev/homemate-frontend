@@ -41,3 +41,8 @@ export const patchNotificationTime = async (
   })
   return res.data
 }
+
+export const fetchNotificationTime = async () => {
+  const res = await api.get('/users/me/notification-settings/time')
+  return res.data
+}
