@@ -1,7 +1,7 @@
 // src/components/TabSafeScroll.tsx
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs'
 import { PropsWithChildren } from 'react'
-import { ScrollView, ViewStyle } from 'react-native'
+import { ScrollView, StyleSheet, ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 type Props = PropsWithChildren<{ contentContainerStyle?: ViewStyle }>
@@ -17,7 +17,7 @@ export default function TabSafeScroll({ children, contentContainerStyle }: Props
 
   return (
     <ScrollView
-      className="flex-1 bg-[#F8F8FA] px-5"
+      style={styles.scroll}
       contentContainerStyle={{
         paddingBottom: tabBarHeight + bottom + 12, // 탭바 높이 + 안전영역 + 여유 여백
         ...contentContainerStyle,
@@ -28,3 +28,11 @@ export default function TabSafeScroll({ children, contentContainerStyle }: Props
     </ScrollView>
   )
 }
+
+const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+    backgroundColor: '#F8F8FA',
+    paddingHorizontal: 20, // px-5
+  },
+})

@@ -5,6 +5,7 @@ import {
   ImageSourcePropType,
   ScrollView,
   StatusBar,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -32,7 +33,6 @@ export type MyBadge = {
 }
 
 const myBadges: MyBadge[] = [
-  // ─────────────── 시작 ───────────────
   {
     id: 1,
     title: '시작이반',
@@ -44,8 +44,6 @@ const myBadges: MyBadge[] = [
     earned: true,
     earnedAt: '2025-10-01',
   },
-
-  // ─────────────── 전체 집안일 ───────────────
   {
     id: 100,
     title: '새싹 살림꾼',
@@ -77,8 +75,6 @@ const myBadges: MyBadge[] = [
     section: '전체 집안일',
     earned: false,
   },
-
-  // ─────────────── 집안일 등록 ───────────────
   {
     id: 200,
     title: '소문자 J',
@@ -110,8 +106,6 @@ const myBadges: MyBadge[] = [
     section: '집안일 등록',
     earned: false,
   },
-
-  // ─────────────── 미션 달성 ───────────────
   {
     id: 300,
     title: '미션 새싹',
@@ -143,8 +137,6 @@ const myBadges: MyBadge[] = [
     section: '미션 달성',
     earned: false,
   },
-
-  // ─────────────── 주방 ───────────────
   {
     id: 400,
     title: '주방 깔끔이',
@@ -176,8 +168,6 @@ const myBadges: MyBadge[] = [
     section: '주방',
     earned: false,
   },
-
-  // ─────────────── 욕실 ───────────────
   {
     id: 500,
     title: '욕실 깔끔이',
@@ -209,8 +199,6 @@ const myBadges: MyBadge[] = [
     section: '욕실',
     earned: false,
   },
-
-  // ─────────────── 침실 ───────────────
   {
     id: 600,
     title: '침실 깔끔이',
@@ -242,8 +230,6 @@ const myBadges: MyBadge[] = [
     section: '침실',
     earned: false,
   },
-
-  // ─────────────── 현관 ───────────────
   {
     id: 700,
     title: '현관 깔끔이',
@@ -275,8 +261,6 @@ const myBadges: MyBadge[] = [
     section: '현관',
     earned: false,
   },
-
-  // ─────────────── 빨래하기 ───────────────
   {
     id: 800,
     title: '뽀송 새싹',
@@ -308,8 +292,6 @@ const myBadges: MyBadge[] = [
     section: '빨래하기',
     earned: false,
   },
-
-  // ─────────────── 거울/수전 물때 닦기 ───────────────
   {
     id: 900,
     title: '물때 지우개',
@@ -341,8 +323,6 @@ const myBadges: MyBadge[] = [
     section: '거울/수전 물때 닦기',
     earned: false,
   },
-
-  // ─────────────── 소화기 점검 ───────────────
   {
     id: 1000,
     title: '우리집 소방관',
@@ -354,8 +334,6 @@ const myBadges: MyBadge[] = [
     earned: true,
     earnedAt: '2025-08-05',
   },
-
-  // ─────────────── 바닥 청소기 돌리기 ───────────────
   {
     id: 1100,
     title: '쓱쓱요정',
@@ -387,8 +365,6 @@ const myBadges: MyBadge[] = [
     section: '바닥 청소기 돌리기',
     earned: false,
   },
-
-  // ─────────────── 기상후 침구 정리하기 ───────────────
   {
     id: 1200,
     title: '상쾌한모닝',
@@ -420,8 +396,6 @@ const myBadges: MyBadge[] = [
     section: '기상후 침구 정리하기',
     earned: false,
   },
-
-  // ─────────────── 쓰레기통 비우기 ───────────────
   {
     id: 1300,
     title: '쓰레기 텅',
@@ -464,7 +438,6 @@ const SECTION_ORDER = [
   '욕실',
   '침실',
   '현관',
-  // 집안일별 (세부 chore 그룹)
   '빨래하기',
   '거울/수전 물때 닦기',
   '소화기 점검',
@@ -473,36 +446,30 @@ const SECTION_ORDER = [
   '쓰레기통 비우기',
 ]
 
-export default function Mission() {
+export default function MyBadges() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const selected = myBadges.find((badge) => badge.id === selectedId)
 
   return (
     <>
       <StatusBar backgroundColor="#F8F8FA" />
-
-      <ScrollView className="bg-[#F8F8FA] px-5 pt-6">
-        {/* 헤더 */}
-        <View className="flex-row items-center justify-center mb-6">
-          <TouchableOpacity onPress={() => router.back()} className="absolute left-0">
+      <ScrollView contentContainerStyle={styles.scrollContent} style={styles.scroll}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <MaterialIcons name="chevron-left" size={24} color="#686F79" />
           </TouchableOpacity>
-          <Text className="text-[22px] font-semibold">나의 뱃지</Text>
+          <Text style={styles.headerTitle}>나의 뱃지</Text>
         </View>
 
-        {/* 뱃지 */}
         {SECTION_ORDER.map((sec) => {
           const items: MyBadge[] = myBadges.filter((b) => b.section === sec)
-
           if (items.length === 0) return null
-
           return (
-            <View key={sec} className="mb-6">
-              <Text className="text-lg font-semibold mb-[18px]">{sec}</Text>
-
-              <View className="flex-row justify-between">
+            <View key={sec} style={styles.sectionWrap}>
+              <Text style={styles.sectionTitle}>{sec}</Text>
+              <View style={styles.rowBetween}>
                 {items.map((b) => (
-                  <View key={b.id} className="items-center">
+                  <View key={b.id} style={styles.badgeCol}>
                     <TouchableOpacity activeOpacity={0.8} onPress={() => setSelectedId(b.id)}>
                       <BadgeCard
                         icon={b.icon}
@@ -511,8 +478,7 @@ export default function Mission() {
                         earned={b.current === b.target}
                       />
                     </TouchableOpacity>
-
-                    <Text className="text-base mt-2">{b.title}</Text>
+                    <Text style={styles.badgeText}>{b.title}</Text>
                   </View>
                 ))}
               </View>
@@ -527,3 +493,21 @@ export default function Mission() {
     </>
   )
 }
+
+const styles = StyleSheet.create({
+  scroll: { backgroundColor: '#F8F8FA' },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 24 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  backBtn: { position: 'absolute', left: 0 },
+  headerTitle: { fontSize: 22, fontWeight: '600' },
+  sectionWrap: { marginBottom: 24 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 18 },
+  rowBetween: { flexDirection: 'row', justifyContent: 'space-between' },
+  badgeCol: { alignItems: 'center' },
+  badgeText: { fontSize: 16, marginTop: 8 },
+})

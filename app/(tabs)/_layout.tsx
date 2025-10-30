@@ -1,7 +1,7 @@
 // app/(tabs)/_layout.tsx
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { router, Tabs } from 'expo-router'
-import { Image, Platform, TouchableOpacity, View } from 'react-native'
+import { Image, Platform, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const ICONS = {
   index: [
@@ -24,11 +24,11 @@ const ICONS = {
 
 function CenterAddButton() {
   return (
-    <View className="flex-1 items-center justify-center">
+    <View style={styles.centerBtnWrap}>
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => router.push('/add-chore')}
-        className="w-[48px] h-[48px] bg-[#57C9D0] rounded-full items-center justify-center"
+        style={styles.centerBtn}
       >
         <Ionicons name="add" size={40} color={'#fff'} />
       </TouchableOpacity>
@@ -57,14 +57,16 @@ export default function TabsLayout() {
           overflow: 'visible',
           borderTopWidth: 0,
         },
-        tabBarBackground: () => (
-          <View className="h-full rounded-t-3xl bg-white border-t border-r border-l border-[#E5E5E5]" />
-        ),
+        tabBarBackground: () => <View style={styles.tabBarBg} />,
         tabBarIcon: ({ focused }) => {
           const [inactive, active] = ICONS[route.name as keyof typeof ICONS] ?? []
           if (!inactive || !active) return null
           return (
-            <Image source={focused ? active : inactive} className="w-6 h-6" resizeMode="contain" />
+            <Image
+              source={focused ? active : inactive}
+              style={styles.tabIcon}
+              resizeMode="contain"
+            />
           )
         },
       })}
@@ -84,3 +86,33 @@ export default function TabsLayout() {
     </Tabs>
   )
 }
+
+const styles = StyleSheet.create({
+  centerBtnWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerBtn: {
+    width: 48,
+    height: 48,
+    backgroundColor: '#57C9D0',
+    borderRadius: 9999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabBarBg: {
+    height: '100%',
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderRightWidth: 1,
+    borderLeftWidth: 1,
+    borderColor: '#E5E5E5',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  tabIcon: {
+    width: 24,
+    height: 24,
+  },
+})

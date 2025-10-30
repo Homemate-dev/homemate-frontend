@@ -1,8 +1,10 @@
-import 'react-native-reanimated'
 
-import { QueryClientProvider } from '@tanstack/react-query'
+import 'react-native-reanimated'
 import { Href, router, Stack } from 'expo-router'
 import { useEffect } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
+
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { Provider as ReduxProvider } from 'react-redux'
 
@@ -10,30 +12,48 @@ import { setAccessToken, setOnUnauthorized } from '@/libs/api/axios'
 import { queryClient } from '@/libs/queryClient'
 import { store } from '@/store'
 
-export default function RootLayout() {
-  useEffect(() => {
-    // 토큰 만료 시 토큰 제거 + 로그인 화면 이동
-    setAccessToken(null)
-    setOnUnauthorized(() => {
-      router.replace('/onboarding' as Href)
-    })
-  }, [])
+import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 
-  // if (!fontsLoaded) return null
+const queryClient = new QueryClient()
+
+function RootNavigator() {
+  const { token, loading } = useAuth()
+
+  
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#57C9D0" />
+      </View>
+    )
+  }
 
   return (
-    <ReduxProvider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <SafeAreaProvider>
-          <SafeAreaView edges={['bottom']} className="flex-1 bg-[#F8F8FA]">
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="(modals)" options={{ headerShown: false }} />
-            </Stack>
-            {/* <AchievementModal /> */}
-          </SafeAreaView>
-        </SafeAreaProvider>
-      </QueryClientProvider>
-    </ReduxProvider>
+    <Stack screenOptions={{ headerShown: false }}>
+      {token ? <Stack.Screen name="(tabs)" /> : <Stack.Screen name="(auth)" />}
+    </Stack>
   )
 }
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F8F8FA' }}>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <RootNavigator />
+          </AuthProvider>
+        </QueryClientProvider>
+      </SafeAreaView>
+    </SafeAreaProvider>
+  )
+}
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+})

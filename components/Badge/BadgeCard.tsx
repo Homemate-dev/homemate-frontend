@@ -1,5 +1,5 @@
 import { BlurView } from 'expo-blur'
-import { Image, ImageSourcePropType, Platform, View } from 'react-native'
+import { Image, ImageSourcePropType, Platform, StyleSheet, View } from 'react-native'
 
 import GradientSurface from '../Badge/GradientSurface'
 
@@ -19,10 +19,10 @@ export default function BadgeCard({
   const locked = !earned
 
   return (
-    <View className="relative" style={{ width: size, height: size }}>
+    <View style={[styles.relative, { width: size, height: size }]}>
       <GradientSurface size={size}>
         {/* 같은 컨테이너 안에서 겹치기 */}
-        <View className="relative w-full h-full items-center justify-center">
+        <View style={styles.inner}>
           {/* 아이콘 */}
           <Image source={icon} style={{ width: iconSize, height: iconSize }} resizeMode="contain" />
 
@@ -35,26 +35,20 @@ export default function BadgeCard({
                 {...(Platform.OS === 'android'
                   ? { experimentalBlurMethod: 'dimezisBlurView' }
                   : {})}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                  left: 0,
-                  borderRadius: 8,
-                }}
+                style={styles.absoluteFillRounded}
               />
 
               <View
                 pointerEvents="none"
-                className={`absolute inset-0 rounded-lg bg-black`}
-                style={{
-                  opacity: Platform.OS === 'ios' ? 0.7 : 0.45,
-                }}
+                style={[
+                  styles.absoluteFillRounded,
+                  styles.blackBg,
+                  { opacity: Platform.OS === 'ios' ? 0.7 : 0.45 },
+                ]}
               />
 
               {/* 자물쇠 */}
-              <View className="absolute inset-0 items-center justify-center">
+              <View style={styles.absoluteCenter}>
                 <Image source={require('@/assets/images/lock.png')} />
               </View>
             </>
@@ -64,3 +58,36 @@ export default function BadgeCard({
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  relative: {
+    position: 'relative',
+  },
+  inner: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  absoluteFillRounded: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    borderRadius: 8,
+  },
+  blackBg: {
+    backgroundColor: '#000000',
+  },
+  absoluteCenter: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+})

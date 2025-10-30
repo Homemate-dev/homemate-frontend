@@ -1,11 +1,22 @@
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { useMemo, useState } from 'react'
-import { Image, Platform, Text, TouchableOpacity, View } from 'react-native'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 
 import Checkbox from '@/components/Checkbox'
+import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
+import { api, setAccessToken } from '@/libs/api/axios'
 import { useChoreByDate } from '@/libs/hooks/chore/useChoreByDate'
 import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
 import { usePatchChoreStatus } from '@/libs/hooks/chore/usePatchChoreStatus'
@@ -14,26 +25,76 @@ import { formatKoreanDate, getMonthRange } from '@/libs/utils/date'
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
 
 export default function HomeScreen() {
-  const androidTop = Platform.OS === 'android' ? 50 : 0
   const router = useRouter()
+  const [showSetupModal, setShowSetupModal] = useState(false)
+  const [ampm, setAmpm] = useState<'오전' | '오후'>('오후')
+  const [hour, setHour] = useState(7)
+  const [minute, setMinute] = useState(0)
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+
+  useEffect(() => {
+    const init = async () => {
+      const res = await api.post('/auth/dev/token/3')
+      const token = res.data.accessToken
+      setAccessToken(token)
+
+      const statusRes = await api.get('/users/me/notification-settings/first-setup-status')
+      const { firstSetupCompleted, notificationTime } = statusRes.data
+
+      if (!firstSetupCompleted) {
+        if (notificationTime) {
+          const [hourStr, minuteStr] = notificationTime.split(':')
+          const hourNum = parseInt(hourStr, 10)
+          const ampmValue = hourNum >= 12 ? '오후' : '오전'
+          const convertedHour = hourNum > 12 ? hourNum - 12 : hourNum
+
+          setAmpm(ampmValue)
+          setHour(convertedHour)
+          setMinute(parseInt(minuteStr, 10))
+        }
+
+        setShowSetupModal(true)
+      }
+    }
+
+    init()
+  }, [])
+
+  const handleAllowNotification = async () => {
+    try {
+      const convertedHour = ampm === '오후' && hour < 12 ? hour + 12 : hour
+      const formattedTime = `${String(convertedHour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+
+      await api.post('/users/me/notification-settings/first-setup', {
+        notificationTime: formattedTime,
+        masterEnabled: true,
+        choreEnabled: true,
+        noticeEnabled: true,
+      })
+
+      setShowSetupModal(false)
+      alert('알림 설정이 완료되었습니다!')
+      router.replace('/')
+    } catch (err) {
+      console.error('최초 알림 설정 실패:', err)
+    }
+  }
+
+  const androidTop = Platform.OS === 'android' ? 50 : 0
 
   const todayStr = useMemo(() => {
     const t = new Date()
-    const yyyy = t.getFullYear()
-    const mm = String(t.getMonth() + 1).padStart(2, '0')
-    const dd = String(t.getDate()).padStart(2, '0')
-    return `${yyyy}-${mm}-${dd}`
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(
+      t.getDate()
+    ).padStart(2, '0')}`
   }, [])
 
-  const [selectedDate, setSelectedDate] = useState<string>(todayStr)
+  const [selectedDate, setSelectedDate] = useState(todayStr)
   const [range, setRange] = useState(() => getMonthRange(selectedDate))
-
-  // api
   const { data: dotDates = [] } = useChoreCalendar(range.start, range.end)
   const { data: choresList = [], isLoading, isError } = useChoreByDate(selectedDate)
   const { mutate: choreStatus } = usePatchChoreStatus(selectedDate)
 
-  // 선택 날짜 기준 진행률
   const progress = useMemo(() => {
     const total = choresList.length
     if (!total) return 0
@@ -41,20 +102,26 @@ export default function HomeScreen() {
     return Math.round((done / total) * 100)
   }, [choresList])
 
-  return (
-    <View className="flex-1 bg-[#F8F8FA]">
-      {/* StatusBar 색상 지정 */}
-      <StatusBar style="dark" backgroundColor="#F8F8FA" />
+  const styleFromRepeatColor = (cls: string | undefined) => {
+    if (!cls) return {}
+    const bgMatch = cls.match(/bg-\[#([0-9A-Fa-f]{6})\]/)
+    const textMatch = cls.match(/text-\[#([0-9A-Fa-f]{6})\]/)
+    const style: any = {}
+    if (bgMatch) style.backgroundColor = `#${bgMatch[1]}`
+    if (textMatch) style.color = `#${textMatch[1]}`
+    return style
+  }
 
+  return (
+    <View style={styles.container}>
+      <StatusBar style="dark" backgroundColor="#F8F8FA" />
       <TabSafeScroll contentContainerStyle={{ paddingTop: androidTop }}>
-        {/* 헤더 */}
-        <View className="py-4 flex-row items-center justify-between">
+        <View style={styles.headerRow}>
           <Image
             source={require('../../assets/images/logo/logo.png')}
             style={{ width: 125, height: 24 }}
             resizeMode="contain"
           />
-
           <TouchableOpacity onPress={() => router.push('/notifications')}>
             <Image
               source={require('../../assets/images/notification.png')}
@@ -64,54 +131,43 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        <View className="flex gap-4">
-          {/* 홈카드 */}
-          <View className="bg-[#DDF4F6] px-5 py-3 rounded-2xl">
-            <View className="flex-row items-center justify-between">
-              <View className="flex gap-2">
-                <Text className="font-semibold text-xl">안녕하세요, 사용자님!</Text>
-                <Text className="text-base">
-                  오늘의 집안일을 <Text className="font-bold text-[#46A1A6]">{progress}%</Text>{' '}
-                  완료했어요.
+        <View style={styles.contentWrap}>
+          <View style={styles.homeCard}>
+            <View style={styles.rowBetween}>
+              <View style={styles.colGap2}>
+                <Text style={styles.helloTitle}>안녕하세요, 사용자님!</Text>
+                <Text style={styles.baseText}>
+                  오늘의 집안일을 <Text style={styles.progressNum}>{progress}%</Text> 완료했어요.
                 </Text>
               </View>
-
               <Image
                 source={require('../../assets/images/card/card-img.png')}
                 style={{ width: 70, height: 70 }}
                 resizeMode="contain"
               />
             </View>
-
-            {/* 진행 바 */}
-            <View className="mt-3 mb-2 h-[6px] w-full rounded-full bg-[#F5FCFC] overflow-hidden">
-              <View
-                className="h-full rounded-full bg-[#57C9D0]"
-                style={{ width: `${progress}%`, borderRadius: 9999 }}
-              />
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${progress}%`, borderRadius: 9999 }]} />
             </View>
           </View>
 
-          {/* 캘린더 */}
-          <View>
-            <HomeCalendar
-              onSelect={setSelectedDate}
-              dotDates={dotDates}
-              onMonthChangeRange={(start, end) => setRange({ start, end })}
-            />
-          </View>
-          {/* 할일 내역 */}
-          <View className="flex">
-            <View className="flex-row gap-2 items-center mb-3">
-              <Text className="text-xl font-bold">{formatKoreanDate(selectedDate)}</Text>
-              <Text className="text-lg">집안일</Text>
+          <HomeCalendar
+            onSelect={setSelectedDate}
+            dotDates={dotDates}
+            onMonthChangeRange={(start, end) => setRange({ start, end })}
+          />
+
+          <View style={styles.flex}>
+            <View style={styles.listHeaderRow}>
+              <Text style={styles.listHeaderTitle}>{formatKoreanDate(selectedDate)}</Text>
+              <Text style={styles.listHeaderSub}>집안일</Text>
             </View>
 
-            <View className="bg-white rounded-2xl p-5">
-              {isLoading && <Text className="text-base">집안일 내역을 불러오는 중입니다.</Text>}
-              {isError && <Text className="text-base">집안일 내역 불러오기에 실패했습니다.</Text>}
+            <View style={styles.listBox}>
+              {isLoading && <Text>집안일 내역을 불러오는 중입니다.</Text>}
+              {isError && <Text>집안일 내역 불러오기에 실패했습니다.</Text>}
               {!isLoading && !isError && choresList.length === 0 ? (
-                <Text className="text-base">사용자님의 하루 집안일을 계획해보세요</Text>
+                <Text>사용자님의 하루 집안일을 계획해보세요</Text>
               ) : (
                 choresList.map((item, index) => {
                   const key = getRepeatKey(item.repeatType, item.repeatInterval)
@@ -120,17 +176,16 @@ export default function HomeScreen() {
                   return (
                     <View
                       key={item.id}
-                      className={`flex-row items-center justify-between ${
-                        choresList.length === 1 || index === choresList.length - 1 ? '' : 'mb-3'
-                      }`}
+                      style={[styles.itemRow, index !== choresList.length - 1 && styles.mb12]}
                     >
-                      <View className="flex-row gap-3 items-center">
+                      <View style={styles.itemLeftRow}>
                         <Text
-                          className={`rounded-[6px] px-2 py-[2px] text-sm ${
+                          style={[
+                            styles.badgeText,
                             item.status === 'COMPLETED'
-                              ? 'bg-[#CDCFD2] text-[#9B9FA6] '
-                              : repeat.color
-                          }  `}
+                              ? styles.badgeDone
+                              : styleFromRepeatColor(repeat.color),
+                          ]}
                         >
                           {repeat.label}
                         </Text>
@@ -149,11 +204,12 @@ export default function HomeScreen() {
                           }
                         >
                           <Text
-                            className={`text-base ${
+                            style={[
+                              styles.itemTitle,
                               item.status === 'COMPLETED'
-                                ? 'text-gray-400 line-through'
-                                : 'text-black'
-                            }`}
+                                ? styles.itemTitleDone
+                                : styles.itemTitleActive,
+                            ]}
                           >
                             {item.titleSnapshot}
                           </Text>
@@ -172,6 +228,120 @@ export default function HomeScreen() {
           </View>
         </View>
       </TabSafeScroll>
+
+      {/* 알림 최초 설정 모달 */}
+      <Modal visible={showSetupModal} transparent animationType="fade">
+        <View style={styles.overlay}>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              overflow: 'visible',
+            }}
+          >
+            <View style={styles.modalBox}>
+              <Text style={styles.modalTitle}>알림을 언제 보내드릴까요?</Text>
+              <Text style={styles.modalDesc}>
+                가입 시 한 번만 설정하면, {'\n'}
+                새로운 일정도 자동으로 그 시간에 알려드려요.
+              </Text>
+
+              <TimeDropdown
+                ampm={ampm}
+                hour={hour}
+                minute={minute}
+                onChange={(v) => {
+                  setAmpm(v.ampm)
+                  setHour(v.hour)
+                  setMinute(v.minute)
+                }}
+                activeDropdown={activeDropdown}
+                setActiveDropdown={setActiveDropdown}
+              />
+
+              <Text style={styles.modalDesc}>
+                알림 설정 및 시간은 {'\n'}
+                <Text style={styles.highlightText}>마이페이지</Text>에서 수정할 수 있어요.
+              </Text>
+
+              <TouchableOpacity onPress={handleAllowNotification} style={styles.allowBtn}>
+                <Text style={styles.allowText}>알림 허용하기</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#F8F8FA' },
+  headerRow: {
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  contentWrap: { flexDirection: 'column', gap: 16 },
+  homeCard: {
+    backgroundColor: '#DDF4F6',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 16,
+  },
+  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  colGap2: { flexDirection: 'column', gap: 8 },
+  helloTitle: { fontWeight: '600', fontSize: 20 },
+  baseText: { fontSize: 16 },
+  progressNum: { fontWeight: '700', color: '#46A1A6' },
+  progressBar: {
+    marginTop: 12,
+    marginBottom: 8,
+    height: 6,
+    width: '100%',
+    borderRadius: 9999,
+    backgroundColor: '#F5FCFC',
+    overflow: 'hidden',
+  },
+  progressFill: { height: '100%', backgroundColor: '#57C9D0' },
+  flex: { flex: 1 },
+  listHeaderRow: { flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 12 },
+  listHeaderTitle: { fontSize: 20, fontWeight: '700' },
+  listHeaderSub: { fontSize: 18 },
+  listBox: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20 },
+  itemRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  mb12: { marginBottom: 12 },
+  itemLeftRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  badgeText: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontSize: 14 },
+  badgeDone: { backgroundColor: '#CDCFD2', color: '#9B9FA6' },
+  itemTitle: { fontSize: 16 },
+  itemTitleActive: { color: '#000000' },
+  itemTitleDone: { color: '#9CA3AF', textDecorationLine: 'line-through' },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    overflow: 'visible',
+    maxHeight: '80%',
+    zIndex: 999,
+  },
+  modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
+  modalDesc: { fontSize: 14, textAlign: 'center', marginVertical: 24 },
+  allowBtn: {
+    backgroundColor: '#57C9D0',
+    borderRadius: 12,
+    paddingVertical: 15,
+    width: '100%',
+  },
+  allowText: { color: '#fff', fontWeight: '700', textAlign: 'center' },
+  highlightText: { color: '#46A1A6' },
+})
