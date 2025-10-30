@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native'
-import { useState } from 'react'
-import { FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+import { api, setAccessToken } from '@/libs/api/axios'
+import { fetchNotifications } from '@/libs/api/notification'
 
 type Notification = {
   id: number
@@ -12,42 +14,72 @@ type Notification = {
 }
 
 export default function Notifications() {
-  const navigation = useNavigation()
   const [activeTab, setActiveTab] = useState<'chore' | 'notice'>('chore')
-
-  // 집안일 알림
   const [choreNotifications, setChoreNotifications] = useState<Notification[]>([])
+  const [noticeNotifications, setNoticeNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(false)
 
-  // 공지 알림
-  const [noticeNotifications, setNoticeNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      title: '공지',
-      message: '앱 업데이트 공지가 있습니다.',
-      time: '2시간 전',
-      read: false,
-    },
-    {
-      id: 2,
-      title: '공지',
-      message: '10월 25일(금) 서버 점검 예정',
-      time: '1일 전',
-      read: true,
-    },
-  ])
-
-  // 탭별 데이터
   const notifications = activeTab === 'chore' ? choreNotifications : noticeNotifications
   const setNotifications = activeTab === 'chore' ? setChoreNotifications : setNoticeNotifications
-  const unreadCount = notifications.filter((n) => !n.read).length
-  const hasData = notifications.length > 0
 
-  // 클릭 시 읽음 처리
+  // 최대 30개까지만 표시
+  const visibleNotifications = notifications.slice(0, 30)
+  const unreadCount = notifications.filter((n) => !n.read).length
+  const hasData = visibleNotifications.length > 0
+
+  // 상대 시간 포맷 함수
+  const formatRelativeTime = (dateString: string) => {
+    const now = new Date()
+    const date = new Date(dateString)
+    const diff = (now.getTime() - date.getTime()) / 1000
+
+    if (diff < 60) return '방금 전'
+    if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
+    if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
+    if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`
+    if (diff < 2419200) return `${Math.floor(diff / 604800)}주 전`
+    return date.toLocaleDateString('ko-KR')
+  }
+
+  // 클릭 시 읽음 처리 (회색 처리)
   const handlePressNotification = (id: number) => {
     setNotifications((prev) =>
       prev.map((item) => (item.id === id ? { ...item, read: true } : item))
     )
   }
+
+  // 알림 목록 조회
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        setLoading(true)
+
+        // 토큰 발급
+        const res = await api.post('/auth/dev/token/1')
+        const token = res.data.accessToken
+        await setAccessToken(token)
+
+        // 알림 API 호출
+        const data = await fetchNotifications(activeTab)
+        const formatted = data.map((item: any) => ({
+          id: item.id,
+          title: item.title || '알림',
+          message: item.message || '',
+          time: formatRelativeTime(item.scheduledAt),
+          read: false,
+        }))
+
+        if (activeTab === 'chore') setChoreNotifications(formatted)
+        else setNoticeNotifications(formatted)
+      } catch (error: any) {
+        console.error('🚨 알림 조회 실패:', error.response?.data || error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadNotifications()
+  }, [activeTab])
 
   // 알림 카드 렌더
   const renderItem = ({ item }: { item: Notification }) => (
@@ -66,13 +98,9 @@ export default function Notifications() {
 
   return (
     <View style={styles.container}>
-      {/* 헤더 (뒤로가기 버튼 + 제목) */}
+      {/* 헤더 */}
       <View style={styles.headerContainer}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={26} color="#1A1A1A" />
-        </TouchableOpacity>
         <Text style={styles.header}>알림</Text>
-        <View style={{ width: 26 }} />
       </View>
 
       {/* 탭 버튼 */}
@@ -108,24 +136,23 @@ export default function Notifications() {
 
       {/* 본문 */}
       <View style={styles.contentArea}>
-        {hasData ? (
+        {loading ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color="#57C9D0" />
+          </View>
+        ) : hasData ? (
           <>
             <Text style={styles.unreadText}>
               읽지 않은 알림 <Text style={styles.unreadNumber}>{unreadCount}</Text>
             </Text>
 
             <FlatList
-              data={notifications}
+              data={visibleNotifications}
               keyExtractor={(item) => item.id.toString()}
               renderItem={renderItem}
-              showsVerticalScrollIndicator={false}
-              removeClippedSubviews={false}
-              style={{
-                overflow: 'visible',
-                position: Platform.OS === 'web' ? 'static' : 'relative',
-              }}
+              showsVerticalScrollIndicator={true}
               contentContainerStyle={{
-                paddingBottom: 20,
+                paddingBottom: 30,
                 overflow: 'visible',
               }}
             />
@@ -151,7 +178,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     marginBottom: 20,
   },
   header: {
@@ -192,8 +219,6 @@ const styles = StyleSheet.create({
   },
   contentArea: {
     flex: 1,
-    overflow: 'visible',
-    position: Platform.OS === 'web' ? 'static' : 'relative',
   },
   unreadText: {
     fontSize: 13,
@@ -243,4 +268,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginTop: 8,
   },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 })
