@@ -28,7 +28,7 @@ export type MyBadge = {
   icon: ImageSourcePropType
   section: string
   chore?: string
-  earned: boolean
+  acquired: boolean
   earnedAt?: string
 }
 
@@ -41,7 +41,7 @@ const myBadges: MyBadge[] = [
     desc: '첫 시작! 시작 미션을 1회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '시작',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-10-01',
   },
   {
@@ -52,7 +52,7 @@ const myBadges: MyBadge[] = [
     desc: '완료한 집안일 수 누적 100회를 달성하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '전체 집안일',
-    earned: false,
+    acquired: false,
   },
   {
     id: 101,
@@ -62,7 +62,7 @@ const myBadges: MyBadge[] = [
     desc: '완료한 집안일 수 누적 200회를 달성하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '전체 집안일',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-09-20',
   },
   {
@@ -73,7 +73,7 @@ const myBadges: MyBadge[] = [
     desc: '완료한 집안일 수 누적 300회를 달성하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '전체 집안일',
-    earned: false,
+    acquired: false,
   },
   {
     id: 200,
@@ -83,7 +83,7 @@ const myBadges: MyBadge[] = [
     desc: '집안일을 총 30회 등록하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '집안일 등록',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-08-25',
   },
   {
@@ -94,7 +94,7 @@ const myBadges: MyBadge[] = [
     desc: '집안일을 총 90회 등록하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '집안일 등록',
-    earned: false,
+    acquired: false,
   },
   {
     id: 202,
@@ -104,7 +104,7 @@ const myBadges: MyBadge[] = [
     desc: '집안일을 총 180회 등록하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '집안일 등록',
-    earned: false,
+    acquired: false,
   },
   {
     id: 300,
@@ -114,7 +114,7 @@ const myBadges: MyBadge[] = [
     desc: '미션 달성 횟수 누적 3회를 달성하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '미션 달성',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-10-02',
   },
   {
@@ -125,7 +125,7 @@ const myBadges: MyBadge[] = [
     desc: '미션 달성 횟수 누적 18회를 달성하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '미션 달성',
-    earned: false,
+    acquired: false,
   },
   {
     id: 302,
@@ -135,7 +135,7 @@ const myBadges: MyBadge[] = [
     desc: '미션 달성 횟수 누적 36회를 달성하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '미션 달성',
-    earned: false,
+    acquired: false,
   },
   {
     id: 400,
@@ -145,7 +145,7 @@ const myBadges: MyBadge[] = [
     desc: '주방 공간의 집안일을 총 30회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '주방',
-    earned: false,
+    acquired: false,
   },
   {
     id: 401,
@@ -155,7 +155,7 @@ const myBadges: MyBadge[] = [
     desc: '주방 공간의 집안일을 총 90회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '주방',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-09-12',
   },
   {
@@ -166,7 +166,7 @@ const myBadges: MyBadge[] = [
     desc: '주방 공간의 집안일을 총 180회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '주방',
-    earned: false,
+    acquired: false,
   },
   {
     id: 500,
@@ -176,7 +176,7 @@ const myBadges: MyBadge[] = [
     desc: '욕실 공간의 집안일을 총 30회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '욕실',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-08-14',
   },
   {
@@ -187,7 +187,7 @@ const myBadges: MyBadge[] = [
     desc: '욕실 공간의 집안일을 총 90회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '욕실',
-    earned: false,
+    acquired: false,
   },
   {
     id: 502,
@@ -197,7 +197,7 @@ const myBadges: MyBadge[] = [
     desc: '욕실 공간의 집안일을 총 180회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '욕실',
-    earned: false,
+    acquired: false,
   },
   {
     id: 600,
@@ -207,7 +207,7 @@ const myBadges: MyBadge[] = [
     desc: '침실 공간의 집안일을 총 30회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '침실',
-    earned: false,
+    acquired: false,
   },
   {
     id: 601,
@@ -217,7 +217,7 @@ const myBadges: MyBadge[] = [
     desc: '침실 공간의 집안일을 총 90회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '침실',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-10-06',
   },
   {
@@ -228,7 +228,7 @@ const myBadges: MyBadge[] = [
     desc: '침실 공간의 집안일을 총 180회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '침실',
-    earned: false,
+    acquired: false,
   },
   {
     id: 700,
@@ -238,7 +238,7 @@ const myBadges: MyBadge[] = [
     desc: '현관 공간의 집안일을 총 30회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '현관',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-09-02',
   },
   {
@@ -249,7 +249,7 @@ const myBadges: MyBadge[] = [
     desc: '현관 공간의 집안일을 총 90회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '현관',
-    earned: false,
+    acquired: false,
   },
   {
     id: 702,
@@ -259,7 +259,7 @@ const myBadges: MyBadge[] = [
     desc: '현관 공간의 집안일을 총 180회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '현관',
-    earned: false,
+    acquired: false,
   },
   {
     id: 800,
@@ -269,7 +269,7 @@ const myBadges: MyBadge[] = [
     desc: '‘빨래하기’를 총 30회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '빨래하기',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-09-14',
   },
   {
@@ -280,7 +280,7 @@ const myBadges: MyBadge[] = [
     desc: '‘빨래하기’를 총 90회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '빨래하기',
-    earned: false,
+    acquired: false,
   },
   {
     id: 802,
@@ -290,7 +290,7 @@ const myBadges: MyBadge[] = [
     desc: '‘빨래하기’를 총 180회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '빨래하기',
-    earned: false,
+    acquired: false,
   },
   {
     id: 900,
@@ -300,7 +300,7 @@ const myBadges: MyBadge[] = [
     desc: '‘거울/수전 물때 닦기’를 총 30회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '거울/수전 물때 닦기',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-09-30',
   },
   {
@@ -311,7 +311,7 @@ const myBadges: MyBadge[] = [
     desc: '‘거울/수전 물때 닦기’를 총 90회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '거울/수전 물때 닦기',
-    earned: false,
+    acquired: false,
   },
   {
     id: 902,
@@ -321,7 +321,7 @@ const myBadges: MyBadge[] = [
     desc: '‘거울/수전 물때 닦기’를 총 180회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '거울/수전 물때 닦기',
-    earned: false,
+    acquired: false,
   },
   {
     id: 1000,
@@ -331,7 +331,7 @@ const myBadges: MyBadge[] = [
     desc: '‘소화기 점검’을 2회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '소화기 점검',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-08-05',
   },
   {
@@ -342,7 +342,7 @@ const myBadges: MyBadge[] = [
     desc: '‘바닥 청소기 돌리기’를 총 30회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '바닥 청소기 돌리기',
-    earned: false,
+    acquired: false,
   },
   {
     id: 1101,
@@ -352,7 +352,7 @@ const myBadges: MyBadge[] = [
     desc: '‘바닥 청소기 돌리기’를 총 90회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '바닥 청소기 돌리기',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-09-22',
   },
   {
@@ -363,7 +363,7 @@ const myBadges: MyBadge[] = [
     desc: '‘바닥 청소기 돌리기’를 총 180회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '바닥 청소기 돌리기',
-    earned: false,
+    acquired: false,
   },
   {
     id: 1200,
@@ -373,7 +373,7 @@ const myBadges: MyBadge[] = [
     desc: '‘기상후 침구 정리하기’를 총 30회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '기상후 침구 정리하기',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-09-10',
   },
   {
@@ -384,7 +384,7 @@ const myBadges: MyBadge[] = [
     desc: '‘기상후 침구 정리하기’를 총 90회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '기상후 침구 정리하기',
-    earned: false,
+    acquired: false,
   },
   {
     id: 1202,
@@ -394,7 +394,7 @@ const myBadges: MyBadge[] = [
     desc: '‘기상후 침구 정리하기’를 총 180회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '기상후 침구 정리하기',
-    earned: false,
+    acquired: false,
   },
   {
     id: 1300,
@@ -404,7 +404,7 @@ const myBadges: MyBadge[] = [
     desc: '‘쓰레기통 비우기’를 총 30회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '쓰레기통 비우기',
-    earned: true,
+    acquired: true,
     earnedAt: '2025-10-04',
   },
   {
@@ -415,7 +415,7 @@ const myBadges: MyBadge[] = [
     desc: '‘쓰레기통 비우기’를 총 90회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '쓰레기통 비우기',
-    earned: false,
+    acquired: false,
   },
   {
     id: 1302,
@@ -425,7 +425,7 @@ const myBadges: MyBadge[] = [
     desc: '‘쓰레기통 비우기’를 총 180회 완료하면 받을 수 있어요.',
     icon: require('@/assets/images/chore-home.png'),
     section: '쓰레기통 비우기',
-    earned: false,
+    acquired: false,
   },
 ]
 
@@ -475,10 +475,10 @@ export default function MyBadges() {
                         icon={b.icon}
                         size={100}
                         iconSize={100}
-                        earned={b.current === b.target}
+                        acquired={b.current === b.target}
                       />
                     </TouchableOpacity>
-                    <Text style={styles.badgeText}>{b.title}</Text>
+                    <Text style={styles.badgeText}>{b.acquired === true ? b.title : '???'}</Text>
                   </View>
                 ))}
               </View>
@@ -487,9 +487,7 @@ export default function MyBadges() {
         })}
       </ScrollView>
 
-      {selected && (
-        <BadgeDetail badge={selected} variant="mine" onClose={() => setSelectedId(null)} />
-      )}
+      {selected && <BadgeDetail badge={selected} onClose={() => setSelectedId(null)} />}
     </>
   )
 }
@@ -504,10 +502,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   backBtn: { position: 'absolute', left: 0 },
-  headerTitle: { fontSize: 22, fontWeight: '600' },
+  headerTitle: { fontSize: 20, fontWeight: '600' },
   sectionWrap: { marginBottom: 24 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 18 },
+  sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 18 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between' },
   badgeCol: { alignItems: 'center' },
-  badgeText: { fontSize: 16, marginTop: 8 },
+  badgeText: { fontSize: 14, marginTop: 8, color: '#4F5763' },
 })

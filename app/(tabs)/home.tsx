@@ -28,14 +28,14 @@ import HomeCalendar from '../../components/Calendar/HomeCalendar'
 
 export default function HomeScreen() {
   const router = useRouter()
-  const { token } = useAuth() // ✅ 토큰 준비 이후에만 초기화 로직 실행
+  const { token } = useAuth() // 토큰 준비 이후에만 초기화 로직 실행
   const [showSetupModal, setShowSetupModal] = useState(false)
   const [ampm, setAmpm] = useState<'오전' | '오후'>('오후')
   const [hour, setHour] = useState(7)
   const [minute, setMinute] = useState(0)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
-  // ✅ dev 토큰 발급/주입 제거. 토큰이 있을 때만 최초 설정 상태 조회
+  // dev 토큰 발급/주입 제거. 토큰이 있을 때만 최초 설정 상태 조회
   useEffect(() => {
     if (!token) return
 
@@ -291,7 +291,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F8FA' },
   headerRow: {
-    paddingVertical: 16,
+    paddingVertical: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -305,8 +305,8 @@ const styles = StyleSheet.create({
   },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   colGap2: { flexDirection: 'column', gap: 8 },
-  helloTitle: { fontWeight: '600', fontSize: 20 },
-  baseText: { fontSize: 16 },
+  helloTitle: { fontWeight: '600', fontSize: 18 },
+  baseText: { fontSize: 14 },
   progressNum: { fontWeight: '700', color: '#46A1A6' },
   progressBar: {
     marginTop: 12,
@@ -320,17 +320,25 @@ const styles = StyleSheet.create({
   progressFill: { height: '100%', backgroundColor: '#57C9D0' },
   flex: { flex: 1 },
   listHeaderRow: { flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 12 },
-  listHeaderTitle: { fontSize: 20, fontWeight: '700' },
-  listHeaderSub: { fontSize: 18 },
+  listHeaderTitle: { fontSize: 18, fontWeight: '700' },
+  listHeaderSub: { fontSize: 16 },
   listBox: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20 },
   itemRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   mb12: { marginBottom: 12 },
   itemLeftRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  badgeText: { borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3, fontSize: 14 },
+  badgeText: {
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    fontSize: 12,
+    width: 42,
+    height: 23,
+    textAlign: 'center',
+  },
   badgeDone: { backgroundColor: '#CDCFD2', color: '#9B9FA6' },
-  itemTitle: { fontSize: 16 },
+  itemTitle: { fontSize: 14 },
   itemTitleActive: { color: '#000000' },
-  itemTitleDone: { color: '#9CA3AF', textDecorationLine: 'line-through' },
+  itemTitleDone: { color: '#CDCFD2', textDecorationLine: 'line-through' },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

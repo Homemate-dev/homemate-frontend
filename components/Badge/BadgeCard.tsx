@@ -7,16 +7,16 @@ type BadgeCardProps = {
   icon: ImageSourcePropType
   size?: number
   iconSize?: number
-  earned?: boolean
+  acquired?: boolean
 }
 
 export default function BadgeCard({
   icon,
   size = 84,
   iconSize = 82,
-  earned = true,
+  acquired = true,
 }: BadgeCardProps) {
-  const locked = !earned
+  const locked = !acquired
 
   return (
     <View style={[styles.relative, { width: size, height: size }]}>
@@ -40,11 +40,7 @@ export default function BadgeCard({
 
               <View
                 pointerEvents="none"
-                style={[
-                  styles.absoluteFillRounded,
-                  styles.blackBg,
-                  { opacity: Platform.OS === 'ios' ? 0.7 : 0.45 },
-                ]}
+                style={[styles.absoluteFillRounded, styles.blackBg, { opacity: 0.7 }]}
               />
 
               {/* 자물쇠 */}

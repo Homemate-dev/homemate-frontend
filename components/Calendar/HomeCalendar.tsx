@@ -56,10 +56,10 @@ export default function HomeCalendar({ onSelect, dotDates = [], onMonthChangeRan
 
   const themeObj = useMemo(
     () => ({
-      textDayFontSize: 16,
+      textDayFontSize: 14,
       textDayHeaderFontSize: 14,
-      textMonthFontSize: 18,
-      textMonthFontWeight: '700',
+      textMonthFontSize: 16,
+      textMonthFontWeight: '600',
       monthTextColor: '#0F172A',
       arrowColor: '#57C9D0',
       'stylesheet.calendar.main': {
@@ -70,9 +70,10 @@ export default function HomeCalendar({ onSelect, dotDates = [], onMonthChangeRan
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: 16,
+          marginBottom: 8,
+          paddingHorizontal: 6,
         },
-        dayHeader: { fontSize: 14, marginBottom: 16, color: '#040F2080' },
+        dayHeader: { fontSize: 16, marginBottom: 8, color: '#040F2080' },
       },
     }),
     []
@@ -206,12 +207,13 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, fontWeight: '600', color: '#040F20B2' },
   todayBtn: {
     borderWidth: 1,
-    borderColor: '#57C9D0',
-    borderRadius: 6,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
+    borderColor: '#E6E7E9',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginLeft: 5,
   },
-  todayBtnText: { color: '#57C9D0' },
+  todayBtnText: { color: '#81878F', fontSize: 12 },
   dayBtn: {
     flex: 1,
     width: '100%',

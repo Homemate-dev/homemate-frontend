@@ -115,11 +115,9 @@ export default function MyPage() {
   const handleLogout = async () => {
     try {
       await postLogout()
-      await AsyncStorage.removeItem('accessToken')
-      await AsyncStorage.removeItem('refreshToken')
-
+      await AsyncStorage.multiRemove(['accessToken', 'refreshToken'])
       alert('로그아웃 되었습니다.')
-      router.replace('/')
+      router.replace('/login')
     } catch (error) {
       console.error('로그아웃 실패:', error)
       alert('로그아웃 중 오류가 발생했습니다.')
@@ -145,8 +143,11 @@ export default function MyPage() {
 
   return (
     <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: Platform.OS === 'android' ? 100 : 90 }}
+      style={[styles.container, { overflow: 'visible' }]}
+      contentContainerStyle={{
+        paddingBottom: Platform.OS === 'android' ? 100 : 90,
+        overflow: 'visible',
+      }}
     >
       <View style={styles.headerWrapper}>
         <Text style={styles.headerTitle}>마이페이지</Text>
@@ -168,12 +169,12 @@ export default function MyPage() {
           }
           style={styles.profileImage}
         />
-
         <View>
           <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
         </View>
       </View>
-      {/* 뱃지 영역 */}
+
+      {/* 뱃지 */}
       <View style={styles.badgeSection}>
         <View style={styles.badgeHeader}>
           <Text style={styles.sectionTitle}>나의 뱃지</Text>
@@ -189,7 +190,7 @@ export default function MyPage() {
       </View>
 
       {/* 알림 설정 */}
-      <View style={styles.section}>
+      <View style={styles.sectionWithDropdown}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>알림 설정</Text>
           <Toggle value={isNotificationEnabled} onChange={(v) => handleToggleChange('master', v)} />
@@ -207,7 +208,6 @@ export default function MyPage() {
 
         <View style={styles.divider} />
 
-        {/* 알림 시간 드롭다운 + 확인 버튼 */}
         <View style={styles.timeSetting}>
           <Text style={[styles.settingText, { marginBottom: 8 }]}>알림 시간 설정</Text>
           <TimeDropdown
@@ -234,8 +234,8 @@ export default function MyPage() {
         </View>
       </View>
 
-      {/* 정책 섹션 */}
-      <View style={styles.section}>
+      {/* 정책 + 로그아웃 */}
+      <View style={styles.sectionBelow}>
         <TouchableOpacity style={styles.settingRow} onPress={() => Linking.openURL(TERMS_URL)}>
           <Text style={styles.settingText}>이용 약관</Text>
           <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
@@ -247,7 +247,6 @@ export default function MyPage() {
         </TouchableOpacity>
       </View>
 
-      {/* 로그아웃 */}
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
         <Text style={styles.logoutText}>로그아웃</Text>
       </TouchableOpacity>
@@ -262,20 +261,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('6%'),
     height: hp('100%'),
   },
-  headerWrapper: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: hp('2%'),
-  },
-  headerTitle: {
-    fontSize: hp('2.4%'),
-    fontWeight: '700',
-  },
-  headerIcon: {
-    position: 'absolute',
-    right: 0,
-  },
+  headerWrapper: { alignItems: 'center', justifyContent: 'center', marginVertical: hp('2%') },
+  headerTitle: { fontSize: hp('2.4%'), fontWeight: '700' },
+  headerIcon: { position: 'absolute', right: 0 },
   profileCard: {
     backgroundColor: '#57C9D0',
     borderRadius: 12,
@@ -303,7 +291,15 @@ const styles = StyleSheet.create({
   badgeTotal: { fontSize: hp('1.8%'), color: '#A1A1A1', marginRight: hp('1%') },
   badgeBarBackground: { height: hp('1%'), backgroundColor: '#E4E4E4', borderRadius: 100 },
   badgeBarFill: { height: '100%', backgroundColor: '#57C9D0', borderRadius: 100 },
-  section: {
+  sectionWithDropdown: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: hp('2%'),
+    paddingHorizontal: wp('5%'),
+    marginTop: hp('2%'),
+    elevation: 4,
+  },
+  sectionBelow: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     paddingVertical: hp('2%'),
@@ -314,7 +310,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: hp('1%'),
     borderBottomWidth: 1,
     borderBottomColor: '#E6E7E9',
     paddingBottom: hp('2%'),

@@ -25,6 +25,7 @@ const mockBadges = [
     target: 7,
     desc: '7개의 미션을 완료하면 받을 수 있는 도전 뱃지예요.',
     icon: require('@/assets/images/chore-home.png'),
+    acquired: false,
   },
   {
     id: 2,
@@ -33,6 +34,7 @@ const mockBadges = [
     target: 30,
     desc: '욕실 청소 미션을 30회 완수하면 획득할 수 있는 청결의 상징 뱃지예요.',
     icon: require('@/assets/images/chore-home.png'),
+    acquired: false,
   },
   {
     id: 3,
@@ -41,6 +43,7 @@ const mockBadges = [
     target: 90,
     desc: '침실 정리 미션을 90회 달성하면 얻을 수 있는 정리왕 뱃지예요.',
     icon: require('@/assets/images/chore-home.png'),
+    acquired: false,
   },
 ]
 
@@ -133,7 +136,7 @@ export default function Mission() {
                         iconSize={82}
                       />
                     </TouchableOpacity>
-                    <Text style={styles.badgeTitle}>{b.title}</Text>
+                    <Text style={styles.badgeTitle}>{b.acquired === true ? b.title : '???'}</Text>
                     <Text style={styles.badgeCount}>
                       <Text style={styles.badgeCurrent}>{b.current}회</Text> / {b.target}회
                     </Text>
@@ -148,9 +151,7 @@ export default function Mission() {
           </View>
         </View>
       </TabSafeScroll>
-      {selected && (
-        <BadgeDetail badge={selected} variant="mission" onClose={() => setSelectedId(null)} />
-      )}
+      {selected && <BadgeDetail badge={selected} onClose={() => setSelectedId(null)} />}
     </>
   )
 }
@@ -158,17 +159,17 @@ export default function Mission() {
 const styles = StyleSheet.create({
   container: { backgroundColor: '#F8F8FA' },
   header: { alignItems: 'center', marginVertical: 16 },
-  headerText: { fontSize: 24, fontWeight: '600' },
+  headerText: { fontSize: 20, fontWeight: '600' },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 20, fontWeight: '700', marginBottom: 10 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 10 },
   missionBox: { backgroundColor: '#FFFFFF', padding: 20, borderRadius: 12, marginBottom: 10 },
   loadingBox: { paddingVertical: 24, alignItems: 'center', justifyContent: 'center' },
   errorText: { color: '#D64545' },
   noMissionText: { color: '#686F79' },
   mb12: { marginBottom: 12 },
   missionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  missionTitle: { fontSize: 16 },
-  missionCountText: { fontSize: 16, color: '#B4B7BC' },
+  missionTitle: { fontSize: 14 },
+  missionCountText: { fontSize: 14, color: '#B4B7BC' },
   missionCurrent: { fontWeight: '600', color: '#57C9D0' },
   progressBar: {
     marginTop: 12,
@@ -183,13 +184,13 @@ const styles = StyleSheet.create({
   tipRow: { flexDirection: 'row', alignItems: 'center' },
   star: { marginRight: 4 },
   tipInner: { flexDirection: 'row', alignItems: 'center' },
-  tipText: { fontSize: 14, color: '#686F79' },
+  tipText: { fontSize: 12, color: '#686F79' },
   tipArrow: { width: 16, height: 16 },
   badgeBox: { backgroundColor: '#FFFFFF', padding: 20, borderRadius: 12, marginBottom: 12 },
   badgeRow: { flexDirection: 'row', justifyContent: 'space-between' },
   badgeItem: { alignItems: 'center' },
-  badgeTitle: { fontSize: 16, color: '#4F5763', marginTop: 8 },
-  badgeCount: { fontSize: 16, color: '#B4B7BC', marginTop: 8 },
+  badgeTitle: { fontSize: 14, color: '#4F5763', marginTop: 8 },
+  badgeCount: { fontSize: 14, color: '#B4B7BC', marginTop: 8 },
   badgeCurrent: { color: '#57C9D0', fontWeight: '600' },
   moreBtn: {
     height: 52,
@@ -198,5 +199,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 12,
   },
-  moreText: { color: '#46A1A6', fontSize: 18, fontWeight: '600' },
+  moreText: { color: '#46A1A6', fontSize: 16, fontWeight: '600' },
 })
