@@ -4,7 +4,7 @@ import { router, Tabs } from 'expo-router'
 import { Image, Platform, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const ICONS = {
-  index: [
+  home: [
     require('../../assets/images/tabs/home.png'),
     require('../../assets/images/tabs/home-active.png'),
   ],
@@ -39,7 +39,7 @@ function CenterAddButton() {
 export default function TabsLayout() {
   return (
     <Tabs
-      initialRouteName="index" // 첫 화면: 홈
+      initialRouteName="home" // 첫 화면: 홈
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: '#57C9D0',
@@ -71,7 +71,7 @@ export default function TabsLayout() {
         },
       })}
     >
-      <Tabs.Screen name="index" options={{ title: '홈' }} />
+      <Tabs.Screen name="home" options={{ title: '홈' }} />
       <Tabs.Screen name="recommend" options={{ title: '추천' }} />
       <Tabs.Screen
         name="addChore"

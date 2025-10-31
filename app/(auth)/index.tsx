@@ -1,7 +1,7 @@
 import * as Linking from 'expo-linking'
 import { useRouter } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   ActivityIndicator,
   Image,
@@ -16,21 +16,31 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen'
 
-import { setAccessToken } from '@/libs/api/axios'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function Login() {
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { login } = useAuth()
 
   const KAKAO_REST_API_KEY = '767c656f116d3d699c2b979f9c77f0a6'
-  const KAKAO_REDIRECT_URI = 'http://localhost:3000'
+  const KAKAO_REDIRECT_URI = Platform.OS === 'web' ? 'http://localhost:3000' : 'homematefrontend://'
   const codeVerifier = 'buxcAKiNFcQ8Kslcm5NrKq6pm8JgFULeujc2usyw0g4'
   const codeChallenge = 'jrHilj7qFqhxKHKKM8AoQsqociZfnv-QJQjXrSyT0jU'
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const parsed = Linking.parse(window.location.href)
+      const code = parsed.queryParams?.code
+      if (code) fetchKakaoToken(code)
+    }
+  }, [])
 
   const fetchKakaoToken = async (code: string | string[]) => {
     const codeString = Array.isArray(code) ? code[0] : code
 
     try {
+      setLoading(true)
       const response = await fetch(`https://homemate.io.kr/api/auth/login/kakao`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,44 +54,37 @@ export default function Login() {
       const data = await response.json()
 
       if (data.accessToken) {
-        console.log('Received Access Token:', data.accessToken)
-        setAccessToken(data.accessToken)
-
-        router.replace('./index')
+        await login(data.accessToken, data.user)
+        router.replace('/home')
+      } else {
+        alert('로그인에 실패했습니다. 다시 시도해주세요.')
       }
     } catch (err) {
-      console.error('로그인 중 오류 발생:', err)
+      console.error('로그인 오류:', err)
+      alert('카카오 로그인 중 문제가 발생했습니다.')
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleKakaoLogin = async () => {
-    console.log('Initiating Kakao login...')
     setLoading(true)
     try {
       const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&code_challenge=${codeChallenge}&code_challenge_method=S256`
 
       if (Platform.OS === 'web') {
-        console.log('Web platform detected. Redirecting...')
         window.location.href = kakaoAuthUrl
         return
       }
 
       const result = await WebBrowser.openAuthSessionAsync(kakaoAuthUrl, KAKAO_REDIRECT_URI)
-      console.log('WebBrowser result:', result)
-
       if (result.type === 'success' && result.url) {
         const parsed = Linking.parse(result.url)
         const code = parsed.queryParams?.code
-        if (code) {
-          console.log('Authorization code:', code)
-          await fetchKakaoToken(code)
-        }
-      } else {
-        console.warn('로그인 취소 또는 실패:', result.type)
+        if (code) await fetchKakaoToken(code)
       }
     } catch (error) {
-      console.error('Kakao 로그인 중 오류 발생:', error)
-      alert('카카오 로그인 중 오류가 발생했습니다. 다시 시도해주세요.')
+      console.error('Kakao 로그인 오류:', error)
     } finally {
       setLoading(false)
     }
@@ -137,9 +140,7 @@ const styles = StyleSheet.create({
   },
   kakaoIcon: { width: 24, height: 24, marginRight: 8 },
   kakaoText: { fontSize: hp('2%'), color: '#FFFFFF', fontWeight: '600' },
-  loadingIndicator: {
-    marginTop: hp('2%'),
-  },
+  loadingIndicator: { marginTop: hp('2%') },
   footerText: {
     marginTop: hp('3%'),
     fontSize: hp('1.4%'),
