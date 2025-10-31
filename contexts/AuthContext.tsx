@@ -3,59 +3,74 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { setAccessToken } from '@/libs/api/axios'
 
+type User = {
+  id: number
+  nickname: string
+  email?: string
+  profileImage?: string
+}
+
 type AuthContextType = {
   token: string | null
+  user: User | null
   loading: boolean
-  login: (token: string) => Promise<void>
+  login: (token: string, userData: User) => Promise<void>
   logout: () => Promise<void>
+  updateUser: (userData: Partial<User>) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadToken = async () => {
+    const loadAuthData = async () => {
       try {
         const storedToken = await AsyncStorage.getItem('accessToken')
+        const storedUser = await AsyncStorage.getItem('user')
+
         if (storedToken) {
-          console.log('Loaded token from AsyncStorage:', storedToken)
-          setToken(storedToken)
           setAccessToken(storedToken)
-        } else {
-          console.log('No token found in AsyncStorage.')
+          setToken(storedToken)
         }
+
+        if (storedUser) setUser(JSON.parse(storedUser))
       } catch (e) {
-        console.warn('Error loading token:', e)
+        console.warn('Error loading auth data:', e)
       } finally {
         setLoading(false)
       }
     }
-
-    loadToken()
+    loadAuthData()
   }, [])
 
-  const login = async (token: string) => {
-    console.log('Storing token in AsyncStorage:', token)
+  const login = async (token: string, userData: User) => {
     await AsyncStorage.setItem('accessToken', token)
-
-    const storedToken = await AsyncStorage.getItem('accessToken')
-    console.log('Token after saving:', storedToken)
-
+    await AsyncStorage.setItem('user', JSON.stringify(userData))
     setAccessToken(token)
+    setToken(token)
+    setUser(userData)
+  }
+
+  const updateUser = async (userData: Partial<User>) => {
+    if (!user) return
+    const updatedUser = { ...user, ...userData }
+    setUser(updatedUser)
+    await AsyncStorage.setItem('user', JSON.stringify(updatedUser))
   }
 
   const logout = async () => {
-    console.log('Logging out...')
     setToken(null)
+    setUser(null)
     setAccessToken(null)
-    await AsyncStorage.removeItem('accessToken')
+    await AsyncStorage.multiRemove(['accessToken', 'user'])
   }
 
   return (
-    <AuthContext.Provider value={{ token, loading, login, logout }}>
+    <AuthContext.Provider value={{ token, user, loading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   )
