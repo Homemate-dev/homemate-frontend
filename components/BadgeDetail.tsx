@@ -7,6 +7,7 @@ export type Badge = {
   current: number
   target: number
   icon: ImageSourcePropType
+  acquired: boolean
 }
 
 type Props = {
@@ -32,7 +33,7 @@ export default function BadgeDetail({ badge, onClose }: Props) {
       {/* 중앙 카드 */}
       <View style={styles.centerWrapper}>
         <View style={styles.card}>
-          <Text style={styles.title}>{badge.title}</Text>
+          <Text style={styles.title}>{badge.acquired === true ? badge.title : '???'}</Text>
           <Text style={styles.desc}>{badge.desc}</Text>
           <View style={styles.ImageWrap}>
             <Image source={badge.icon} style={styles.image} resizeMode="contain" />

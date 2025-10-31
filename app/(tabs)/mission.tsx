@@ -25,6 +25,7 @@ const mockBadges = [
     target: 7,
     desc: '7개의 미션을 완료하면 받을 수 있는 도전 뱃지예요.',
     icon: require('@/assets/images/chore-home.png'),
+    acquired: false,
   },
   {
     id: 2,
@@ -33,6 +34,7 @@ const mockBadges = [
     target: 30,
     desc: '욕실 청소 미션을 30회 완수하면 획득할 수 있는 청결의 상징 뱃지예요.',
     icon: require('@/assets/images/chore-home.png'),
+    acquired: false,
   },
   {
     id: 3,
@@ -41,6 +43,7 @@ const mockBadges = [
     target: 90,
     desc: '침실 정리 미션을 90회 달성하면 얻을 수 있는 정리왕 뱃지예요.',
     icon: require('@/assets/images/chore-home.png'),
+    acquired: false,
   },
 ]
 
@@ -133,7 +136,7 @@ export default function Mission() {
                         iconSize={82}
                       />
                     </TouchableOpacity>
-                    <Text style={styles.badgeTitle}>{b.title}</Text>
+                    <Text style={styles.badgeTitle}>{b.acquired === true ? b.title : '???'}</Text>
                     <Text style={styles.badgeCount}>
                       <Text style={styles.badgeCurrent}>{b.current}회</Text> / {b.target}회
                     </Text>
