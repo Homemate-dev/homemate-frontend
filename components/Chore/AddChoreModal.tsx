@@ -642,10 +642,8 @@ const styles = StyleSheet.create({
 
   calendarPopover: {
     position: 'absolute',
-    left: -13,
-    right: 0,
+    right: -15,
     width: 340,
-    height: 267,
     top: '100%',
     marginTop: 8,
     paddingTop: 4,

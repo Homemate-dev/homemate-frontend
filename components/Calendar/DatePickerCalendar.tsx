@@ -1,6 +1,5 @@
-import { MaterialIcons } from '@expo/vector-icons'
 import { useEffect, useMemo, useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { Calendar, LocaleConfig } from 'react-native-calendars'
 
 import { toFirstDayOfMonth, toYMD } from '@/libs/utils/date'
@@ -141,13 +140,21 @@ export default function DatePickerCalendar({ selectedDate, onSelect, isOpen }: P
           addMonth()
         }}
         onDayPress={(d: DateData) => onSelect?.(d.dateString)}
-        renderArrow={(direction) => (
-          <MaterialIcons
-            name={direction === 'left' ? 'chevron-left' : 'chevron-right'}
-            size={22}
-            color="#57C9D0"
-          />
-        )}
+        renderArrow={(direction) =>
+          direction === 'left' ? (
+            <Image
+              source={require('../../assets/images/arrow/left.png')}
+              style={{ width: 14, height: 14 }}
+              resizeMode="contain"
+            />
+          ) : (
+            <Image
+              source={require('../../assets/images/arrow/right.png')}
+              style={{ width: 14, height: 14 }}
+              resizeMode="contain"
+            />
+          )
+        }
         renderHeader={(date) => {
           const y = date.getFullYear()
           const m = date.getMonth() + 1
@@ -189,6 +196,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingTop: 5,
+    paddingBottom: 20,
   },
   header: {
     flexDirection: 'row',
