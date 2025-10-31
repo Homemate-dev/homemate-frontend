@@ -22,7 +22,6 @@ import {
 
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import Toggle from '@/components/Toggle'
-import { api, setAccessToken } from '@/libs/api/axios'
 import {
   fetchMyPage,
   fetchNotificationTime,
@@ -37,7 +36,6 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 export default function MyPage() {
   const router = useRouter()
-
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -57,12 +55,8 @@ export default function MyPage() {
     'https://classy-group-db3.notion.site/29aaba73bec6807fbb64c4b38eae9f7a?source=copy_link'
 
   useEffect(() => {
-    const issueDevTokenAndFetch = async () => {
+    const fetchUserData = async () => {
       try {
-        const res = await api.post('/auth/dev/token/1')
-        const token = res.data.accessToken
-        setAccessToken(token)
-
         const myData = await fetchMyPage()
         const notifTimeData = await fetchNotificationTime()
 
@@ -83,13 +77,13 @@ export default function MyPage() {
           setMinute(parseInt(minuteStr, 10))
         }
       } catch (error) {
-        console.error('마이페이지 조회 실패:', error)
+        console.error('❌ 마이페이지 조회 실패:', error)
       } finally {
         setLoading(false)
       }
     }
 
-    issueDevTokenAndFetch()
+    fetchUserData()
   }, [])
 
   useEffect(() => {
@@ -118,7 +112,6 @@ export default function MyPage() {
     }
   }
 
-  // 로그아웃 처리
   const handleLogout = async () => {
     try {
       await postLogout()
@@ -126,7 +119,6 @@ export default function MyPage() {
       await AsyncStorage.removeItem('refreshToken')
 
       alert('로그아웃 되었습니다.')
-
       router.replace('/login')
     } catch (error) {
       console.error('로그아웃 실패:', error)
@@ -176,11 +168,11 @@ export default function MyPage() {
           }
           style={styles.profileImage}
         />
-      </View>
-      <View>
-        <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
-      </View>
 
+        <View>
+          <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
+        </View>
+      </View>
       {/* 뱃지 영역 */}
       <View style={styles.badgeSection}>
         <View style={styles.badgeHeader}>
@@ -217,14 +209,7 @@ export default function MyPage() {
 
         {/* 알림 시간 드롭다운 + 확인 버튼 */}
         <View style={styles.timeSetting}>
-          <TouchableOpacity
-            onPress={() => setShowConfirm(true)}
-            activeOpacity={0.7}
-            style={{ alignItems: 'center' }}
-          >
-            <Text style={[styles.settingText, { marginBottom: 8 }]}>알림 시간 설정</Text>
-          </TouchableOpacity>
-
+          <Text style={[styles.settingText, { marginBottom: 8 }]}>알림 시간 설정</Text>
           <TimeDropdown
             ampm={ampm}
             hour={hour}
@@ -241,7 +226,6 @@ export default function MyPage() {
               if (v) setShowConfirm(true)
             }}
           />
-
           {showConfirm && (
             <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
               <Text style={styles.confirmText}>확인</Text>
