@@ -104,7 +104,7 @@ export default function OnboardingScreen() {
     if (activeIndex < slides.length - 1) {
       swiperRef.current?.scrollToIndex({ index: activeIndex + 1, animated: true })
     } else {
-      router.replace('/login')
+      router.replace('/')
     }
   }
 

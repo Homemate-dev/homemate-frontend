@@ -22,7 +22,6 @@ import {
 
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import Toggle from '@/components/Toggle'
-import { api, setAccessToken } from '@/libs/api/axios'
 import {
   fetchMyPage,
   fetchNotificationTime,
@@ -37,7 +36,6 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 export default function MyPage() {
   const router = useRouter()
-
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -57,12 +55,8 @@ export default function MyPage() {
     'https://classy-group-db3.notion.site/29aaba73bec6807fbb64c4b38eae9f7a?source=copy_link'
 
   useEffect(() => {
-    const issueDevTokenAndFetch = async () => {
+    const fetchUserData = async () => {
       try {
-        const res = await api.post('/auth/dev/token/1')
-        const token = res.data.accessToken
-        setAccessToken(token)
-
         const myData = await fetchMyPage()
         const notifTimeData = await fetchNotificationTime()
 
@@ -71,7 +65,7 @@ export default function MyPage() {
         setIsHouseAlarm(myData.choreEnabled)
         setIsNoticeAlarm(myData.noticeEnabled)
 
-        // 알림 시간 세팅 (서버 시:분 → 화면용 오전/오후, 12시간제)
+        // 알림 시간 세팅
         const time = notifTimeData?.notificationTime || myData.notificationTime
         if (time) {
           const [hourStr, minuteStr] = time.split(':')
@@ -83,13 +77,13 @@ export default function MyPage() {
           setMinute(parseInt(minuteStr, 10))
         }
       } catch (error) {
-        console.error('마이페이지 조회 실패:', error)
+        console.error('❌ 마이페이지 조회 실패:', error)
       } finally {
         setLoading(false)
       }
     }
 
-    issueDevTokenAndFetch()
+    fetchUserData()
   }, [])
 
   useEffect(() => {
@@ -121,9 +115,7 @@ export default function MyPage() {
   const handleLogout = async () => {
     try {
       await postLogout()
-      await AsyncStorage.removeItem('accessToken')
-      await AsyncStorage.removeItem('refreshToken')
-
+      await AsyncStorage.multiRemove(['accessToken', 'refreshToken'])
       alert('로그아웃 되었습니다.')
       router.replace('/login')
     } catch (error) {
@@ -157,7 +149,6 @@ export default function MyPage() {
         overflow: 'visible',
       }}
     >
-      {/* 헤더 */}
       <View style={styles.headerWrapper}>
         <Text style={styles.headerTitle}>마이페이지</Text>
         <Ionicons
@@ -178,12 +169,12 @@ export default function MyPage() {
           }
           style={styles.profileImage}
         />
-      </View>
-      <View>
-        <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
+        <View>
+          <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
+        </View>
       </View>
 
-      {/* 뱃지 영역 */}
+      {/* 뱃지 */}
       <View style={styles.badgeSection}>
         <View style={styles.badgeHeader}>
           <Text style={styles.sectionTitle}>나의 뱃지</Text>
@@ -198,7 +189,7 @@ export default function MyPage() {
         </View>
       </View>
 
-      {/* 알림 설정 (드롭다운 포함) */}
+      {/* 알림 설정 */}
       <View style={styles.sectionWithDropdown}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>알림 설정</Text>
@@ -218,14 +209,7 @@ export default function MyPage() {
         <View style={styles.divider} />
 
         <View style={styles.timeSetting}>
-          <TouchableOpacity
-            onPress={() => setShowConfirm(true)}
-            activeOpacity={0.7}
-            style={{ alignItems: 'center' }}
-          >
-            <Text style={[styles.settingText, { marginBottom: 8 }]}>알림 시간 설정</Text>
-          </TouchableOpacity>
-
+          <Text style={[styles.settingText, { marginBottom: 8 }]}>알림 시간 설정</Text>
           <TimeDropdown
             ampm={ampm}
             hour={hour}
@@ -242,7 +226,6 @@ export default function MyPage() {
               if (v) setShowConfirm(true)
             }}
           />
-
           {showConfirm && (
             <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
               <Text style={styles.confirmText}>확인</Text>
@@ -251,7 +234,7 @@ export default function MyPage() {
         </View>
       </View>
 
-      {/* 정책 섹션  */}
+      {/* 정책 + 로그아웃 */}
       <View style={styles.sectionBelow}>
         <TouchableOpacity style={styles.settingRow} onPress={() => Linking.openURL(TERMS_URL)}>
           <Text style={styles.settingText}>이용 약관</Text>
@@ -264,7 +247,6 @@ export default function MyPage() {
         </TouchableOpacity>
       </View>
 
-      {/* 로그아웃 */}
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
         <Text style={styles.logoutText}>로그아웃</Text>
       </TouchableOpacity>
@@ -279,52 +261,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('6%'),
     height: hp('100%'),
   },
-
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: hp('1%'),
-    borderBottomWidth: 1,
-    borderBottomColor: '#E6E7E9',
-    paddingBottom: hp('2%'),
-  },
-  sectionTitle: { fontSize: hp('2.2%'), fontWeight: '700' },
-
-  sectionWithDropdown: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: hp('2%'),
-    paddingHorizontal: wp('5%'),
-    marginTop: hp('2%'),
-    position: 'relative',
-    zIndex: 10,
-    overflow: 'visible',
-    elevation: 4,
-  },
-
-  sectionBelow: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: hp('2%'),
-    paddingHorizontal: wp('5%'),
-    marginTop: hp('2%'),
-    position: 'relative',
-    zIndex: 0, // ✅ 아래
-    overflow: 'visible',
-    elevation: 0,
-  },
-
-  // ===== 헤더 / 프로필 / 뱃지 =====
-  headerWrapper: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: hp('2%'),
-  },
+  headerWrapper: { alignItems: 'center', justifyContent: 'center', marginVertical: hp('2%') },
   headerTitle: { fontSize: hp('2.4%'), fontWeight: '700' },
   headerIcon: { position: 'absolute', right: 0 },
-
   profileCard: {
     backgroundColor: '#57C9D0',
     borderRadius: 12,
@@ -340,16 +279,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#C8EDEE',
   },
   userName: { fontSize: hp('2.4%'), color: '#FFFFFF', fontWeight: '700' },
-
   badgeSection: {
     marginTop: hp('3%'),
     backgroundColor: '#FFFFFF',
     padding: hp('2.5%'),
     borderRadius: 12,
-    position: 'relative',
-    zIndex: 0,
-    overflow: 'visible',
-    elevation: 0,
   },
   badgeHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: hp('1%') },
   badgeCountWrapper: { flexDirection: 'row', alignItems: 'center' },
@@ -357,8 +291,30 @@ const styles = StyleSheet.create({
   badgeTotal: { fontSize: hp('1.8%'), color: '#A1A1A1', marginRight: hp('1%') },
   badgeBarBackground: { height: hp('1%'), backgroundColor: '#E4E4E4', borderRadius: 100 },
   badgeBarFill: { height: '100%', backgroundColor: '#57C9D0', borderRadius: 100 },
-
-  // ===== 설정 공통 =====
+  sectionWithDropdown: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: hp('2%'),
+    paddingHorizontal: wp('5%'),
+    marginTop: hp('2%'),
+    elevation: 4,
+  },
+  sectionBelow: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: hp('2%'),
+    paddingHorizontal: wp('5%'),
+    marginTop: hp('2%'),
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E6E7E9',
+    paddingBottom: hp('2%'),
+  },
+  sectionTitle: { fontSize: hp('2.2%'), fontWeight: '700' },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -367,15 +323,7 @@ const styles = StyleSheet.create({
   },
   settingText: { fontSize: hp('1.8%'), color: '#686F79' },
   divider: { borderBottomWidth: 1, borderBottomColor: '#E6E7E9' },
-
-  timeSetting: {
-    marginTop: hp('1.5%'),
-    alignItems: 'center',
-    position: 'relative',
-    zIndex: 100,
-    overflow: 'visible',
-  },
-
+  timeSetting: { marginTop: hp('1.5%'), alignItems: 'center' },
   confirmBtn: {
     backgroundColor: '#57C9D0',
     borderRadius: 12,
@@ -385,9 +333,7 @@ const styles = StyleSheet.create({
     marginTop: hp('2%'),
   },
   confirmText: { color: '#FFFFFF', fontSize: hp('2%'), fontWeight: '700' },
-
   logoutBtn: { alignItems: 'center', marginTop: hp('3%') },
   logoutText: { color: '#9B9FA6', fontSize: hp('1.8%') },
-
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 })
