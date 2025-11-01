@@ -1,14 +1,31 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import * as Notifications from 'expo-notifications'
 import { Stack } from 'expo-router'
+import { useEffect } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { registerFCMToken } from '@/libs/api/fcm'
 
 const queryClient = new QueryClient()
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+})
+
 function RootNavigator() {
   const { token, user, loading } = useAuth()
+
+  useEffect(() => {
+    registerFCMToken()
+  }, [])
 
   if (loading) {
     return (
