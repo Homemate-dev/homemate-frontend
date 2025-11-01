@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
+    "projectId": "abcd1234-5678-90ef-ghij-klmnopqrstuv",
     "scheme": "homematefrontend",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
