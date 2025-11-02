@@ -92,8 +92,6 @@ export default function AddChoreModal() {
   const [updateOpen, setUpdateOpen] = useState(false)
   const [applyToAfter, setApplyToAfter] = useState<boolean | null>(null)
 
-  const maxLength = 20
-
   const { mutate: createChore, isPending: creating } = useCreateChore()
   const { mutate: updateChore, isPending: updating } = useUpdateChore()
   const { mutate: deleteChore, isPending: deleting } = useDeleteChore()
@@ -295,6 +293,15 @@ export default function AddChoreModal() {
   // 전역 오버레이 없이도 스크롤 잠금은 유지
   const overlayOpen = Boolean(activeDropdown || openCalendar)
 
+  // web에서 input max length 적용
+
+  const MAX_LEN = 20
+
+  const handleChangeText = (text: string) => {
+    const limited = Array.from(text).slice(0, MAX_LEN).join('')
+    setInputValue(limited)
+  }
+
   return (
     <>
       <StatusBar backgroundColor="#F8F8FA" />
@@ -343,15 +350,15 @@ export default function AddChoreModal() {
                   placeholder="집안일을 입력해주세요"
                   placeholderTextColor="#9B9FA6"
                   value={inputValue}
-                  onChangeText={setInputValue}
-                  maxLength={maxLength}
+                  onChangeText={handleChangeText}
+                  maxLength={MAX_LEN}
                   style={[
                     styles.textInput,
                     Platform.OS === 'web' && ({ outlineStyle: 'none' } as any),
                   ]}
                 />
                 <Text style={styles.counterText}>
-                  {inputValue.length}자/{maxLength}자
+                  {inputValue.length}자/{MAX_LEN}자
                 </Text>
               </View>
 
