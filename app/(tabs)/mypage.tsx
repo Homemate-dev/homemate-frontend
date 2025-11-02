@@ -21,6 +21,7 @@ import {
 } from 'react-native-responsive-screen'
 
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
+import NotificationBell from '@/components/notification/NotificationBell'
 import Toggle from '@/components/Toggle'
 import {
   fetchMyPage,
@@ -108,6 +109,7 @@ export default function MyPage() {
       setShowConfirm(false)
       setActiveDropdown(null)
     } catch (error) {
+      console.error('알림 시간 변경 실패:', error)
       alert('알림 시간 변경 중 오류가 발생했습니다.')
     }
   }
@@ -117,7 +119,7 @@ export default function MyPage() {
       await postLogout()
       await AsyncStorage.multiRemove(['accessToken', 'refreshToken'])
       alert('로그아웃 되었습니다.')
-      router.replace('/login')
+      router.replace('/(auth)')
     } catch (error) {
       console.error('로그아웃 실패:', error)
       alert('로그아웃 중 오류가 발생했습니다.')
@@ -151,12 +153,9 @@ export default function MyPage() {
     >
       <View style={styles.headerWrapper}>
         <Text style={styles.headerTitle}>마이페이지</Text>
-        <Ionicons
-          name="notifications-outline"
-          size={24}
-          color="#B4B7BC"
-          style={styles.headerIcon}
-        />
+        <View style={styles.notificationBell}>
+          <NotificationBell />
+        </View>
       </View>
 
       {/* 프로필 카드 */}
@@ -261,8 +260,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('6%'),
     height: hp('100%'),
   },
-  headerWrapper: { alignItems: 'center', justifyContent: 'center', marginVertical: hp('2%') },
+  headerWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: hp('2%'),
+    position: 'relative',
+    flexDirection: 'row',
+  },
   headerTitle: { fontSize: hp('2.4%'), fontWeight: '700' },
+  notificationBell: { position: 'absolute', right: 0 },
+
   headerIcon: { position: 'absolute', right: 0 },
   profileCard: {
     backgroundColor: '#57C9D0',

@@ -14,6 +14,7 @@ import {
 
 import Checkbox from '@/components/Checkbox'
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
+import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import { useAuth } from '@/contexts/AuthContext'
@@ -132,13 +133,7 @@ export default function HomeScreen() {
             style={{ width: 125, height: 24 }}
             resizeMode="contain"
           />
-          <TouchableOpacity onPress={() => router.push('/notifications')}>
-            <Image
-              source={require('../../assets/images/notification.png')}
-              style={{ width: 24, height: 24 }}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
+          <NotificationBell />
         </View>
 
         <View style={styles.contentWrap}>
