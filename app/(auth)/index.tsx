@@ -10,6 +10,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  type ImageStyle,
+  type TextStyle,
+  type ViewStyle,
 } from 'react-native'
 import {
   heightPercentageToDP as hp,
@@ -23,15 +26,21 @@ export default function Login() {
   const router = useRouter()
   const { login } = useAuth()
 
-  const KAKAO_REST_API_KEY = '767c656f116d3d699c2b979f9c77f0a6'
-  const KAKAO_REDIRECT_URI = Platform.OS === 'web' ? 'http://localhost:3000' : 'homematefrontend://'
+  const KAKAO_REST_API_KEY = process.env.EXPO_PUBLIC_KAKAO_REST_API_KEY!
+  const KAKAO_WEB_REDIRECT_URI = process.env.EXPO_PUBLIC_KAKAO_REDIRECT_URI!
+  const KAKAO_NATIVE_REDIRECT_URI = 'homematefrontend://'
+
+  const KAKAO_REDIRECT_URI =
+    Platform.OS === 'web' ? KAKAO_WEB_REDIRECT_URI : KAKAO_NATIVE_REDIRECT_URI
+
   const codeVerifier = 'buxcAKiNFcQ8Kslcm5NrKq6pm8JgFULeujc2usyw0g4'
   const codeChallenge = 'jrHilj7qFqhxKHKKM8AoQsqociZfnv-QJQjXrSyT0jU'
 
   useEffect(() => {
     if (Platform.OS === 'web') {
       const parsed = Linking.parse(window.location.href)
-      const code = parsed.queryParams?.code
+      const raw = parsed.queryParams?.code
+      const code = Array.isArray(raw) ? raw[0] : raw
       if (code) fetchKakaoToken(code)
     }
   }, [])
@@ -70,7 +79,13 @@ export default function Login() {
   const handleKakaoLogin = async () => {
     setLoading(true)
     try {
-      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&code_challenge=${codeChallenge}&code_challenge_method=S256`
+      const kakaoAuthUrl =
+        `https://kauth.kakao.com/oauth/authorize` +
+        `?client_id=${KAKAO_REST_API_KEY}` +
+        `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}` +
+        `&response_type=code` +
+        `&code_challenge=${codeChallenge}` +
+        `&code_challenge_method=S256`
 
       if (Platform.OS === 'web') {
         window.location.href = kakaoAuthUrl
@@ -80,7 +95,8 @@ export default function Login() {
       const result = await WebBrowser.openAuthSessionAsync(kakaoAuthUrl, KAKAO_REDIRECT_URI)
       if (result.type === 'success' && result.url) {
         const parsed = Linking.parse(result.url)
-        const code = parsed.queryParams?.code
+        const raw = parsed.queryParams?.code
+        const code = Array.isArray(raw) ? raw[0] : raw
         if (code) await fetchKakaoToken(code)
       }
     } catch (error) {
@@ -118,13 +134,26 @@ export default function Login() {
   )
 }
 
-const styles = StyleSheet.create({
+type Styles = {
+  container: ViewStyle
+  logo: TextStyle
+  subtitle: TextStyle
+  image: ImageStyle
+  kakaoButton: ViewStyle
+  kakaoIcon: ImageStyle
+  kakaoText: TextStyle
+  loadingIndicator: ViewStyle
+  footerText: TextStyle
+  link: TextStyle
+}
+
+const styles = StyleSheet.create<Styles>({
   container: {
     backgroundColor: '#57C9D0',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: wp('8%'),
-    height: '100vh',
+    height: hp('100%'),
   },
   logo: { fontSize: hp('4%'), color: '#fff', fontWeight: '700', marginBottom: hp('2%') },
   subtitle: { fontSize: hp('2%'), color: '#fff', marginBottom: hp('4%') },
