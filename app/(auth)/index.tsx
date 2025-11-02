@@ -29,10 +29,15 @@ export default function Login() {
   const KAKAO_REST_API_KEY = process.env.EXPO_PUBLIC_KAKAO_REST_API_KEY!
   const KAKAO_WEB_REDIRECT_URI = process.env.EXPO_PUBLIC_KAKAO_REDIRECT_URI!
   const KAKAO_NATIVE_REDIRECT_URI = 'homematefrontend://'
-
   const KAKAO_REDIRECT_URI =
     Platform.OS === 'web' ? KAKAO_WEB_REDIRECT_URI : KAKAO_NATIVE_REDIRECT_URI
 
+  // ======== 프리픽스 분리: QA(/test) vs 운영(/api) ========
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL! // CHANGED
+  // 예) Preview: https://homemate.io.kr/test
+  //     Prod   : https://homemate.io.kr/api
+
+  // (PKCE 사용 시 유지)
   const codeVerifier = 'buxcAKiNFcQ8Kslcm5NrKq6pm8JgFULeujc2usyw0g4'
   const codeChallenge = 'jrHilj7qFqhxKHKKM8AoQsqociZfnv-QJQjXrSyT0jU'
 
@@ -50,7 +55,8 @@ export default function Login() {
 
     try {
       setLoading(true)
-      const response = await fetch(`https://homemate.io.kr/api/auth/login/kakao`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login/kakao`, {
+        // CHANGED
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
