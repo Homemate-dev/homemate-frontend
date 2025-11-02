@@ -1,34 +1,29 @@
 import { Ionicons } from '@expo/vector-icons'
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
-import { api, setAccessToken } from '@/libs/api/axios'
-import { fetchNotifications, patchReadNotification } from '@/libs/api/notification'
+import { useChoreNotifications } from '@/libs/hooks/notification/useChoreNotifications'
+import { usePatchChoreReadNotification } from '@/libs/hooks/notification/useChoreReadNotification'
+import { useNoticeNotifications } from '@/libs/hooks/notification/useNoticeNotifications'
 
-type Notification = {
+// 화면 렌더 전용 타입
+type UiNotification = {
   id: number
   title: string
   message: string
   time: string
-  read?: boolean
+  isRead: boolean
 }
 
 export default function Notifications() {
   const [activeTab, setActiveTab] = useState<'chore' | 'notice'>('chore')
-  const [choreNotifications, setChoreNotifications] = useState<Notification[]>([])
-  const [noticeNotifications, setNoticeNotifications] = useState<Notification[]>([])
-  const [loading, setLoading] = useState(false)
 
-  const notifications = activeTab === 'chore' ? choreNotifications : noticeNotifications
-  const setNotifications = activeTab === 'chore' ? setChoreNotifications : setNoticeNotifications
-  const visibleNotifications = notifications.slice(0, 30)
-  const unreadCount = notifications.filter((n) => !n.read).length
-  const hasData = visibleNotifications.length > 0
-
-  // 시간 포맷
-  const formatRelativeTime = (dateString: string) => {
+  // 상대 시간 포맷
+  const formatRelativeTime = (dateString?: string) => {
+    if (!dateString) return ''
+    // 혹시 YYYY-MM-DD:HH:mm:ssZ 같이 들어오면 T로 교정
+    const date = new Date(dateString.replace(/^(\d{4}-\d{2}-\d{2}):/, '$1T'))
     const now = new Date()
-    const date = new Date(dateString)
     const diff = (now.getTime() - date.getTime()) / 1000
     if (diff < 60) return '방금 전'
     if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
@@ -38,53 +33,45 @@ export default function Notifications() {
     return date.toLocaleDateString('ko-KR')
   }
 
-  // 읽음 처리
-  const handlePressNotification = async (id: number) => {
-    try {
-      await patchReadNotification(activeTab, id)
-      setNotifications((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, read: true } : item))
-      )
-    } catch (error) {
-      console.error('알림 읽음 처리 실패:', error)
-    }
+  // 탭별 목록 훅 (활성 탭 기준으로 isLoading만 사용)
+  const { data: choreData = [], isLoading: isChoreLoading } = useChoreNotifications()
+
+  const { data: noticeData = [], isLoading: isNoticeLoading } = useNoticeNotifications()
+
+  const raw = activeTab === 'chore' ? choreData : noticeData
+  const isLoading = activeTab === 'chore' ? isChoreLoading : isNoticeLoading
+
+  // API → UI 매핑
+  const notifications: UiNotification[] = useMemo(
+    () =>
+      raw.map((item: any) => ({
+        id: item.id,
+        title: item.title || '알림',
+        message: item.message || '',
+        time: formatRelativeTime(item.scheduledAt ?? item.createdAt),
+        isRead: !!item.isRead,
+      })),
+    [raw]
+  )
+
+  const visibleNotifications = notifications.slice(0, 30)
+  const unreadCount = notifications.filter((n) => !n.isRead).length
+  const hasData = visibleNotifications.length > 0
+
+  // 읽음 처리 훅
+  const patchChoreRead = usePatchChoreReadNotification()
+  const patchNoticeRead = usePatchChoreReadNotification()
+
+  const handlePressNotification = (id: number) => {
+    if (activeTab === 'chore') patchChoreRead.mutate(id)
+    else patchNoticeRead.mutate(id)
   }
 
-  // 알림 목록 조회
-  useEffect(() => {
-    const loadNotifications = async () => {
-      try {
-        setLoading(true)
-        const res = await api.post('/auth/dev/token/1')
-        const token = res.data.accessToken
-        await setAccessToken(token)
-
-        const data = await fetchNotifications(activeTab)
-        const formatted = data.map((item: any) => ({
-          id: item.id,
-          title: item.title || '알림',
-          message: item.message || '',
-          time: formatRelativeTime(item.scheduledAt),
-          read: item.isRead ?? false,
-        }))
-
-        if (activeTab === 'chore') setChoreNotifications(formatted)
-        else setNoticeNotifications(formatted)
-      } catch (error: any) {
-        console.error('알림 조회 실패:', error.response?.data || error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadNotifications()
-  }, [activeTab])
-
-  const renderItem = ({ item }: { item: Notification }) => (
+  const renderItem = ({ item }: { item: UiNotification }) => (
     <TouchableOpacity
       onPress={() => handlePressNotification(item.id)}
       activeOpacity={0.8}
-      style={[styles.card, item.read && styles.cardRead]}
+      style={[styles.card, item.isRead && styles.cardRead]}
     >
       <Text style={styles.cardTitle}>{item.title}</Text>
       <Text style={styles.cardMessage} numberOfLines={2}>
@@ -133,7 +120,7 @@ export default function Notifications() {
 
       {/* 본문 */}
       <View style={styles.contentArea}>
-        {loading ? (
+        {isLoading ? (
           <View style={styles.center}>
             <ActivityIndicator size="large" color="#57C9D0" />
           </View>
@@ -146,11 +133,8 @@ export default function Notifications() {
               data={visibleNotifications}
               keyExtractor={(item) => item.id.toString()}
               renderItem={renderItem}
-              showsVerticalScrollIndicator={true}
-              contentContainerStyle={{
-                paddingBottom: 30,
-                overflow: 'visible',
-              }}
+              showsVerticalScrollIndicator
+              contentContainerStyle={{ paddingBottom: 30, overflow: 'visible' }}
             />
           </>
         ) : (
@@ -165,27 +149,15 @@ export default function Notifications() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingTop: 24,
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF', paddingHorizontal: 20, paddingTop: 24 },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
   },
-  header: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A1A',
-  },
-  tabRow: {
-    flexDirection: 'row',
-    marginBottom: 16,
-  },
+  header: { fontSize: 18, fontWeight: '700', color: '#1A1A1A' },
+  tabRow: { flexDirection: 'row', marginBottom: 16 },
   tabButton: {
     flex: 1,
     paddingVertical: 10,
@@ -195,36 +167,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tabActive: {
-    backgroundColor: '#E2F9FA',
-    borderColor: '#57D0D7',
-  },
-  tabInactive: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E5E5',
-  },
-  tabText: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  tabTextActive: {
-    color: '#00ADB5',
-  },
-  tabTextInactive: {
-    color: '#999999',
-  },
-  contentArea: {
-    flex: 1,
-  },
-  unreadText: {
-    fontSize: 13,
-    color: '#666666',
-    marginBottom: 10,
-  },
-  unreadNumber: {
-    fontWeight: '600',
-    color: '#00ADB5',
-  },
+  tabActive: { backgroundColor: '#E2F9FA', borderColor: '#57D0D7' },
+  tabInactive: { backgroundColor: '#FFFFFF', borderColor: '#E5E5E5' },
+  tabText: { fontSize: 15, fontWeight: '600' },
+  tabTextActive: { color: '#00ADB5' },
+  tabTextInactive: { color: '#999999' },
+  contentArea: { flex: 1 },
+  unreadText: { fontSize: 13, color: '#666666', marginBottom: 10 },
+  unreadNumber: { fontWeight: '600', color: '#00ADB5' },
   card: {
     backgroundColor: '#F8FEFF',
     borderWidth: 1,
@@ -234,35 +184,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 10,
   },
-  cardRead: {
-    backgroundColor: '#F3F3F3',
-    borderColor: '#E0E0E0',
-  },
-  cardTitle: {
-    fontWeight: '700',
-    fontSize: 15,
-    color: '#1A1A1A',
-    marginBottom: 4,
-  },
-  cardMessage: {
-    fontSize: 14,
-    color: '#555555',
-  },
-  cardTime: {
-    fontSize: 12,
-    color: '#999999',
-    textAlign: 'right',
-    marginTop: 6,
-  },
-  emptyWrapper: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#AAAAAA',
-    fontSize: 15,
-    marginTop: 8,
-  },
+  cardRead: { backgroundColor: '#F3F3F3', borderColor: '#E0E0E0' },
+  cardTitle: { fontWeight: '700', fontSize: 15, color: '#1A1A1A', marginBottom: 4 },
+  cardMessage: { fontSize: 14, color: '#555555' },
+  cardTime: { fontSize: 12, color: '#999999', textAlign: 'right', marginTop: 6 },
+  emptyWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyText: { color: '#AAAAAA', fontSize: 15, marginTop: 8 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 })
