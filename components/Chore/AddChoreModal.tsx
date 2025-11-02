@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -98,7 +99,7 @@ export default function AddChoreModal() {
   const { mutate: createChore, isPending: creating } = useCreateChore()
   const { mutate: updateChore, isPending: updating } = useUpdateChore()
   const { mutate: deleteChore, isPending: deleting } = useDeleteChore()
-  const { data: randomChores, isLoading } = useRandomChores()
+  const { data: randomChores, isLoading, isRefetching, refetch } = useRandomChores()
 
   const instanceKey = isEdit && instanceId ? instanceId : 0
   const { data: detail, isLoading: loadingDetail } = useChoreDetail(instanceKey)
@@ -389,6 +390,20 @@ export default function AddChoreModal() {
                       <Text style={styles.chipText}>{item.titleKo}</Text>
                     </Pressable>
                   ))}
+                  <Pressable
+                    style={styles.resetBtn}
+                    onPress={() => refetch()}
+                    disabled={isRefetching || isLoading}
+                  >
+                    <View style={styles.resetContent}>
+                      <Image
+                        source={require('../../assets/images/icon/refresh.png')}
+                        style={{ width: 16, height: 16 }}
+                        resizeMode="contain"
+                      />
+                      <Text style={styles.resetBtnText}>새로고침하기</Text>
+                    </View>
+                  </Pressable>
                 </ScrollView>
               )}
 
@@ -633,6 +648,19 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   chipText: { color: '#46A1A6', fontSize: 12, fontWeight: 500 },
+
+  resetBtn: {
+    backgroundColor: '#79D4D9',
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginLeft: 8,
+    marginBottom: 12,
+  },
+  resetContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  resetBtnText: { fontSize: 12, fontWeight: 600, color: 'white', paddingLeft: 10 },
 
   card: {
     backgroundColor: '#FFFFFF',
