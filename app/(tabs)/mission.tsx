@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Image,
   Platform,
+  Pressable,
   StatusBar,
   StyleSheet,
   Text,
@@ -110,7 +111,7 @@ export default function Mission() {
                 ))}
             </View>
 
-            <View style={styles.tipRow}>
+            <Pressable style={styles.tipRow} onPress={() => router.push('/recommend')}>
               <Text style={styles.star}>⭐</Text>
               <View style={styles.tipInner}>
                 <Text style={styles.tipText}>추천 카테고리에서 추가해보세요!</Text>
@@ -120,7 +121,7 @@ export default function Mission() {
                   resizeMode="contain"
                 />
               </View>
-            </View>
+            </Pressable>
           </View>
 
           <View>
