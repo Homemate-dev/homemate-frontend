@@ -33,6 +33,9 @@ import { toHHmm, toHHmmParts } from '@/libs/utils/time'
 import DeleteModal from '../DeleteModal'
 import UpdateModal from '../UpdateModal'
 
+// 이모지(특수문자) 불가
+const FORBIDDEN_CHAR_RE = /[^\uAC00-\uD7A3a-zA-Z0-9\s]/
+
 export default function AddChoreModal() {
   const {
     mode: modeParam,
@@ -184,7 +187,10 @@ export default function AddChoreModal() {
     return false
   }, [isEdit, initialValue, currentValue])
 
+  const hasForbiddenChar = useMemo(() => FORBIDDEN_CHAR_RE.test(inputValue), [inputValue])
+
   const baseValid =
+    !hasForbiddenChar &&
     Boolean(inputValue.trim()) &&
     Boolean(space) &&
     Boolean(repeat) &&
@@ -361,6 +367,8 @@ export default function AddChoreModal() {
                   {inputValue.length}자/{MAX_LEN}자
                 </Text>
               </View>
+
+              {hasForbiddenChar && <Text style={styles.warnText}>*특수문자를 제외해주세요</Text>}
 
               {isLoading ? (
                 <View style={styles.loadingRow}>
@@ -604,6 +612,8 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   counterText: { fontSize: 12, color: '#B4B7BC' },
+
+  warnText: { fontSize: 12, color: '#FF4838', marginBottom: 12, paddingLeft: 12 },
 
   loadingRow: { paddingVertical: 12, alignItems: 'center' },
 
