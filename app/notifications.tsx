@@ -94,29 +94,19 @@ export default function Notifications() {
       {/* 탭 버튼 */}
       <View style={styles.tabRow}>
         <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'chore' ? styles.tabActive : styles.tabInactive]}
+          style={activeTab === 'chore' ? styles.tabActive : styles.tabChoreButton}
           onPress={() => setActiveTab('chore')}
         >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'chore' ? styles.tabTextActive : styles.tabTextInactive,
-            ]}
-          >
+          <Text style={activeTab === 'chore' ? styles.tabTextActive : styles.tabChoreText}>
             집안일
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'notice' ? styles.tabActive : styles.tabInactive]}
+          style={activeTab === 'notice' ? styles.tabActive : styles.tabNoticeButton}
           onPress={() => setActiveTab('notice')}
         >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'notice' ? styles.tabTextActive : styles.tabTextInactive,
-            ]}
-          >
+          <Text style={activeTab === 'notice' ? styles.tabTextActive : styles.tabNoticeText}>
             공지
           </Text>
         </TouchableOpacity>
@@ -143,7 +133,7 @@ export default function Notifications() {
           </>
         ) : (
           <View style={styles.emptyWrapper}>
-            <Ionicons name="alert-circle-outline" size={50} color="#CCCCCC" />
+            <Ionicons name="alert-circle-outline" size={72} color="#CCCCCC" />
             <Text style={styles.emptyText}>아직 알림이 없어요</Text>
           </View>
         )}
@@ -158,43 +148,70 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
     position: 'relative',
   },
   header: { fontSize: 18, fontWeight: '700', color: '#1A1A1A' },
   headerBack: { position: 'absolute', left: 0 },
   tabRow: { flexDirection: 'row', marginBottom: 16 },
-  tabButton: {
-    flex: 1,
-    paddingVertical: 10,
+  tabChoreButton: {
+    paddingVertical: 5,
+    paddingHorizontal: 16,
     borderRadius: 8,
-    borderWidth: 1.2,
+    borderWidth: 0.5,
     marginHorizontal: 4,
     alignItems: 'center',
     justifyContent: 'center',
+    height: 32,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E6E7E9',
   },
-  tabActive: { backgroundColor: '#E2F9FA', borderColor: '#57D0D7' },
-  tabInactive: { backgroundColor: '#FFFFFF', borderColor: '#E5E5E5' },
-  tabText: { fontSize: 15, fontWeight: '600' },
-  tabTextActive: { color: '#00ADB5' },
-  tabTextInactive: { color: '#999999' },
+  tabNoticeButton: {
+    paddingVertical: 5,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 0.5,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E6E7E9',
+    height: 32,
+  },
+  tabActive: {
+    backgroundColor: '#79D4D9',
+    borderWidth: 0,
+    paddingVertical: 5,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 32,
+  },
+  tabChoreText: { fontSize: 14, color: '#9B9FA6' },
+  tabNoticeText: { fontSize: 14, color: '#9B9FA6' },
+  tabTextActive: { color: '#FFFFFF' },
+
   contentArea: { flex: 1 },
-  unreadText: { fontSize: 13, color: '#666666', marginBottom: 10 },
+  unreadText: { fontSize: 14, color: '#686F79', marginBottom: 8 },
   unreadNumber: { fontWeight: '600', color: '#00ADB5' },
+
   card: {
-    backgroundColor: '#F8FEFF',
+    backgroundColor: '#F5FCFC',
     borderWidth: 1,
     borderColor: '#BCEAEC',
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  cardRead: { backgroundColor: '#F3F3F3', borderColor: '#E0E0E0' },
-  cardTitle: { fontWeight: '700', fontSize: 15, color: '#1A1A1A', marginBottom: 4 },
-  cardMessage: { fontSize: 14, color: '#555555' },
-  cardTime: { fontSize: 12, color: '#999999', textAlign: 'right', marginTop: 6 },
+  cardRead: { backgroundColor: '#FFFFFF' },
+
+  cardTitle: { fontWeight: '600', fontSize: 14, color: '#1D2736', marginBottom: 4 },
+  cardMessage: { fontSize: 14, color: '#686F79' },
+  cardTime: { fontSize: 12, color: '#9B9FA6', textAlign: 'right', marginTop: 6 },
   emptyWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyText: { color: '#AAAAAA', fontSize: 15, marginTop: 8 },
+  emptyText: { color: '#B4B7BC', fontSize: 16, marginTop: 8, fontWeight: 600 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 })
