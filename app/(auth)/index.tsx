@@ -10,14 +10,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-  type ImageStyle,
-  type TextStyle,
-  type ViewStyle,
 } from 'react-native'
-import {
-  heightPercentageToDP as hp,
-  widthPercentageToDP as wp,
-} from 'react-native-responsive-screen'
+import { heightPercentageToDP as hp } from 'react-native-responsive-screen'
 
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -110,7 +104,11 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.logo, { fontFamily: 'PoetsenOne_400Regular' }]}>HOMEMATE</Text>
+      <Image
+        source={require('../../assets/images/logo/logo-white.png')}
+        style={{ width: 208, height: 40, marginBottom: 24 }}
+        resizeMode="contain"
+      />
       <Text style={styles.subtitle}>주기적인 청소생활 시작</Text>
 
       <Image
@@ -136,48 +134,41 @@ export default function Login() {
   )
 }
 
-type Styles = {
-  container: ViewStyle
-  logo: TextStyle
-  subtitle: TextStyle
-  image: ImageStyle
-  kakaoButton: ViewStyle
-  kakaoIcon: ImageStyle
-  kakaoText: TextStyle
-  loadingIndicator: ViewStyle
-  footerText: TextStyle
-  link: TextStyle
-}
-
-const styles = StyleSheet.create<Styles>({
+const styles = StyleSheet.create({
   container: {
     backgroundColor: '#57C9D0',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: wp('8%'),
-    height: hp('100%'),
+    paddingHorizontal: 20,
+    height: '100%',
   },
-  logo: { fontSize: hp('4%'), color: '#fff', fontWeight: '700', marginBottom: hp('2%') },
-  subtitle: { fontSize: hp('2%'), color: '#fff', marginBottom: hp('4%') },
-  image: { width: wp('65%'), height: hp('40%'), marginBottom: hp('6%') },
+
+  subtitle: { fontFamily: 'SeoulNamsanEB', fontSize: 20, color: '#fff', marginBottom: 48 },
+  image: { width: 200, height: 300, marginBottom: 48 },
   kakaoButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#79D4D9',
     borderRadius: 100,
-    paddingVertical: hp('1.8%'),
-    width: wp('90%'),
+    paddingVertical: 12,
+    width: '100%',
     justifyContent: 'center',
+    marginBottom: 44,
   },
-  kakaoIcon: { width: 24, height: 24, marginRight: 8 },
-  kakaoText: { fontSize: hp('2%'), color: '#FFFFFF', fontWeight: '600' },
+  kakaoIcon: { width: 32, height: 32, marginRight: 8 },
+  kakaoText: {
+    fontFamily: 'PretendardSemiBold',
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
   loadingIndicator: { marginTop: hp('2%') },
   footerText: {
-    marginTop: hp('3%'),
-    fontSize: hp('1.4%'),
+    fontFamily: 'PretendardRegular',
+    fontSize: 12,
     color: '#FFFFFF',
     textAlign: 'center',
-    lineHeight: hp('2.5%'),
+    lineHeight: 20,
   },
   link: { textDecorationLine: 'underline', color: '#fff' },
 })
