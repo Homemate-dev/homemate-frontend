@@ -32,12 +32,8 @@ export default function Login() {
   const KAKAO_REDIRECT_URI =
     Platform.OS === 'web' ? KAKAO_WEB_REDIRECT_URI : KAKAO_NATIVE_REDIRECT_URI
 
-  // ======== 프리픽스 분리: QA(/test) vs 운영(/api) ========
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL! // CHANGED
-  // 예) Preview: https://homemate.io.kr/test
-  //     Prod   : https://homemate.io.kr/api
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL!
 
-  // (PKCE 사용 시 유지)
   const codeVerifier = 'buxcAKiNFcQ8Kslcm5NrKq6pm8JgFULeujc2usyw0g4'
   const codeChallenge = 'jrHilj7qFqhxKHKKM8AoQsqociZfnv-QJQjXrSyT0jU'
 
