@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     marginBottom: 26,
   },
 
-  slideWrapper: { flex: 1, width: '100%', marginBottom: 0 },
+  slideWrapper: { flex: 1, width: '100%', marginBottom: 16 },
 
   slide: { width: SCREEN_WIDTH, alignItems: 'center', justifyContent: 'flex-start' },
   slideInner: { width: '100%', paddingHorizontal: 20, alignItems: 'center' },
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   dotsRow: {
     height: 20,
     marginTop: 8,
-    marginBottom: 10,
+    marginBottom: 26,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
