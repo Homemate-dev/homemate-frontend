@@ -59,7 +59,7 @@ export const RECOMMEND_ENDPOINTS = {
   OVERVIEW: '/reco/overview', // GET (query: ?limitTrending=number)
 
   /** 카테고리 하위 집안일 목록 조회 */
-  CATEGORY_CHORES: (categoryId: number) => `/recommend/categories/${categoryId}/chores`, // GET
+  CATEGORY_CHORES: (category: string) => `/recommend/categories/${category}/chores`, // GET
 
   /** 선택한 집안일 등록 (카테고리 기준) */
   REGISTER_CATEGORY: (categoryId: number) => `/recommend/categories/${categoryId}/register`, // POST
