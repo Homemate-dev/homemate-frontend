@@ -1,4 +1,5 @@
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { router } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -84,6 +85,9 @@ export default function Notifications() {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
+          <MaterialIcons name="chevron-left" size={28} color="#686F79" />
+        </TouchableOpacity>
         <Text style={styles.header}>알림</Text>
       </View>
 
@@ -155,8 +159,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
+    position: 'relative',
   },
   header: { fontSize: 18, fontWeight: '700', color: '#1A1A1A' },
+  headerBack: { position: 'absolute', left: 0 },
   tabRow: { flexDirection: 'row', marginBottom: 16 },
   tabButton: {
     flex: 1,
