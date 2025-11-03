@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -32,6 +33,9 @@ import { toHHmm, toHHmmParts } from '@/libs/utils/time'
 
 import DeleteModal from '../DeleteModal'
 import UpdateModal from '../UpdateModal'
+
+// 이모지(특수문자) 불가
+const FORBIDDEN_CHAR_RE = /[^\uAC00-\uD7A3a-zA-Z0-9\s]/
 
 export default function AddChoreModal() {
   const {
@@ -92,12 +96,10 @@ export default function AddChoreModal() {
   const [updateOpen, setUpdateOpen] = useState(false)
   const [applyToAfter, setApplyToAfter] = useState<boolean | null>(null)
 
-  const maxLength = 20
-
   const { mutate: createChore, isPending: creating } = useCreateChore()
   const { mutate: updateChore, isPending: updating } = useUpdateChore()
   const { mutate: deleteChore, isPending: deleting } = useDeleteChore()
-  const { data: randomChores, isLoading } = useRandomChores()
+  const { data: randomChores, isLoading, isRefetching, refetch } = useRandomChores()
 
   const instanceKey = isEdit && instanceId ? instanceId : 0
   const { data: detail, isLoading: loadingDetail } = useChoreDetail(instanceKey)
@@ -186,7 +188,10 @@ export default function AddChoreModal() {
     return false
   }, [isEdit, initialValue, currentValue])
 
+  const hasForbiddenChar = useMemo(() => FORBIDDEN_CHAR_RE.test(inputValue), [inputValue])
+
   const baseValid =
+    !hasForbiddenChar &&
     Boolean(inputValue.trim()) &&
     Boolean(space) &&
     Boolean(repeat) &&
@@ -295,6 +300,15 @@ export default function AddChoreModal() {
   // 전역 오버레이 없이도 스크롤 잠금은 유지
   const overlayOpen = Boolean(activeDropdown || openCalendar)
 
+  // web에서 input max length 적용
+
+  const MAX_LEN = 20
+
+  const handleChangeText = (text: string) => {
+    const limited = Array.from(text).slice(0, MAX_LEN).join('')
+    setInputValue(limited)
+  }
+
   return (
     <>
       <StatusBar backgroundColor="#F8F8FA" />
@@ -343,17 +357,19 @@ export default function AddChoreModal() {
                   placeholder="집안일을 입력해주세요"
                   placeholderTextColor="#9B9FA6"
                   value={inputValue}
-                  onChangeText={setInputValue}
-                  maxLength={maxLength}
+                  onChangeText={handleChangeText}
+                  maxLength={MAX_LEN}
                   style={[
                     styles.textInput,
                     Platform.OS === 'web' && ({ outlineStyle: 'none' } as any),
                   ]}
                 />
                 <Text style={styles.counterText}>
-                  {inputValue.length}자/{maxLength}자
+                  {inputValue.length}자/{MAX_LEN}자
                 </Text>
               </View>
+
+              {hasForbiddenChar && <Text style={styles.warnText}>*특수문자를 제외해주세요</Text>}
 
               {isLoading ? (
                 <View style={styles.loadingRow}>
@@ -374,6 +390,20 @@ export default function AddChoreModal() {
                       <Text style={styles.chipText}>{item.titleKo}</Text>
                     </Pressable>
                   ))}
+                  <Pressable
+                    style={styles.resetBtn}
+                    onPress={() => refetch()}
+                    disabled={isRefetching || isLoading}
+                  >
+                    <View style={styles.resetContent}>
+                      <Image
+                        source={require('../../assets/images/icon/refresh.png')}
+                        style={{ width: 16, height: 16 }}
+                        resizeMode="contain"
+                      />
+                      <Text style={styles.resetBtnText}>새로고침하기</Text>
+                    </View>
+                  </Pressable>
                 </ScrollView>
               )}
 
@@ -598,6 +628,8 @@ const styles = StyleSheet.create({
   },
   counterText: { fontSize: 12, color: '#B4B7BC' },
 
+  warnText: { fontSize: 12, color: '#FF4838', marginBottom: 12, paddingLeft: 12 },
+
   loadingRow: { paddingVertical: 12, alignItems: 'center' },
 
   chipsRow: {
@@ -616,6 +648,19 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   chipText: { color: '#46A1A6', fontSize: 12, fontWeight: 500 },
+
+  resetBtn: {
+    backgroundColor: '#79D4D9',
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginLeft: 8,
+    marginBottom: 12,
+  },
+  resetContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  resetBtnText: { fontSize: 12, fontWeight: 600, color: 'white', paddingLeft: 10 },
 
   card: {
     backgroundColor: '#FFFFFF',
