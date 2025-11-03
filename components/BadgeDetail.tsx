@@ -31,7 +31,7 @@ export default function BadgeDetail({ badge, onClose }: Props) {
       <Pressable style={styles.backdrop} onPress={onClose} />
 
       {/* 중앙 카드 */}
-      <View style={styles.centerWrapper}>
+      <View style={styles.centerWrapper} pointerEvents="box-none">
         <View style={styles.card}>
           <Text style={styles.title}>{badge.acquired === true ? badge.title : '???'}</Text>
           <Text style={styles.desc}>{badge.desc}</Text>

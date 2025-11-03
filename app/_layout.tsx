@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useFonts } from 'expo-font'
 import * as Notifications from 'expo-notifications'
 import { Stack } from 'expo-router'
 import { useEffect } from 'react'
@@ -23,11 +24,20 @@ Notifications.setNotificationHandler({
 function RootNavigator() {
   const { token, user, loading } = useAuth()
 
+  // 폰트 로드
+  const [loaded] = useFonts({
+    SeoulNamsanEB: require('../assets/fonts/SeoulNamsanEB.ttf'),
+    PretendardRegular: require('../assets/fonts/prestandard/Pretendard-Regular.ttf'),
+    PretendardMedium: require('../assets/fonts/prestandard/Pretendard-Medium.ttf'),
+    PretendardBold: require('../assets/fonts/prestandard/Pretendard-Bold.ttf'),
+    PretendardSemiBold: require('../assets/fonts/prestandard/Pretendard-SemiBold.ttf'),
+  })
+
   useEffect(() => {
     registerFCMToken()
   }, [])
 
-  if (loading) {
+  if (loading || !loaded) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#57C9D0" />

@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Image,
   Platform,
+  Pressable,
   StatusBar,
   StyleSheet,
   Text,
@@ -13,6 +14,7 @@ import {
 
 import BadgeCard from '@/components/Badge/BadgeCard'
 import BadgeDetail from '@/components/BadgeDetail'
+import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { useMonthlyMissions } from '@/libs/hooks/mission/useMonthlyMissions'
 import { inferUnitFromTitle } from '@/libs/utils/mission'
@@ -62,6 +64,9 @@ export default function Mission() {
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.headerText}>미션</Text>
+            <View style={styles.notificationBell}>
+              <NotificationBell />
+            </View>
           </View>
 
           <View style={styles.section}>
@@ -110,7 +115,7 @@ export default function Mission() {
                 ))}
             </View>
 
-            <View style={styles.tipRow}>
+            <Pressable style={styles.tipRow} onPress={() => router.push('/recommend')}>
               <Text style={styles.star}>⭐</Text>
               <View style={styles.tipInner}>
                 <Text style={styles.tipText}>추천 카테고리에서 추가해보세요!</Text>
@@ -120,7 +125,7 @@ export default function Mission() {
                   resizeMode="contain"
                 />
               </View>
-            </View>
+            </Pressable>
           </View>
 
           <View>
@@ -158,8 +163,15 @@ export default function Mission() {
 
 const styles = StyleSheet.create({
   container: { backgroundColor: '#F8F8FA' },
-  header: { alignItems: 'center', marginVertical: 16 },
+  header: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 16,
+    position: 'relative',
+    flexDirection: 'row',
+  },
   headerText: { fontSize: 20, fontWeight: '600' },
+  notificationBell: { position: 'absolute', right: 0 },
   section: { marginBottom: 24 },
   sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 10 },
   missionBox: { backgroundColor: '#FFFFFF', padding: 20, borderRadius: 12, marginBottom: 10 },
