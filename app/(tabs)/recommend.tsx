@@ -267,9 +267,11 @@ export default function Recommend() {
                           style={[styles.choreList, i === row.length - 1 && styles.mb0]}
                         >
                           <View style={styles.chore}>
-                            <Text style={[styles.badgeText, styleFromRepeatColor(repeat.color)]}>
-                              {repeat.label}
-                            </Text>
+                            <View style={[styles.badge, styleFromRepeatColor(repeat.color)]}>
+                              <Text style={[styles.badgeText, styleFromRepeatColor(repeat.color)]}>
+                                {repeat.label}
+                              </Text>
+                            </View>
                             <Text style={styles.choreTitle}>{c.titleKo}</Text>
                           </View>
 
@@ -400,13 +402,17 @@ const styles = StyleSheet.create({
     minWidth: 300,
   },
   chore: { flexDirection: 'row', gap: 12 },
-  badgeText: {
-    fontFamily: 'PretendardRegular',
-    fontSize: 12,
-    textAlign: 'center',
+  badge: {
+    alignItems: 'center',
+    justifyContent: 'center',
     width: 42,
     height: 23,
     borderRadius: 6,
+  },
+
+  badgeText: {
+    fontFamily: 'PretendardRegular',
+    fontSize: 12,
   },
 
   choreTitle: {
