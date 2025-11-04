@@ -1,3 +1,5 @@
+import { SpaceApi } from '@/libs/utils/space'
+
 export type RandomChore = {
   id: number
   space: string
@@ -20,15 +22,13 @@ export type RecommendChores = {
 // 공간 리스트 조회
 export type SpaceList = {
   spaceName: string
-  space: string
+  space: SpaceApi
 }
 
 // 공간 집안일 정보
-export type SpaceChore = {
-  id: number
-  code: string
-  titleKo: string
-  repeatType: string
-  repeatInterval: number
-  space: string
+export type SpaceChoreList = {
+  choreId: number
+  title: string
+  frequency: string
+  categoryName: string
 }

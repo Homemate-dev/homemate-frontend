@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { useMemo, useState } from 'react'
 import {
+  ActivityIndicator,
   Image,
   Platform,
   Pressable,
@@ -12,143 +13,17 @@ import {
 } from 'react-native'
 
 import NotificationBell from '@/components/notification/NotificationBell'
+import RecommendChoreModal from '@/components/RecommendChoreModal'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
+import useCategoryChoresCount from '@/libs/hooks/recommend/useCategoryChoresCount'
+import useChoreCategory from '@/libs/hooks/recommend/useChoreCategory'
+import useRecommendChores from '@/libs/hooks/recommend/useRecommendChores'
+import useSpaceChoreList from '@/libs/hooks/recommend/useSpaceChoreList'
+import useSpaceList from '@/libs/hooks/recommend/useSpaceList'
+import { toCategoryApi } from '@/libs/utils/category'
+import { styleFromRepeatColor, toRepeatFields } from '@/libs/utils/repeat'
 import { SpaceApi, SpaceUi, toSpaceUi } from '@/libs/utils/space'
-
-const mockCategory = [
-  { category: '겨울철 대청소' },
-  { category: '주말 대청소 루틴' },
-  { category: '호텔 화장실 따라잡기' },
-  { category: '안전 점검의 날' },
-  { category: '가전제품 관리하기' },
-  { category: '하루 10분 청소하기' },
-]
-
-const mockChores = [
-  {
-    id: 1,
-    code: 'KITCHEN_01',
-    titleKo: '설거지하기',
-    repeatType: 'DAILY',
-    repeatInterval: 1,
-    space: 'KITCHEN',
-  },
-  {
-    id: 2,
-    code: 'KITCHEN_02',
-    titleKo: '싱크대 거름망 비우기',
-    repeatType: 'DAILY',
-    repeatInterval: 1,
-    space: 'KITCHEN',
-  },
-  {
-    id: 3,
-    code: 'KITCHEN_03',
-    titleKo: '조리대·식탁 닦기',
-    repeatType: 'DAILY',
-    repeatInterval: 1,
-    space: 'KITCHEN',
-  },
-  {
-    id: 4,
-    code: 'KITCHEN_04',
-    titleKo: '가스레인지/인덕션 상판 닦기',
-    repeatType: 'DAILY',
-    repeatInterval: 1,
-    space: 'KITCHEN',
-  },
-  {
-    id: 5,
-    code: 'KITCHEN_05',
-    titleKo: '도마·칼 소독하기',
-    repeatType: 'WEEKLY',
-    repeatInterval: 1,
-    space: 'KITCHEN',
-  },
-  {
-    id: 6,
-    code: 'KITCHEN_06',
-    titleKo: '수세미·행주 삶기/교체',
-    repeatType: 'WEEKLY',
-    repeatInterval: 1,
-    space: 'KITCHEN',
-  },
-  {
-    id: 7,
-    code: 'KITCHEN_07',
-    titleKo: '식료품 재고 체크·장보기 목록 만들기',
-    repeatType: 'WEEKLY',
-    repeatInterval: 1,
-    space: 'KITCHEN',
-  },
-  {
-    id: 8,
-    code: 'KITCHEN_08',
-    titleKo: '전자레인지 스팀 청소하기',
-    repeatType: 'WEEKLY',
-    repeatInterval: 2,
-    space: 'KITCHEN',
-  },
-  {
-    id: 9,
-    code: 'KITCHEN_09',
-    titleKo: '싱크대 배수구 세정제 사용',
-    repeatType: 'WEEKLY',
-    repeatInterval: 2,
-    space: 'KITCHEN',
-  },
-  {
-    id: 10,
-    code: 'KITCHEN_10',
-    titleKo: '냉장고 정리·유통기한 확인하기',
-    repeatType: 'MONTHLY',
-    repeatInterval: 1,
-    space: 'KITCHEN',
-  },
-  {
-    id: 11,
-    code: 'KITCHEN_11',
-    titleKo: '양념통·조미료 정리',
-    repeatType: 'MONTHLY',
-    repeatInterval: 1,
-    space: 'KITCHEN',
-  },
-  {
-    id: 12,
-    code: 'KITCHEN_12',
-    titleKo: '식기세척기 필터 청소',
-    repeatType: 'MONTHLY',
-    repeatInterval: 1,
-    space: 'KITCHEN',
-  },
-  {
-    id: 13,
-    code: 'KITCHEN_13',
-    titleKo: '주방 후드 필터 세척',
-    repeatType: 'MONTHLY',
-    repeatInterval: 3,
-    space: 'KITCHEN',
-  },
-  {
-    id: 14,
-    code: 'KITCHEN_14',
-    titleKo: '커피머신 디스케일링',
-    repeatType: 'MONTHLY',
-    repeatInterval: 3,
-    space: 'KITCHEN',
-  },
-  {
-    id: 15,
-    code: 'KITCHEN_15',
-    titleKo: '오븐 내부 딥클리닝',
-    repeatType: 'MONTHLY',
-    repeatInterval: 6,
-    space: 'KITCHEN',
-  },
-]
-
-const SPACE: readonly SpaceApi[] = ['KITCHEN', 'BATHROOM', 'BEDROOM', 'PORCH', 'ETC']
 
 // 3개씩 묶어서 "한 행(row)" 만들기
 function chunkBy<T>(arr: T[], size: number): T[][] {
@@ -159,34 +34,44 @@ function chunkBy<T>(arr: T[], size: number): T[][] {
 
 export default function Recommend() {
   const androidTop = Platform.OS === 'android' ? 50 : 0
-
-  const categoryRows = chunkBy(mockCategory, 3) // ← 한 줄에 3개
-
-  const [activeSpace, setActiveSpace] = useState<SpaceApi>('KITCHEN')
+  // ----- 상태관리 -----
   const [isOpen, setIsOpen] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined)
+  const [activeSpace, setActiveSpace] = useState<SpaceApi>('KITCHEN')
+  const [selectedSpace, setSelectedSpace] = useState<string | undefined>('KITCHEN')
 
-  const filteredChores = useMemo(
-    () => mockChores.filter((c) => c.space === activeSpace),
-    [activeSpace]
-  )
+  const categoryEnum = toCategoryApi(selectedCategory) ?? undefined
 
-  const choreRows = useMemo(() => chunkBy(filteredChores, 5), [filteredChores])
+  // ----- api 훅 -----
+  const { data: categories = [], isLoading: catLoading, isError: catError } = useChoreCategory()
+  const { data: categoryChores = [], isLoading: choreLoading } = useRecommendChores(categoryEnum)
 
-  const uiSpaces = useMemo(
-    (): { code: SpaceApi; label: SpaceUi }[] =>
-      SPACE.map((code) => ({ code, label: toSpaceUi(code)! })), // ← !
-    []
-  )
+  const { data: spaceList = [], isLoading: spaLoading, isError: spaError } = useSpaceList()
+  const {
+    data: spaceChores = [],
+    isLoading: spaChoreLoading,
+    isError: spaChoreError,
+  } = useSpaceChoreList(selectedSpace)
 
-  const styleFromRepeatColor = (cls: string | undefined) => {
-    if (!cls) return {}
-    const bgMatch = cls.match(/bg-\[#([0-9A-Fa-f]{6})\]/)
-    const textMatch = cls.match(/text-\[#([0-9A-Fa-f]{6})\]/)
-    const style: any = {}
-    if (bgMatch) style.backgroundColor = `#${bgMatch[1]}`
-    if (textMatch) style.color = `#${textMatch[1]}`
-    return style
-  }
+  // 집안일 개수 표시용 훅
+  const { counts, loading: countLoading } = useCategoryChoresCount(categories)
+
+  const uiSpaces = useMemo((): { code: SpaceApi; label: SpaceUi }[] => {
+    const list = (spaceList ?? []).map(({ space }) => ({
+      code: space as SpaceApi,
+      label: toSpaceUi(space)!,
+    }))
+
+    return list.length
+      ? list
+      : (['KITCHEN', 'BATHROOM', 'BEDROOM', 'PORCH', 'ETC'] as SpaceApi[]).map((code) => ({
+          code,
+          label: toSpaceUi(code)!,
+        }))
+  }, [spaceList])
+
+  const categoryRows = useMemo(() => chunkBy(categories, 3), [categories]) // ← 한 줄에 3개
+  const choreRows = useMemo(() => chunkBy(spaceChores, 5), [spaceChores])
 
   return (
     <>
@@ -210,29 +95,49 @@ export default function Recommend() {
               contentContainerStyle={styles.scrollContainer}
               horizontal
             >
-              {categoryRows.map((row, rIdx) => (
-                <View key={`row-${rIdx}`} style={styles.row}>
-                  {row.map((c, i) => (
-                    <Pressable
-                      key={`${c.category}-${i}`}
-                      style={styles.card}
-                      onPress={() => {
-                        setIsOpen(true)
-                      }}
-                    >
-                      <View style={styles.cardHeader}>
-                        <Text style={styles.cardTitle} numberOfLines={2}>
-                          {c.category}
-                        </Text>
-                        <MaterialIcons name="chevron-right" size={18} color="#B4B7BC" />
-                      </View>
-                      <Text style={styles.cardSub}>5개의 집안일</Text>
-                    </Pressable>
-                  ))}
+              {catLoading ? (
+                <View style={styles.loadingRow}>
+                  <ActivityIndicator />
                 </View>
-              ))}
+              ) : (
+                categoryRows.map((row, rIdx) => (
+                  <View key={`row-${rIdx}`} style={styles.row}>
+                    {row.map((c, i) => {
+                      return (
+                        <Pressable
+                          key={`${c.category}-${i}`}
+                          style={styles.card}
+                          onPress={() => {
+                            setSelectedCategory(c.category)
+                            setIsOpen(true)
+                          }}
+                        >
+                          <View style={styles.cardHeader}>
+                            <Text style={styles.cardTitle} numberOfLines={2}>
+                              {c.category}
+                            </Text>
+                            <MaterialIcons name="chevron-right" size={18} color="#B4B7BC" />
+                          </View>
 
-              {/* <RecommendChoreModal visible={isOpen} onClose={() => setIsOpen(false)} /> */}
+                          <Text style={styles.cardSub}>
+                            {countLoading ? <ActivityIndicator /> : counts[c.category]}개의 집안일
+                          </Text>
+                        </Pressable>
+                      )
+                    })}
+                  </View>
+                ))
+              )}
+
+              {catError && <Text>집안일 카테고리 불러오기에 실패했습니다.</Text>}
+
+              <RecommendChoreModal
+                visible={isOpen}
+                onClose={() => setIsOpen(false)}
+                title={selectedCategory ?? ''}
+                chores={categoryChores}
+                loading={choreLoading}
+              />
             </ScrollView>
           </View>
 
@@ -241,13 +146,24 @@ export default function Recommend() {
             <Text style={styles.sectionTitle}>공간별 집안일</Text>
 
             <View style={styles.spaceList}>
+              {spaLoading && (
+                <View style={styles.loadingRow}>
+                  <ActivityIndicator />
+                </View>
+              )}
+
+              {spaError && <Text>공간 내역 불러오기에 실패했습니다.</Text>}
+
               {uiSpaces.map(({ code, label }) => {
                 const isActive = activeSpace === code
                 return (
                   <Pressable
                     key={code}
                     style={[styles.space, isActive && styles.spaceActive]}
-                    onPress={() => setActiveSpace(code)}
+                    onPress={() => {
+                      setActiveSpace(code)
+                      setSelectedSpace(code)
+                    }}
                     hitSlop={6}
                   >
                     <Text style={[styles.spaceText, isActive && styles.spaceTextActive]}>
@@ -263,16 +179,25 @@ export default function Recommend() {
               contentContainerStyle={styles.scrollChore}
               horizontal
             >
+              {spaChoreLoading && (
+                <View style={styles.loadingRow}>
+                  <ActivityIndicator />
+                </View>
+              )}
+
+              {spaChoreError && <Text>집안일 내역 불러오기에 실패했습니다.</Text>}
+
               {choreRows.map((row, rIdx) => (
                 <View key={`row-${rIdx}`} style={styles.choreRow}>
                   {row.map((c, i) => {
-                    const key = getRepeatKey(c.repeatType, c.repeatInterval)
+                    const { repeatType, repeatInterval } = toRepeatFields(c.frequency)
+                    const key = getRepeatKey(repeatType, repeatInterval)
                     const repeat = REPEAT_STYLE[key] ?? REPEAT_STYLE['NONE-0']
 
                     return (
                       <>
                         <View
-                          key={c.id}
+                          key={c.choreId}
                           style={[styles.choreList, i === row.length - 1 && styles.mb0]}
                         >
                           <View style={styles.chore}>
@@ -281,7 +206,7 @@ export default function Recommend() {
                                 {repeat.label}
                               </Text>
                             </View>
-                            <Text style={styles.choreTitle}>{c.titleKo}</Text>
+                            <Text style={styles.choreTitle}>{c.title}</Text>
                           </View>
 
                           <Pressable>
@@ -434,4 +359,5 @@ const styles = StyleSheet.create({
   },
 
   divider: { borderBottomWidth: 0.5, borderBottomColor: '#E6E7E9', marginBottom: 8.5 },
+  loadingRow: { paddingVertical: 12 },
 })
