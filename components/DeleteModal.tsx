@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   },
   sheetHandle: {
     alignSelf: 'center',
-    width: 36,
+    width: 60,
     height: 4,
     borderRadius: 2,
     backgroundColor: '#E6E7E9',

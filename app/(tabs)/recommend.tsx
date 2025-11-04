@@ -163,6 +163,7 @@ export default function Recommend() {
   const categoryRows = chunkBy(mockCategory, 3) // ← 한 줄에 3개
 
   const [activeSpace, setActiveSpace] = useState<SpaceApi>('KITCHEN')
+  const [isOpen, setIsOpen] = useState(false)
 
   const filteredChores = useMemo(
     () => mockChores.filter((c) => c.space === activeSpace),
@@ -212,7 +213,13 @@ export default function Recommend() {
               {categoryRows.map((row, rIdx) => (
                 <View key={`row-${rIdx}`} style={styles.row}>
                   {row.map((c, i) => (
-                    <Pressable key={`${c.category}-${i}`} style={styles.card} onPress={() => {}}>
+                    <Pressable
+                      key={`${c.category}-${i}`}
+                      style={styles.card}
+                      onPress={() => {
+                        setIsOpen(true)
+                      }}
+                    >
                       <View style={styles.cardHeader}>
                         <Text style={styles.cardTitle} numberOfLines={2}>
                           {c.category}
@@ -224,6 +231,8 @@ export default function Recommend() {
                   ))}
                 </View>
               ))}
+
+              {/* <RecommendChoreModal visible={isOpen} onClose={() => setIsOpen(false)} /> */}
             </ScrollView>
           </View>
 
