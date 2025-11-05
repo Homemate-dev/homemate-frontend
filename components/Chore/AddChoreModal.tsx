@@ -35,7 +35,7 @@ import DeleteModal from '../DeleteModal'
 import UpdateModal from '../UpdateModal'
 
 // 이모지(특수문자) 불가
-const FORBIDDEN_CHAR_RE = /[^\uAC00-\uD7A3a-zA-Z0-9\s]/
+const EMOJI_RE = /[\p{Extended_Pictographic}]/u
 
 export default function AddChoreModal() {
   const {
@@ -188,7 +188,7 @@ export default function AddChoreModal() {
     return false
   }, [isEdit, initialValue, currentValue])
 
-  const hasForbiddenChar = useMemo(() => FORBIDDEN_CHAR_RE.test(inputValue), [inputValue])
+  const hasForbiddenChar = useMemo(() => EMOJI_RE.test(inputValue), [inputValue])
 
   const baseValid =
     !hasForbiddenChar &&
@@ -292,7 +292,7 @@ export default function AddChoreModal() {
   }
 
   const spaceOptions = SPACE_UI_OPTIONS
-  const repeatOptions = ['안 함', '매일', '1주마다', '2주마다', '매달', '3개월마다', '6개월마다']
+  const repeatOptions = ['한번', '매일', '1주마다', '2주마다', '매달', '3개월마다', '6개월마다']
 
   const headerTitle = isEdit ? '집안일 수정' : '집안일 추가'
   const btnLabel = isEdit ? '수정하기' : '등록하기'

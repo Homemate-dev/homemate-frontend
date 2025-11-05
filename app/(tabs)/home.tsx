@@ -186,7 +186,15 @@ export default function HomeScreen() {
                       style={[styles.itemRow, index !== choresList.length - 1 && styles.mb12]}
                     >
                       <View style={styles.itemLeftRow}>
-                        <View style={[styles.badge, styleFromRepeatColor(repeat.color)]}>
+                        <View
+                          style={[
+                            styles.badge,
+                            styleFromRepeatColor(repeat.color),
+                            item.status === 'COMPLETED'
+                              ? styles.badgeDone
+                              : styleFromRepeatColor(repeat.color),
+                          ]}
+                        >
                           <Text
                             style={[
                               styles.badgeText,

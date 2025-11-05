@@ -40,38 +40,22 @@ export default function DeleteModal({
             <Text style={styles.bannerText}>일정을 삭제하시겠습니까?</Text>
           </View>
         ) : (
-          <Pressable
-            disabled={loading}
-            onPress={onDeleteOnly}
-            style={[styles.primaryBtn, styles.mb8]}
-          >
+          <Pressable onPress={onDeleteOnly} style={[styles.primaryBtn, styles.mb8]}>
             <Text style={styles.primaryBtnText}>이 일정만 삭제</Text>
           </Pressable>
         )}
 
         {noneRepeat ? (
-          <Pressable
-            disabled={loading}
-            onPress={onDeleteOnly}
-            style={[styles.primaryBtn, styles.mb8]}
-          >
+          <Pressable onPress={onDeleteOnly} style={[styles.primaryBtn, styles.mb8]}>
             <Text style={styles.primaryBtnText}>일정 삭제</Text>
           </Pressable>
         ) : (
-          <Pressable
-            disabled={loading}
-            onPress={onDeleteAll}
-            style={[styles.primaryBtn, styles.mb8]}
-          >
-            <Text style={styles.primaryBtnText}>전체 반복 일정 삭제</Text>
+          <Pressable onPress={onDeleteAll} style={[styles.primaryBtn, styles.mb8]}>
+            <Text style={styles.primaryBtnText}>향후 일정 삭제</Text>
           </Pressable>
         )}
 
-        <Pressable
-          disabled={loading}
-          onPress={!loading ? onClose : undefined}
-          style={styles.cancelBtn}
-        >
+        <Pressable onPress={onClose} style={styles.cancelBtn}>
           <Text style={styles.cancelBtnText}>취소</Text>
         </Pressable>
       </View>

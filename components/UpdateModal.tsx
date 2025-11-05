@@ -47,7 +47,7 @@ export default function UpdateModal({
               </View>
 
               <Text onPress={!loading ? onUpdateAll : undefined} style={styles.primaryBtnTextWrap}>
-                <Text style={styles.primaryBtnText}>전체 반복 일정 수정</Text>
+                <Text style={styles.primaryBtnText}>향후 일정 수정</Text>
               </Text>
             </View>
           </View>
