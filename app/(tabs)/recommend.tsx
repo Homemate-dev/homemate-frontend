@@ -244,11 +244,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: 62,
   },
-  headerText: { fontFamily: 'PretendardSemiBold', fontSize: 20 },
+  headerText: { fontFamily: 'Pretendard', fontWeight: 600, fontSize: 20 },
   notificationBell: { position: 'absolute', right: 0 },
 
   section: { marginBottom: 24 },
-  sectionTitle: { fontFamily: 'PretendardBold', fontSize: 18, fontWeight: '700', marginBottom: 12 },
+  sectionTitle: { fontFamily: 'Pretendard', fontSize: 18, fontWeight: '700', marginBottom: 12 },
 
   scrollContainer: {
     flexDirection: 'column',
@@ -281,14 +281,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardTitle: {
-    fontSize: 15,
-    fontFamily: 'PretendardSemiBold',
+    fontFamily: 'Pretendard',
+    fontSize: 16,
+    fontWeight: 600,
     color: '#46A1A6',
     flexShrink: 1,
   },
   cardSub: {
-    fontSize: 13,
-    fontFamily: 'PretendardRegular',
+    fontFamily: 'Pretendard',
+    fontSize: 14,
     color: '#4F5763',
   },
 
@@ -314,10 +315,11 @@ const styles = StyleSheet.create({
 
   spaceTextActive: {
     color: '#FFFFFF',
-    fontFamily: 'PretendardSemiBold',
+    fontFamily: 'Pretendard',
+    fontWeight: 600,
   },
 
-  spaceText: { color: '#9B9FA6', fontFamily: 'PretendardRegular', fontSize: 14 },
+  spaceText: { color: '#9B9FA6', fontFamily: 'Pretendard', fontSize: 14 },
 
   scrollChore: {
     flexDirection: 'row',
@@ -346,12 +348,12 @@ const styles = StyleSheet.create({
   },
 
   badgeText: {
-    fontFamily: 'PretendardRegular',
+    fontFamily: 'Pretendard',
     fontSize: 12,
   },
 
   choreTitle: {
-    fontFamily: 'PretendardRegular',
+    fontFamily: 'Pretendard',
     fontSize: 14,
   },
 
