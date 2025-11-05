@@ -1,17 +1,9 @@
-import { Image, ImageSourcePropType, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
-export type Badge = {
-  id: number
-  title: string
-  desc: string
-  current: number
-  target: number
-  icon: ImageSourcePropType
-  acquired: boolean
-}
+import { ResponseBadge } from '@/types/badge'
 
 type Props = {
-  badge: Badge
+  badge: ResponseBadge
   onClose: () => void
 }
 
@@ -33,15 +25,20 @@ export default function BadgeDetail({ badge, onClose }: Props) {
       {/* 중앙 카드 */}
       <View style={styles.centerWrapper} pointerEvents="box-none">
         <View style={styles.card}>
-          <Text style={styles.title}>{badge.acquired === true ? badge.title : '???'}</Text>
-          <Text style={styles.desc}>{badge.desc}</Text>
+          <Text style={styles.title}>{badge.acquired === true ? badge.badgeTitle : '???'}</Text>
+          <Text style={styles.desc}>{badge.description}</Text>
           <View style={styles.ImageWrap}>
-            <Image source={badge.icon} style={styles.image} resizeMode="contain" />
+            <Image
+              source={{ uri: badge.imageBadgeUrl }}
+              style={styles.image}
+              resizeMode="contain"
+            />
           </View>
           <View style={styles.progressRow}>
             <Text style={styles.progressLabel}>달성도</Text>
             <Text style={styles.progressText}>
-              <Text style={styles.progressValue}>{badge.current}회</Text> / {badge.target}회
+              <Text style={styles.progressValue}>{badge.currentCount}회</Text> /{' '}
+              {badge.requiredCount}회
             </Text>
           </View>
 

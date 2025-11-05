@@ -16,44 +16,48 @@ import BadgeCard from '@/components/Badge/BadgeCard'
 import BadgeDetail from '@/components/BadgeDetail'
 import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
+import { useTopBadges } from '@/libs/hooks/badge/useTopBadges'
 import { useMonthlyMissions } from '@/libs/hooks/mission/useMonthlyMissions'
 import { inferUnitFromTitle } from '@/libs/utils/mission'
 
-const mockBadges = [
-  {
-    id: 1,
-    title: '미션 7회 달성',
-    current: 6,
-    target: 7,
-    desc: '7개의 미션을 완료하면 받을 수 있는 도전 뱃지예요.',
-    icon: require('@/assets/images/chore-home.png'),
-    acquired: false,
-  },
-  {
-    id: 2,
-    title: '욕실 깔끔이',
-    current: 28,
-    target: 30,
-    desc: '욕실 청소 미션을 30회 완수하면 획득할 수 있는 청결의 상징 뱃지예요.',
-    icon: require('@/assets/images/chore-home.png'),
-    acquired: false,
-  },
-  {
-    id: 3,
-    title: '침실 반짝이',
-    current: 89,
-    target: 90,
-    desc: '침실 정리 미션을 90회 달성하면 얻을 수 있는 정리왕 뱃지예요.',
-    icon: require('@/assets/images/chore-home.png'),
-    acquired: false,
-  },
-]
+// const mockBadges = [
+//   {
+//     id: 1,
+//     title: '미션 7회 달성',
+//     current: 6,
+//     target: 7,
+//     desc: '7개의 미션을 완료하면 받을 수 있는 도전 뱃지예요.',
+//     icon: require('@/assets/images/chore-home.png'),
+//     acquired: false,
+//   },
+//   {
+//     id: 2,
+//     title: '욕실 깔끔이',
+//     current: 28,
+//     target: 30,
+//     desc: '욕실 청소 미션을 30회 완수하면 획득할 수 있는 청결의 상징 뱃지예요.',
+//     icon: require('@/assets/images/chore-home.png'),
+//     acquired: false,
+//   },
+//   {
+//     id: 3,
+//     title: '침실 반짝이',
+//     current: 89,
+//     target: 90,
+//     desc: '침실 정리 미션을 90회 달성하면 얻을 수 있는 정리왕 뱃지예요.',
+//     icon: require('@/assets/images/chore-home.png'),
+//     acquired: false,
+//   },
+// ]
 
 export default function Mission() {
   const androidTop = Platform.OS === 'android' ? 50 : 0
+
   const { data: missions, isLoading, isError } = useMonthlyMissions()
+  const { data: TopBadges, isLoading: badgeLoading, isError: badgeError } = useTopBadges()
+
   const [selectedId, setSelectedId] = useState<number | null>(null)
-  const selected = mockBadges.find((badge) => badge.id === selectedId)
+  const selected = TopBadges?.find((badge) => badge.id === selectedId)
   const progress = (cur: number, tgt: number) =>
     tgt ? Math.min(100, Math.round((cur * 100) / tgt)) : 0
 
@@ -132,18 +136,32 @@ export default function Mission() {
             <Text style={styles.sectionTitle}>곧 획득하는 뱃지</Text>
             <View style={styles.badgeBox}>
               <View style={styles.badgeRow}>
-                {mockBadges.map((b) => (
+                {badgeLoading && (
+                  <View style={styles.loadingBox}>
+                    <ActivityIndicator />
+                  </View>
+                )}
+
+                {badgeError && !badgeLoading && (
+                  <Text style={styles.errorText}>뱃지를 불러오지 못했어요.</Text>
+                )}
+
+                {TopBadges?.map((b) => (
                   <View key={b.id} style={styles.badgeItem}>
                     <TouchableOpacity activeOpacity={0.8} onPress={() => setSelectedId(b.id)}>
                       <BadgeCard
-                        icon={require('@/assets/images/chore-home.png')}
+                        icon={{ uri: b.imageBadgeUrl }}
                         size={84}
                         iconSize={82}
+                        acquired={b.currentCount === b.requiredCount}
                       />
                     </TouchableOpacity>
-                    <Text style={styles.badgeTitle}>{b.acquired === true ? b.title : '???'}</Text>
+                    <Text style={styles.badgeTitle}>
+                      {b.acquired === true ? b.badgeTitle : '???'}
+                    </Text>
                     <Text style={styles.badgeCount}>
-                      <Text style={styles.badgeCurrent}>{b.current}회</Text> / {b.target}회
+                      <Text style={styles.badgeCurrent}>{b.currentCount}회</Text> /{' '}
+                      {b.requiredCount}회
                     </Text>
                   </View>
                 ))}
