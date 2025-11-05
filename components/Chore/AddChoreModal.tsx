@@ -26,11 +26,13 @@ import { useChoreDetail } from '@/libs/hooks/chore/useChoreDetail'
 import useCreateChore from '@/libs/hooks/chore/useCreateChore'
 import { useDeleteChore } from '@/libs/hooks/chore/useDeleteChore'
 import useUpdateChore from '@/libs/hooks/chore/useUpdateChore'
+import useRandomChoreInfo from '@/libs/hooks/recommend/useRandomChoreInfo'
 import useRandomChores from '@/libs/hooks/recommend/useRandomChores'
 import { isDateCompare, toYMD } from '@/libs/utils/date'
 import { toRepeatFields, toRepeatLabel } from '@/libs/utils/repeat'
 import { SPACE_UI_OPTIONS, toSpaceApi, toSpaceUi } from '@/libs/utils/space'
 import { toHHmm, toHHmmParts } from '@/libs/utils/time'
+import { RandomChoreList } from '@/types/recommend'
 
 import DeleteModal from '../DeleteModal'
 import UpdateModal from '../UpdateModal'
@@ -76,6 +78,7 @@ export default function AddChoreModal() {
   const safeYMD = (s: string | null | undefined, fallback: string): string =>
     isYMD(s) ? (s as string) : fallback
 
+  // ----- 상태관리 -----
   const [inputValue, setInputValue] = useState('')
   const todayYMD = useMemo(() => toYMD(new Date()), [])
 
@@ -97,15 +100,46 @@ export default function AddChoreModal() {
   const [updateOpen, setUpdateOpen] = useState(false)
   const [applyToAfter, setApplyToAfter] = useState<boolean | null>(null)
 
+  // ----- api 훅 ------
   const { mutate: createChore, isPending: creating } = useCreateChore()
   const { mutate: updateChore, isPending: updating } = useUpdateChore()
   const { mutate: deleteChore, isPending: deleting } = useDeleteChore()
-  const { data: randomChores, isLoading, isRefetching, refetch } = useRandomChores()
+  const { data: randomChores = [], isLoading, isRefetching, refetch } = useRandomChores()
+
+  const [spaceChoreId, setSpaceChoreId] = useState<number | null>(null)
+  const { data: randomChoreInfo } = useRandomChoreInfo(spaceChoreId as number)
 
   const instanceKey = isEdit && instanceId ? instanceId : 0
   const { data: detail, isLoading: loadingDetail } = useChoreDetail(instanceKey)
 
   const isDateRangeValid = isDateCompare(startDate, endDate)
+
+  // 추천 집안일 자동 채우기
+  const applyRandomChore = (c: RandomChoreList) => {
+    // 제목
+    setInputValue(c.titleKo)
+    // 공간
+    setSpace(toSpaceUi(c.space))
+    // 반복주기
+    setRepeat(toRepeatLabel(c.repeatType, c.repeatInterval))
+    // 시작일자
+    setStartDate(c.startDate)
+    // 완료일자
+    setEndDate(c.endDate)
+    // 알림
+    if (c.choreEnabled) {
+      setNotifyOn(true)
+      setAmpm('오전')
+      setHour12(9)
+      setMinute(0)
+    } else {
+      setNotifyOn(false)
+    }
+  }
+
+  useEffect(() => {
+    if (randomChoreInfo) applyRandomChore(randomChoreInfo)
+  }, [randomChoreInfo])
 
   // ADD 기본값
   useEffect(() => {
@@ -391,15 +425,16 @@ export default function AddChoreModal() {
                       showsHorizontalScrollIndicator={false}
                       contentContainerStyle={styles.chipsRow}
                     >
-                      {(Array.isArray(randomChores) ? randomChores : []).map((item: any) => (
+                      {(randomChores ?? []).map((item: any) => (
                         <Pressable
                           key={item.id}
                           style={styles.chip}
-                          onPress={() => setInputValue(item.titleKo)}
+                          onPress={() => setSpaceChoreId(item.id)}
                         >
                           <Text style={styles.chipText}>{item.titleKo}</Text>
                         </Pressable>
                       ))}
+
                       <Pressable
                         style={styles.resetBtn}
                         onPress={() => refetch()}

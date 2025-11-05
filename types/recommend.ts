@@ -1,5 +1,7 @@
 import { SpaceApi } from '@/libs/utils/space'
 
+import { RepeatType } from './chore'
+
 export type Space = 'KITCHEN' | 'BATHROOM' | 'BEDROOM' | 'PORCH' | 'ETC'
 // 추천 화면 개요
 export type Recommend = {
@@ -13,6 +15,19 @@ export type RandomChore = {
   id: number
   space: string
   titleKo: string
+}
+
+// 랜덤 집안일 추천 정보
+export type RandomChoreList = {
+  id: number
+  code: string
+  titleKo: string
+  repeatType: RepeatType
+  repeatInterval: number
+  space: string
+  startDate: string
+  endDate: string
+  choreEnabled: boolean
 }
 
 // 집안일 카테고리
