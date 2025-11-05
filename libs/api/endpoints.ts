@@ -56,19 +56,20 @@ export const CHORE_ENDPOINTS = {
 
 export const RECOMMEND_ENDPOINTS = {
   /** 추천 화면 개요 조회 */
-  OVERVIEW: '/reco/overview', // GET (query: ?limitTrending=number)
+  OVERVIEW: '/recommend/trend', // GET (query: ?limitTrending=number)
 
   /** 카테고리 하위 집안일 목록 조회 */
   CATEGORY_CHORES: (category: string) => `/recommend/categories/${category}/chores`, // GET
 
   /** 선택한 집안일 등록 (카테고리 기준) */
-  REGISTER_CATEGORY: (categoryId: number) => `/recommend/categories/${categoryId}/register`, // POST
+  REGISTER_CATEGORY: (categoryChoreId: number) =>
+    `/recommend/categories/${categoryChoreId}/register`, // POST
 
   /** 공간별 하위 집안일 목록 조회 */
   SPACE_CHORES: (space: string) => `/recommend/spaces/${space}/chores`, // GET
 
   /** 선택한 집안일 등록 (공간 기준) */
-  REGISTER_SPACE: (space: string) => `/recommend/spaces/${space}/register`, // POST
+  REGISTER_SPACE: (spaceChoreId: number) => `/recommend/spaces/${spaceChoreId}/register`, // POST
 
   /** 공간 리스트 조회 */
   SPACES: '/recommend/spaces', // GET

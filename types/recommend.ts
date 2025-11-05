@@ -1,5 +1,14 @@
 import { SpaceApi } from '@/libs/utils/space'
 
+export type Space = 'KITCHEN' | 'BATHROOM' | 'BEDROOM' | 'PORCH' | 'ETC'
+// 추천 화면 개요
+export type Recommend = {
+  name: string
+  code: string
+  count: string
+}
+
+// 랜덤 집안일 추천
 export type RandomChore = {
   id: number
   space: string
@@ -31,4 +40,31 @@ export type SpaceChoreList = {
   title: string
   frequency: string
   categoryName: string
+}
+
+export interface MissionResult {
+  id: number
+  title: string
+  targetCount: number
+  currentCount: number
+  completed: boolean
+}
+
+export interface RegisterChoreResponse {
+  data: {
+    id: number
+    title: string
+    notificationYn: boolean
+    notificationTime: string | null
+    repeatType: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE'
+    repeatInterval: number
+    startDate: string
+    endDate: string
+    isDeleted: boolean
+    space: 'KITCHEN' | 'BATHROOM' | 'BEDROOM' | 'PORCH' | 'ETC'
+    createdAt: string
+    updatedAt: string
+    deletedAt: string | null
+  }
+  missionResults: MissionResult[]
 }

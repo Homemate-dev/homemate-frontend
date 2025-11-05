@@ -16,9 +16,9 @@ import NotificationBell from '@/components/notification/NotificationBell'
 import RecommendChoreModal from '@/components/RecommendChoreModal'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
-import useCategoryChoresCount from '@/libs/hooks/recommend/useCategoryChoresCount'
-import useChoreCategory from '@/libs/hooks/recommend/useChoreCategory'
+import useRecommend from '@/libs/hooks/recommend/useRecommend'
 import useRecommendChores from '@/libs/hooks/recommend/useRecommendChores'
+import { useResisterSpace } from '@/libs/hooks/recommend/useResisterSpace'
 import useSpaceChoreList from '@/libs/hooks/recommend/useSpaceChoreList'
 import useSpaceList from '@/libs/hooks/recommend/useSpaceList'
 import { toCategoryApi } from '@/libs/utils/category'
@@ -43,18 +43,18 @@ export default function Recommend() {
   const categoryEnum = toCategoryApi(selectedCategory) ?? undefined
 
   // ----- api 훅 -----
-  const { data: categories = [], isLoading: catLoading, isError: catError } = useChoreCategory()
+  const { data: overview = [], isLoading: overLoading, isError: overError } = useRecommend()
+  // const { data: categories = [], isLoading: catLoading, isError: catError } = useChoreCategory()
   const { data: categoryChores = [], isLoading: choreLoading } = useRecommendChores(categoryEnum)
 
-  const { data: spaceList = [], isLoading: spaLoading, isError: spaError } = useSpaceList()
+  const { data: spaceList = [], isLoading: spaLoading } = useSpaceList()
   const {
     data: spaceChores = [],
     isLoading: spaChoreLoading,
     isError: spaChoreError,
   } = useSpaceChoreList(selectedSpace)
 
-  // 집안일 개수 표시용 훅
-  const { counts, loading: countLoading } = useCategoryChoresCount(categories)
+  const { mutate } = useResisterSpace()
 
   const uiSpaces = useMemo((): { code: SpaceApi; label: SpaceUi }[] => {
     const list = (spaceList ?? []).map(({ space }) => ({
@@ -70,7 +70,7 @@ export default function Recommend() {
         }))
   }, [spaceList])
 
-  const categoryRows = useMemo(() => chunkBy(categories, 3), [categories]) // ← 한 줄에 3개
+  const categoryRows = useMemo(() => chunkBy(overview, 3), [overview]) // ← 한 줄에 3개
   const choreRows = useMemo(() => chunkBy(spaceChores, 5), [spaceChores])
 
   return (
@@ -95,33 +95,31 @@ export default function Recommend() {
               contentContainerStyle={styles.scrollContainer}
               horizontal
             >
-              {catLoading ? (
+              {overLoading ? (
                 <View style={styles.loadingRow}>
                   <ActivityIndicator />
                 </View>
               ) : (
                 categoryRows.map((row, rIdx) => (
                   <View key={`row-${rIdx}`} style={styles.row}>
-                    {row.map((c, i) => {
+                    {row.map((c) => {
                       return (
                         <Pressable
-                          key={`${c.category}-${i}`}
+                          key={c.code}
                           style={styles.card}
                           onPress={() => {
-                            setSelectedCategory(c.category)
+                            setSelectedCategory(c.name)
                             setIsOpen(true)
                           }}
                         >
                           <View style={styles.cardHeader}>
                             <Text style={styles.cardTitle} numberOfLines={2}>
-                              {c.category}
+                              {c.name}
                             </Text>
                             <MaterialIcons name="chevron-right" size={18} color="#B4B7BC" />
                           </View>
 
-                          <Text style={styles.cardSub}>
-                            {countLoading ? <ActivityIndicator /> : counts[c.category]}개의 집안일
-                          </Text>
+                          <Text style={styles.cardSub}>{c.count}개의 집안일</Text>
                         </Pressable>
                       )
                     })}
@@ -129,7 +127,9 @@ export default function Recommend() {
                 ))
               )}
 
-              {catError && <Text>집안일 카테고리 불러오기에 실패했습니다.</Text>}
+              {overError && (
+                <Text style={{ color: '#FF4838' }}>집안일 카테고리 불러오기에 실패했습니다.</Text>
+              )}
 
               <RecommendChoreModal
                 visible={isOpen}
@@ -151,8 +151,6 @@ export default function Recommend() {
                   <ActivityIndicator />
                 </View>
               )}
-
-              {spaError && <Text>공간 내역 불러오기에 실패했습니다.</Text>}
 
               {uiSpaces.map(({ code, label }) => {
                 const isActive = activeSpace === code
@@ -209,7 +207,10 @@ export default function Recommend() {
                             <Text style={styles.choreTitle}>{c.title}</Text>
                           </View>
 
-                          <Pressable>
+                          <Pressable
+                            onPress={() => mutate({ spaceChoreId: c.choreId, space: activeSpace })}
+                            hitSlop={8}
+                          >
                             <Image
                               source={require('../../assets/images/plus-square.png')}
                               resizeMode="contain"

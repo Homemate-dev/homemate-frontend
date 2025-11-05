@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react'
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
@@ -14,7 +15,52 @@ type Props = {
   chores: RecommendChores[]
 }
 
-export default function DeleteModal({ visible, onClose, title, chores, loading = false }: Props) {
+export default function RecommendChoreModal({
+  visible,
+  onClose,
+  title,
+  chores,
+  loading = false,
+}: Props) {
+  // 개별 체크박스 선택 상태
+  const [selected, setSelected] = useState<Set<number>>(new Set())
+
+  // 모달 열렸을태 상태 및 전체 선택 기능
+  useEffect(() => {
+    if (!visible) return
+
+    // 초기 체크박스 false
+    setSelected(new Set())
+  }, [visible, chores])
+
+  // 전체 체크 여부 계산
+  const allChecked = useMemo(
+    () => chores.length > 0 && selected.size === chores.length,
+    [chores.length, selected]
+  )
+
+  // 개별 토글
+  const toggleOn = (id: number) => {
+    if (loading) return
+
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+
+      return next
+    })
+  }
+
+  // 전체 토글
+  const toggleAllBtn = (next: boolean) => {
+    if (loading) return
+    setSelected(next ? new Set(chores.map((c) => c.choreId)) : new Set())
+  }
+
   return (
     <Modal
       visible={visible}
@@ -34,19 +80,23 @@ export default function DeleteModal({ visible, onClose, title, chores, loading =
         <View>
           <View style={styles.titleSection}>
             <Text style={styles.title}>{title}</Text>
-            <Checkbox checked />
+            <Checkbox
+              checked={allChecked}
+              onChange={(next) => toggleAllBtn(next)}
+              disabled={chores.length === 0}
+            />
           </View>
 
           <View style={styles.divider} />
 
-          {chores.map((c, idx) => {
+          {chores.map((c) => {
             const { repeatType, repeatInterval } = toRepeatFields(c.frequency)
             const key = getRepeatKey(repeatType, repeatInterval)
             const repeat = REPEAT_STYLE[key] ?? REPEAT_STYLE['NONE-0']
-            const isLast = idx === chores.length - 1
+            const isChecked = selected.has(c.choreId)
 
             return (
-              <View key={c.choreId}>
+              <View key={c.choreId} style={styles.choreList}>
                 <View
                   style={{
                     flexDirection: 'row',
@@ -65,13 +115,15 @@ export default function DeleteModal({ visible, onClose, title, chores, loading =
                   </View>
 
                   {/* 우측 액션 자리 */}
-                  <Pressable>{/* ... */}</Pressable>
+                  <Checkbox checked={isChecked} onChange={() => toggleOn(c.choreId)} />
                 </View>
-
-                {!isLast && <View style={styles.divider} />}
               </View>
             )
           })}
+
+          <Pressable onPress={() => {}} style={styles.addBtn}>
+            <Text style={styles.addBtnText}>추가하기</Text>
+          </Pressable>
         </View>
       </View>
     </Modal>
@@ -113,6 +165,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6E7E9',
     marginBottom: 18,
   },
+
+  choreList: {
+    marginBottom: 16,
+  },
+
   titleSection: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -120,7 +177,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: { fontFamily: 'PretendardBold', fontSize: 18, color: '#57C9D0' },
-  divider: { borderBottomWidth: 0.5, borderBottomColor: '#E6E7E9', marginBottom: 8.5 },
+  divider: { borderBottomWidth: 0.5, borderBottomColor: '#DDF4F6', marginBottom: 16 },
 
   badge: {
     alignItems: 'center',
@@ -134,4 +191,14 @@ const styles = StyleSheet.create({
     fontFamily: 'PretendardRegular',
     fontSize: 12,
   },
+
+  addBtn: {
+    width: '100%',
+    height: 52,
+    backgroundColor: '#57C9D0',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addBtnText: { color: '#FFFFFF', fontFamily: 'PretendardSemiBold', fontSize: 16 },
 })

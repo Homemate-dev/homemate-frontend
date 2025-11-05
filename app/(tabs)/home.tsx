@@ -186,16 +186,18 @@ export default function HomeScreen() {
                       style={[styles.itemRow, index !== choresList.length - 1 && styles.mb12]}
                     >
                       <View style={styles.itemLeftRow}>
-                        <Text
-                          style={[
-                            styles.badgeText,
-                            item.status === 'COMPLETED'
-                              ? styles.badgeDone
-                              : styleFromRepeatColor(repeat.color),
-                          ]}
-                        >
-                          {repeat.label}
-                        </Text>
+                        <View style={[styles.badge, styleFromRepeatColor(repeat.color)]}>
+                          <Text
+                            style={[
+                              styles.badgeText,
+                              item.status === 'COMPLETED'
+                                ? styles.badgeDone
+                                : styleFromRepeatColor(repeat.color),
+                            ]}
+                          >
+                            {repeat.label}
+                          </Text>
+                        </View>
                         <TouchableOpacity
                           activeOpacity={0.8}
                           onPress={() =>
@@ -321,15 +323,18 @@ const styles = StyleSheet.create({
   itemRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   mb12: { marginBottom: 12 },
   itemLeftRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  badgeText: {
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    fontSize: 12,
+  badge: {
+    alignItems: 'center',
+    justifyContent: 'center',
     width: 42,
     height: 23,
+    borderRadius: 6,
+  },
+  badgeText: {
+    fontSize: 12,
     textAlign: 'center',
   },
+
   badgeDone: { backgroundColor: '#CDCFD2', color: '#9B9FA6' },
   itemTitle: { fontSize: 14 },
   itemTitleActive: { color: '#000000' },
