@@ -3,7 +3,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { Platform } from 'react-native'
 
-import { api, setAccessToken } from '@/libs/api/axios'
+import { api, setAccessToken, setOnUnauthorized, setRefreshToken } from '@/libs/api/axios'
+
+type LoginTokens = {
+  accessToken: string
+  refreshToken: string
+  accessTokenExpiresIn?: number
+  refreshTokenExpiresIn?: number
+}
 
 type User = {
   id: number
@@ -17,7 +24,7 @@ type AuthContextType = {
   user: User | null
   loading: boolean
   verified: boolean
-  login: (token: string, userData: User) => Promise<void>
+  login: (token: LoginTokens, userData: User) => Promise<void>
   logout: () => Promise<void>
   updateUser: (userData: Partial<User>) => Promise<void>
 }
@@ -64,14 +71,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [verified, setVerified] = useState(false)
 
   useEffect(() => {
+    // ✅ 리프레시 실패(401/419) 시 자동 로그아웃
+    setOnUnauthorized(async () => {
+      await storage.multiRemove(['accessToken', 'refreshToken', 'user'])
+      setAccessToken(null)
+      setRefreshToken(null)
+      setToken(null)
+      setUser(null)
+      setVerified(false)
+    })
+  }, [])
+
+  useEffect(() => {
     const loadAuthData = async () => {
       try {
-        const storedToken = await storage.getItem('accessToken')
-        const storedUser = await storage.getItem('user')
+        // ✅ refreshToken도 함께 복원
+        const [storedAccess, storedRefresh, storedUser] = await Promise.all([
+          storage.getItem('accessToken'),
+          storage.getItem('refreshToken'),
+          storage.getItem('user'),
+        ])
 
-        if (!isInvalid(storedToken)) {
-          setAccessToken(storedToken as string)
-          setToken(storedToken as string)
+        if (!isInvalid(storedAccess)) {
+          setAccessToken(storedAccess as string)
+          setToken(storedAccess as string)
+
+          if (!isInvalid(storedRefresh)) {
+            setRefreshToken(storedRefresh as string)
+          }
 
           // ✅ 토큰 유효성 확인
           try {
@@ -80,15 +107,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setVerified(true)
           } catch {
             // 검증 실패 → 정리
-            await storage.multiRemove(['accessToken', 'user'])
+            await storage.multiRemove(['accessToken', 'refreshToken', 'user'])
             setAccessToken(null)
+            setRefreshToken(null)
             setToken(null)
             setUser(null)
             setVerified(false)
           }
         } else {
-          await storage.multiRemove(['accessToken', 'user'])
+          await storage.multiRemove(['accessToken', 'refreshToken', 'user'])
           setAccessToken(null)
+          setRefreshToken(null)
           setToken(null)
           setUser(null)
           setVerified(false)
@@ -97,30 +126,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // (옵션) 저장된 user를 파싱만 우선 반영하고 싶다면 아래 사용
         if (!user && storedUser && !isInvalid(storedUser)) {
           try {
-            const parsed = JSON.parse(storedUser)
-            setUser(parsed)
+            setUser(JSON.parse(storedUser))
           } catch {}
         }
-      } catch (e) {
-        console.warn('Error loading auth data:', e)
-        await storage.multiRemove(['accessToken', 'user'])
-        setAccessToken(null)
-        setToken(null)
-        setUser(null)
-        setVerified(false)
       } finally {
         setLoading(false)
       }
     }
-
     loadAuthData()
   }, [])
 
-  const login = async (newToken: string, userData: User) => {
-    await storage.setItem('accessToken', newToken)
+  const login = async (tokens: LoginTokens, userData: User) => {
+    await storage.setItem('accessToken', tokens.accessToken)
+    await storage.setItem('refreshToken', tokens.refreshToken)
     await storage.setItem('user', JSON.stringify(userData))
-    setAccessToken(newToken)
-    setToken(newToken)
+    setAccessToken(tokens.accessToken)
+    setRefreshToken(tokens.refreshToken)
+    setToken(tokens.accessToken)
     setUser(userData)
     setVerified(true) // 로그인 직후는 검증 완료로 간주
   }
@@ -138,7 +160,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null)
     setVerified(false)
     setAccessToken(null)
-    await storage.multiRemove(['accessToken', 'user'])
+    setRefreshToken(null)
+    await storage.multiRemove(['accessToken', 'refreshToken', 'user'])
   }
 
   return (
