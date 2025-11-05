@@ -19,7 +19,7 @@ export function useChoreByDate(date: string) {
 
     // 자동 리패치/포커스 리패치 방지
     staleTime: 60 * 1000, // 60s 동안 신선 → 바로 리패치 안 함
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     refetchOnReconnect: false,
     refetchOnMount: false,
     retry: false,

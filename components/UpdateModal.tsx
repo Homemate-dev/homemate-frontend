@@ -1,5 +1,5 @@
 // UpdateModal.tsx
-import { Modal, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native'
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
 type Props = {
   visible: boolean
@@ -26,9 +26,10 @@ export default function UpdateModal({
     >
       <View style={styles.container} pointerEvents="box-none">
         {/* 어두운 배경 (바깥 탭 닫기) */}
-        <TouchableWithoutFeedback onPress={!loading ? onClose : undefined}>
-          <View style={styles.backdrop} />
-        </TouchableWithoutFeedback>
+        <Pressable
+          onPress={!loading ? onClose : undefined} // 로딩 중엔 바깥 탭 닫기 막기
+          style={styles.backdrop}
+        />
 
         {/* 시트 */}
         <View style={styles.sheet}>
@@ -68,8 +69,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: 'transparent',
+    justifyContent: 'flex-end',
   },
   sheet: {
     position: 'relative',
@@ -92,7 +98,7 @@ const styles = StyleSheet.create({
   },
   sheetHandle: {
     alignSelf: 'center',
-    width: 36,
+    width: 60,
     height: 4,
     borderRadius: 2,
     backgroundColor: '#E6E7E9',

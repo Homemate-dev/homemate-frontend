@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 import { getRandomChores } from '@/libs/api/recommend/getRandomChores'
 
-export default function useRecommendChores() {
+export default function useRandomChores() {
   return useQuery({
     queryKey: ['recommend', 'random'],
     queryFn: getRandomChores,

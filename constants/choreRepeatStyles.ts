@@ -5,7 +5,7 @@ export const REPEAT_STYLE = {
   'MONTHLY-1': { label: '1개월', color: 'bg-[#FFE6D3] text-[#FF7300]' },
   'MONTHLY-3': { label: '3개월', color: 'bg-[#E7F4E8] text-[#1BA300]' },
   'MONTHLY-6': { label: '6개월', color: 'bg-[#FBECF3] text-[#E568A0]' },
-  'NONE-0': { label: '안 함', color: 'bg-[#DDF4F6] text-[#46A1A6]' },
+  'NONE-0': { label: '한번', color: 'bg-[#DDF4F6] text-[#46A1A6]' },
 } as const
 
 export function getRepeatKey(type?: string | null, interval?: number | null) {

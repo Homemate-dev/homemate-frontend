@@ -7,6 +7,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { ToastProvider } from '@/contexts/ToastContext'
 import { registerFCMToken } from '@/libs/api/fcm'
 
 const queryClient = new QueryClient()
@@ -59,9 +60,11 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F8F8FA' }}>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <RootNavigator />
-          </AuthProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <RootNavigator />
+            </AuthProvider>
+          </ToastProvider>
         </QueryClientProvider>
       </SafeAreaView>
     </SafeAreaProvider>
