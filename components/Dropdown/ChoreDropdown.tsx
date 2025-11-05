@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   itemPressable: {
     paddingVertical: 2,
   },
-  label: { color: '#686F79', fontSize: 14 },
+  label: { fontFamily: 'pretendard', color: '#686F79', fontSize: 14 },
   icon: { width: 12, height: 22 },
 
   modalRoot: {
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
 
-  option: { fontSize: 14 },
+  option: { fontFamily: 'pretendard', fontSize: 14 },
   divider: {
     height: 1,
     backgroundColor: '#E6E7E9',

@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
   },
   bannerText: {
+    fontFamily: 'pretendard',
     color: '#686F79',
     fontSize: 14,
   },
@@ -118,14 +119,15 @@ const styles = StyleSheet.create({
   // primary buttons
   primaryBtn: {
     width: '100%',
+    height: 52,
     backgroundColor: '#DDF4F6',
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    height: 48,
   },
   primaryBtnText: {
+    fontFamily: 'pretendard',
     color: '#46A1A6',
     fontWeight: '600',
     fontSize: 16,
@@ -135,14 +137,15 @@ const styles = StyleSheet.create({
   // cancel button
   cancelBtn: {
     width: '100%',
+    height: 52,
     backgroundColor: '#040F200D',
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    height: 48,
   },
   cancelBtnText: {
+    fontFamily: 'pretendard',
     color: '#9B9FA6',
     fontWeight: '600',
     fontSize: 16,

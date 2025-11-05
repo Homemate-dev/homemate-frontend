@@ -13,6 +13,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native'
 
@@ -318,236 +319,250 @@ export default function AddChoreModal() {
         style={styles.kbView}
       >
         <View style={styles.wrapper}>
-          <ScrollView
-            style={styles.scroll}
-            scrollEnabled={!overlayOpen}
-            keyboardShouldPersistTaps="handled"
+          <TouchableWithoutFeedback
+            onPress={() => {
+              if (activeDropdown) setActiveDropdown(null) // 바깥 클릭 시 닫기
+              if (openCalendar) setOpenCalendar(null)
+            }}
           >
-            <View style={styles.headerRow}>
-              <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
-                <MaterialIcons name="chevron-left" size={28} color="#686F79" />
-              </TouchableOpacity>
-              <Text style={styles.headerTitle}>{headerTitle}</Text>
-
-              {isEdit && (
-                <>
-                  <TouchableOpacity
-                    onPress={() => setDeleteOpen(true)}
-                    style={styles.headerRight}
-                    disabled={deleting}
-                  >
-                    <Text style={styles.deleteText}>삭제</Text>
+            <View style={{ flex: 1 }}>
+              <ScrollView
+                style={styles.scroll}
+                scrollEnabled={!overlayOpen}
+                keyboardShouldPersistTaps="handled"
+              >
+                <View style={styles.headerRow}>
+                  <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
+                    <MaterialIcons name="chevron-left" size={28} color="#686F79" />
                   </TouchableOpacity>
+                  <Text style={styles.headerTitle}>{headerTitle}</Text>
 
-                  <DeleteModal
-                    visible={deleteOpen}
-                    onClose={() => setDeleteOpen(false)}
-                    onDeleteOnly={() => handleDelete(false)}
-                    onDeleteAll={() => handleDelete(true)}
-                    loading={deleting}
-                    repeatType={detail?.repeatType}
-                  />
-                </>
-              )}
-            </View>
+                  {isEdit && (
+                    <>
+                      <TouchableOpacity
+                        onPress={() => setDeleteOpen(true)}
+                        style={styles.headerRight}
+                        disabled={deleting}
+                      >
+                        <Text style={styles.deleteText}>삭제</Text>
+                      </TouchableOpacity>
 
-            <View style={styles.flex1}>
-              <View style={styles.inputRow}>
-                <TextInput
-                  placeholder="집안일을 입력해주세요"
-                  placeholderTextColor="#9B9FA6"
-                  value={inputValue}
-                  onChangeText={handleChangeText}
-                  maxLength={MAX_LEN}
-                  style={[
-                    styles.textInput,
-                    Platform.OS === 'web' && ({ outlineStyle: 'none' } as any),
-                  ]}
-                />
-                <Text style={styles.counterText}>
-                  {inputValue.length}자/{MAX_LEN}자
-                </Text>
-              </View>
-
-              {hasForbiddenChar && <Text style={styles.warnText}>*특수문자를 제외해주세요</Text>}
-
-              {isLoading ? (
-                <View style={styles.loadingRow}>
-                  <ActivityIndicator />
-                </View>
-              ) : (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.chipsRow}
-                >
-                  {(Array.isArray(randomChores) ? randomChores : []).map((item: any) => (
-                    <Pressable
-                      key={item.id}
-                      style={styles.chip}
-                      onPress={() => setInputValue(item.titleKo)}
-                    >
-                      <Text style={styles.chipText}>{item.titleKo}</Text>
-                    </Pressable>
-                  ))}
-                  <Pressable
-                    style={styles.resetBtn}
-                    onPress={() => refetch()}
-                    disabled={isRefetching || isLoading}
-                  >
-                    <View style={styles.resetContent}>
-                      <Image
-                        source={require('../../assets/images/icon/refresh.png')}
-                        style={{ width: 16, height: 16 }}
-                        resizeMode="contain"
+                      <DeleteModal
+                        visible={deleteOpen}
+                        onClose={() => setDeleteOpen(false)}
+                        onDeleteOnly={() => handleDelete(false)}
+                        onDeleteAll={() => handleDelete(true)}
+                        loading={deleting}
+                        repeatType={detail?.repeatType}
                       />
-                      <Text style={styles.resetBtnText}>새로고침하기</Text>
+                    </>
+                  )}
+                </View>
+
+                <View style={styles.flex1}>
+                  <View style={styles.inputRow}>
+                    <TextInput
+                      placeholder="집안일을 입력해주세요"
+                      placeholderTextColor="#9B9FA6"
+                      value={inputValue}
+                      onChangeText={handleChangeText}
+                      maxLength={MAX_LEN}
+                      style={[
+                        styles.textInput,
+                        Platform.OS === 'web' && ({ outlineStyle: 'none' } as any),
+                      ]}
+                    />
+                    <Text style={styles.counterText}>
+                      {inputValue.length}자/{MAX_LEN}자
+                    </Text>
+                  </View>
+
+                  {hasForbiddenChar && (
+                    <Text style={styles.warnText}>*특수문자를 제외해주세요</Text>
+                  )}
+
+                  {isLoading ? (
+                    <View style={styles.loadingRow}>
+                      <ActivityIndicator />
                     </View>
-                  </Pressable>
-                </ScrollView>
+                  ) : (
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.chipsRow}
+                    >
+                      {(Array.isArray(randomChores) ? randomChores : []).map((item: any) => (
+                        <Pressable
+                          key={item.id}
+                          style={styles.chip}
+                          onPress={() => setInputValue(item.titleKo)}
+                        >
+                          <Text style={styles.chipText}>{item.titleKo}</Text>
+                        </Pressable>
+                      ))}
+                      <Pressable
+                        style={styles.resetBtn}
+                        onPress={() => refetch()}
+                        disabled={isRefetching || isLoading}
+                      >
+                        <View style={styles.resetContent}>
+                          <Image
+                            source={require('../../assets/images/icon/refresh.png')}
+                            style={{ width: 16, height: 16 }}
+                            resizeMode="contain"
+                          />
+                          <Text style={styles.resetBtnText}>새로고침하기</Text>
+                        </View>
+                      </Pressable>
+                    </ScrollView>
+                  )}
+
+                  <View style={styles.card}>
+                    <View style={styles.rowBetween}>
+                      <Text style={styles.label}>공간</Text>
+                      <ChoreDropdown
+                        id="space"
+                        options={spaceOptions}
+                        value={space}
+                        onChange={setSpace}
+                        placeholder="선택"
+                        activeDropdown={activeDropdown}
+                        setActiveDropdown={setActiveDropdown}
+                      />
+                    </View>
+
+                    <View style={styles.divider} />
+
+                    <View style={styles.rowBetween}>
+                      <Text style={styles.label}>반복주기</Text>
+                      <ChoreDropdown
+                        id="repeat"
+                        options={repeatOptions}
+                        value={repeat}
+                        onChange={setRepeat}
+                        placeholder="선택"
+                        activeDropdown={activeDropdown}
+                        setActiveDropdown={setActiveDropdown}
+                      />
+                    </View>
+
+                    <View style={styles.divider} />
+
+                    {/* 시작일자 */}
+                    <View
+                      style={[
+                        styles.rowBetween,
+                        styles.relative,
+                        openCalendar === 'start' ? styles.z50 : styles.z10,
+                      ]}
+                    >
+                      <Text style={styles.label}>시작일자</Text>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => {
+                          if (!isYMD(startDate)) setStartDate(todayYMD)
+                          setOpenCalendar(openCalendar === 'start' ? null : 'start')
+                        }}
+                        style={styles.dateBtn}
+                      >
+                        <Text style={styles.dateBtnText}>{toYYMMDD(startDate ?? todayYMD)}</Text>
+                      </TouchableOpacity>
+
+                      {openCalendar === 'start' && (
+                        <>
+                          <View style={styles.calendarPopover}>
+                            <DatePickerCalendar
+                              selectedDate={safeYMD(startDate, todayYMD)}
+                              onSelect={(d) => {
+                                setStartDate(d)
+                                setOpenCalendar(null)
+                              }}
+                              isOpen={openCalendar === 'start'}
+                            />
+                          </View>
+                        </>
+                      )}
+                    </View>
+
+                    <View style={styles.divider} />
+
+                    {/* 완료일자 */}
+                    <View
+                      style={[
+                        styles.rowBetween,
+                        styles.relative,
+                        openCalendar === 'end' ? styles.z50 : styles.z10,
+                      ]}
+                    >
+                      <Text style={styles.label}>완료일자</Text>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => {
+                          if (!isYMD(endDate)) setEndDate(safeYMD(startDate, todayYMD))
+                          setOpenCalendar(openCalendar === 'end' ? null : 'end')
+                        }}
+                        style={styles.dateBtn}
+                      >
+                        <Text style={styles.dateBtnText}>{toYYMMDD(endDate ?? todayYMD)}</Text>
+                      </TouchableOpacity>
+
+                      {openCalendar === 'end' && (
+                        <>
+                          <View style={styles.calendarPopover}>
+                            <DatePickerCalendar
+                              selectedDate={safeYMD(endDate, safeYMD(startDate, todayYMD))}
+                              onSelect={(d) => {
+                                setEndDate(d)
+                                setOpenCalendar(null)
+                              }}
+                              isOpen={openCalendar === 'end'}
+                            />
+                          </View>
+                        </>
+                      )}
+                    </View>
+
+                    {!isDateRangeValid && (
+                      <Text style={styles.errorMsg}>완료일자는 시작일자보다 빠를 수 없습니다.</Text>
+                    )}
+
+                    <View style={styles.divider} />
+
+                    <View style={styles.rowBetween}>
+                      <Text style={styles.label}>알림</Text>
+                      <Toggle value={notifyOn} onChange={setNotifyOn} />
+                    </View>
+
+                    {notifyOn && (
+                      <TimeDropdown
+                        ampm={ampm}
+                        hour={hour12}
+                        minute={minute}
+                        onChange={({ ampm, hour, minute }) => {
+                          setAmpm(ampm)
+                          setHour12(hour)
+                          setMinute(minute)
+                        }}
+                        activeDropdown={activeDropdown}
+                        setActiveDropdown={setActiveDropdown}
+                      />
+                    )}
+                  </View>
+                </View>
+              </ScrollView>
+
+              {(activeDropdown || openCalendar) && (
+                <Pressable
+                  onPress={() => {
+                    if (activeDropdown) setActiveDropdown(null)
+                    if (openCalendar) setOpenCalendar(null)
+                  }}
+                  style={[StyleSheet.absoluteFillObject, { backgroundColor: 'transparent' }]}
+                  pointerEvents="auto"
+                />
               )}
-
-              <View style={styles.card}>
-                <View style={styles.rowBetween}>
-                  <Text style={styles.label}>공간</Text>
-                  <ChoreDropdown
-                    id="space"
-                    options={spaceOptions}
-                    value={space}
-                    onChange={setSpace}
-                    placeholder="선택"
-                    activeDropdown={activeDropdown}
-                    setActiveDropdown={setActiveDropdown}
-                  />
-                </View>
-
-                <View style={styles.divider} />
-
-                <View style={styles.rowBetween}>
-                  <Text style={styles.label}>반복주기</Text>
-                  <ChoreDropdown
-                    id="repeat"
-                    options={repeatOptions}
-                    value={repeat}
-                    onChange={setRepeat}
-                    placeholder="선택"
-                    activeDropdown={activeDropdown}
-                    setActiveDropdown={setActiveDropdown}
-                  />
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* 시작일자 */}
-                <View
-                  style={[
-                    styles.rowBetween,
-                    styles.relative,
-                    openCalendar === 'start' ? styles.z50 : styles.z10,
-                  ]}
-                >
-                  <Text style={styles.label}>시작일자</Text>
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => {
-                      if (!isYMD(startDate)) setStartDate(todayYMD)
-                      setOpenCalendar(openCalendar === 'start' ? null : 'start')
-                    }}
-                    style={styles.dateBtn}
-                  >
-                    <Text style={styles.dateBtnText}>{toYYMMDD(startDate ?? todayYMD)}</Text>
-                  </TouchableOpacity>
-
-                  {openCalendar === 'start' && (
-                    <>
-                      <Pressable
-                        style={StyleSheet.absoluteFillObject}
-                        onPress={() => setOpenCalendar(null)}
-                      />
-                      <View style={styles.calendarPopover}>
-                        <DatePickerCalendar
-                          selectedDate={safeYMD(startDate, todayYMD)}
-                          onSelect={(d) => {
-                            setStartDate(d)
-                            setOpenCalendar(null)
-                          }}
-                          isOpen={openCalendar === 'start'}
-                        />
-                      </View>
-                    </>
-                  )}
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* 완료일자 */}
-                <View
-                  style={[
-                    styles.rowBetween,
-                    styles.relative,
-                    openCalendar === 'end' ? styles.z50 : styles.z10,
-                  ]}
-                >
-                  <Text style={styles.label}>완료일자</Text>
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => {
-                      if (!isYMD(endDate)) setEndDate(safeYMD(startDate, todayYMD))
-                      setOpenCalendar(openCalendar === 'end' ? null : 'end')
-                    }}
-                    style={styles.dateBtn}
-                  >
-                    <Text style={styles.dateBtnText}>{toYYMMDD(endDate ?? todayYMD)}</Text>
-                  </TouchableOpacity>
-
-                  {openCalendar === 'end' && (
-                    <>
-                      <Pressable
-                        style={StyleSheet.absoluteFillObject}
-                        onPress={() => setOpenCalendar(null)}
-                      />
-                      <View style={styles.calendarPopover}>
-                        <DatePickerCalendar
-                          selectedDate={safeYMD(endDate, safeYMD(startDate, todayYMD))}
-                          onSelect={(d) => {
-                            setEndDate(d)
-                            setOpenCalendar(null)
-                          }}
-                          isOpen={openCalendar === 'end'}
-                        />
-                      </View>
-                    </>
-                  )}
-                </View>
-
-                {!isDateRangeValid && (
-                  <Text style={styles.errorMsg}>완료일자는 시작일자보다 빠를 수 없습니다.</Text>
-                )}
-
-                <View style={styles.divider} />
-
-                <View style={styles.rowBetween}>
-                  <Text style={styles.label}>알림</Text>
-                  <Toggle value={notifyOn} onChange={setNotifyOn} />
-                </View>
-
-                {notifyOn && (
-                  <TimeDropdown
-                    ampm={ampm}
-                    hour={hour12}
-                    minute={minute}
-                    onChange={({ ampm, hour, minute }) => {
-                      setAmpm(ampm)
-                      setHour12(hour)
-                      setMinute(minute)
-                    }}
-                    activeDropdown={activeDropdown}
-                    setActiveDropdown={setActiveDropdown}
-                  />
-                )}
-              </View>
             </View>
-          </ScrollView>
+          </TouchableWithoutFeedback>
 
           <UpdateModal
             visible={updateOpen}
@@ -605,8 +620,8 @@ const styles = StyleSheet.create({
   },
   headerBack: { position: 'absolute', left: 0 },
   headerRight: { position: 'absolute', right: 0 },
-  headerTitle: { fontSize: 20, fontWeight: '600', color: '#111111' },
-  deleteText: { fontSize: 16, color: '#57C9D0', fontWeight: '600' },
+  headerTitle: { fontFamily: 'pretendard', fontSize: 20, fontWeight: 600, color: '#111111' },
+  deleteText: { fontFamily: 'pretendard', fontSize: 16, color: '#57C9D0', fontWeight: '600' },
 
   flex1: { flex: 1 },
 
@@ -620,15 +635,22 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   textInput: {
+    fontFamily: 'pretendard',
     fontSize: 14,
     flex: 1,
     minWidth: 0,
     padding: 0,
     color: '#000',
   },
-  counterText: { fontSize: 12, color: '#B4B7BC' },
+  counterText: { fontFamily: 'pretendard', fontSize: 12, color: '#B4B7BC' },
 
-  warnText: { fontSize: 12, color: '#FF4838', marginBottom: 12, paddingLeft: 12 },
+  warnText: {
+    fontFamily: 'pretendard',
+    fontSize: 12,
+    color: '#FF4838',
+    marginBottom: 12,
+    paddingLeft: 12,
+  },
 
   loadingRow: { paddingVertical: 12, alignItems: 'center' },
 
@@ -647,7 +669,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     marginBottom: 12,
   },
-  chipText: { color: '#46A1A6', fontSize: 12, fontWeight: 500 },
+  chipText: { fontFamily: 'pretendard', color: '#46A1A6', fontSize: 12, fontWeight: 600 },
 
   resetBtn: {
     backgroundColor: '#79D4D9',
@@ -660,7 +682,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   resetContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-  resetBtnText: { fontSize: 12, fontWeight: 600, color: 'white', paddingLeft: 10 },
+  resetBtnText: {
+    fontFamily: 'pretendard',
+    fontSize: 12,
+    fontWeight: 600,
+    color: 'white',
+    paddingLeft: 10,
+  },
 
   card: {
     backgroundColor: '#FFFFFF',
@@ -670,7 +698,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  label: { fontSize: 16, fontWeight: '500', color: '#363F4D' },
+  label: { fontFamily: 'pretendard', fontSize: 16, fontWeight: '500', color: '#363F4D' },
   divider: { height: 1, backgroundColor: '#E6E7E9', marginVertical: 12 },
 
   relative: { position: 'relative' },
@@ -683,7 +711,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 6,
   },
-  dateBtnText: { fontSize: 14, color: '#46A1A6' },
+  dateBtnText: { fontFamily: 'pretendard', fontSize: 14, color: '#46A1A6' },
 
   calendarPopover: {
     position: 'absolute',
@@ -703,7 +731,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 
-  errorMsg: { fontSize: 12, color: '#FF0707', marginTop: 8 },
+  errorMsg: { fontFamily: 'pretendard', fontSize: 12, color: '#FF0707', marginTop: 8 },
 
   submitBtn: {
     height: 52,
@@ -714,7 +742,7 @@ const styles = StyleSheet.create({
   },
   submitBtnActive: { backgroundColor: '#57C9D0' },
   submitBtnDisabled: { backgroundColor: '#E6E7E9' },
-  submitText: { fontSize: 16, fontWeight: '500' },
+  submitText: { fontFamily: 'pretendard', fontSize: 16, fontWeight: '600' },
   submitTextActive: { color: '#FFFFFF' },
   submitTextDisabled: { color: '#B4B7BC' },
 })
