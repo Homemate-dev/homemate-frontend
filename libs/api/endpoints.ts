@@ -79,6 +79,9 @@ export const RECOMMEND_ENDPOINTS = {
 
   /** 랜덤 집안일 추천 조회 */
   RANDOM: '/recommend/random', // GET
+
+  /** 랜덤 집안일 추천 정보 가져오기 */
+  RANDOM_CHORES: (spaceChoreId: number) => `/recommend/spaces/${spaceChoreId}`, // GET
 } as const
 
 export const NOTIFICATION_ENDPOINTS = {

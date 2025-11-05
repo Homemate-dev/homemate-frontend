@@ -38,25 +38,28 @@ export default function UpdateModal({
           <View style={styles.gap}>
             <View style={styles.gap}>
               <View style={styles.mb8}>
-                <Text
+                <Pressable
                   onPress={!loading ? onUpdateOnly : undefined}
                   style={styles.primaryBtnTextWrap}
                 >
                   <Text style={styles.primaryBtnText}>이 일정만 수정</Text>
-                </Text>
+                </Pressable>
               </View>
 
-              <Text onPress={!loading ? onUpdateAll : undefined} style={styles.primaryBtnTextWrap}>
-                <Text style={styles.primaryBtnText}>전체 반복 일정 수정</Text>
-              </Text>
+              <Pressable
+                onPress={!loading ? onUpdateAll : undefined}
+                style={styles.primaryBtnTextWrap}
+              >
+                <Text style={styles.primaryBtnText}>향후 일정 수정</Text>
+              </Pressable>
             </View>
           </View>
 
-          <View style={styles.mt12}>
+          <Pressable style={styles.mt12}>
             <Text onPress={!loading ? onClose : undefined} style={styles.cancelBtnText}>
               취소
             </Text>
-          </View>
+          </Pressable>
         </View>
       </View>
     </Modal>
@@ -105,29 +108,30 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   gap: { gap: 8 },
-  title: { fontSize: 16, fontWeight: '700', color: '#111' },
-  desc: { fontSize: 13, color: '#6B6F76' },
-  label: { fontSize: 12, color: '#9B9FA6' },
 
   primaryBtnTextWrap: {
     width: '100%',
+    height: 52,
     backgroundColor: '#DDF4F6',
     borderRadius: 12,
-    textAlign: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 12,
   },
-  primaryBtnText: { color: '#46A1A6', fontWeight: '600', fontSize: 16 },
+  primaryBtnText: { fontFamily: 'pretendard', color: '#46A1A6', fontWeight: '600', fontSize: 16 },
 
   mt12: { marginTop: 12 },
   mb8: { marginBottom: 8 },
 
   cancelBtnText: {
     width: '100%',
+    height: 52,
     backgroundColor: '#040F200D',
     borderRadius: 12,
     textAlign: 'center',
     paddingVertical: 12,
     color: '#9B9FA6',
+    fontFamily: 'pretendard',
     fontWeight: '600',
     fontSize: 16,
   },
