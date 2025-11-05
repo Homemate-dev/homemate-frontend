@@ -56,10 +56,29 @@ export default function Login() {
         }),
       })
 
+      if (!response.ok) {
+        const text = await response.text().catch(() => '')
+        throw new Error(`Login failed: ${response.status} ${text}`)
+      }
+
       const data = await response.json()
 
-      if (data.accessToken) {
-        await login(data.accessToken, data.user)
+      if (data.accessToken && data.refreshToken) {
+        await login(
+          {
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
+            accessTokenExpiresIn: data.accessTokenExpiresIn, // 있으면 전달
+            refreshTokenExpiresIn: data.refreshTokenExpiresIn, // 있으면 전달
+          },
+          data.user
+        )
+        //  웹에서 URL의 code 파라미터 제거(새로고침 루프 방지)
+        if (Platform.OS === 'web') {
+          const url = new URL(window.location.href)
+          url.searchParams.delete('code')
+          window.history.replaceState(null, '', url.toString())
+        }
         router.replace('/home')
       } else {
         alert('로그인에 실패했습니다. 다시 시도해주세요.')
