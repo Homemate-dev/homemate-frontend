@@ -268,6 +268,7 @@ const styles = StyleSheet.create({
 
   headerBox: { alignItems: 'center', marginTop: 6, marginBottom: 30 },
   title: {
+    fontFamily: 'Pretendard',
     fontSize: 20,
     fontWeight: '600',
     color: '#1D2736',
@@ -275,9 +276,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
+    fontFamily: 'Pretendard',
     fontSize: 14,
     color: '#686F79',
-    fontWeight: '400',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -295,9 +296,10 @@ const styles = StyleSheet.create({
   },
 
   quote: {
+    fontFamily: 'Pretendard',
     fontSize: 16,
     color: '#FFFFFF',
-    fontWeight: '500',
+    fontWeight: '600',
     marginBottom: 20,
     textAlign: 'left',
     lineHeight: 24,
@@ -312,8 +314,8 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
   },
-  percentTop: { color: '#F5FCFC', fontSize: 12, fontWeight: '600' },
-  percentBottom: { color: '#34797D', fontSize: 12, fontWeight: '600' },
+  percentTop: { color: '#F5FCFC', fontFamily: 'Pretendard', fontSize: 12, fontWeight: '600' },
+  percentBottom: { color: '#34797D', fontFamily: 'Pretendard', fontSize: 12, fontWeight: '600' },
 
   dotsRow: {
     height: 20,
@@ -334,5 +336,11 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     marginHorizontal: 20,
   },
-  buttonText: { color: '#fff', fontWeight: '700', fontSize: 16, textAlign: 'center' },
+  buttonText: {
+    color: '#fff',
+    fontFamily: 'Pretendard',
+    fontWeight: '600',
+    fontSize: 16,
+    textAlign: 'center',
+  },
 })

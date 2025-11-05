@@ -84,11 +84,13 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   title: {
+    fontFamily: 'Pretendard',
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 8,
   },
   desc: {
+    fontFamily: 'Pretendard',
     fontSize: 14,
     color: '#686F79',
     textAlign: 'center',
@@ -100,13 +102,16 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#57C9D0',
     width: '100%',
+    height: 52,
     alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 12,
     paddingVertical: 15,
   },
   buttonText: {
+    fontFamily: 'Pretendard',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#FFFFFF',
   },
   progressRow: {
@@ -114,15 +119,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   progressLabel: {
+    fontFamily: 'Pretendard',
     fontSize: 14,
     fontWeight: '600',
     marginRight: 8,
   },
   progressText: {
+    fontFamily: 'Pretendard',
     fontSize: 14,
     color: '#B4B7BC',
   },
   progressValue: {
+    fontFamily: 'Pretendard',
     fontWeight: '600',
     color: '#57C9D0',
   },
