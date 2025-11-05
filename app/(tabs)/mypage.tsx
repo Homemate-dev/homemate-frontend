@@ -10,7 +10,6 @@ import {
   Linking,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -21,6 +20,7 @@ import { heightPercentageToDP as hp } from 'react-native-responsive-screen'
 
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import NotificationBell from '@/components/notification/NotificationBell'
+import TabSafeScroll from '@/components/TabSafeScroll'
 import Toggle from '@/components/Toggle'
 import {
   fetchNotificationTime,
@@ -38,7 +38,7 @@ export default function MyPage() {
   const router = useRouter()
   const qc = useQueryClient()
 
-  // ✅ React Query
+  //  React Query
   const { data: user, isLoading: isUserLoading, isError: isUserError } = useMyPage()
   const { data: notifTimeData, isLoading: isTimeLoading } = useQuery({
     queryKey: ['user', 'notificationTime'],
@@ -125,7 +125,7 @@ export default function MyPage() {
     }
   }
 
-  // ✅ 로딩/에러 UI
+  // 로딩/에러 UI
   if (isUserLoading || isTimeLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -144,8 +144,7 @@ export default function MyPage() {
   }
 
   return (
-    <ScrollView
-      style={[styles.container, { overflow: 'visible' }]}
+    <TabSafeScroll
       contentContainerStyle={{
         paddingBottom: Platform.OS === 'android' ? 100 : 90,
         overflow: 'visible',
@@ -257,7 +256,7 @@ export default function MyPage() {
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
         <Text style={styles.logoutText}>로그아웃</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </TabSafeScroll>
   )
 }
 

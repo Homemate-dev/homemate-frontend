@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
   },
-  title: { fontFamily: 'PretendardBold', fontSize: 18, color: '#57C9D0' },
+  title: { fontFamily: 'pretendard', fontSize: 18, fontWeight: 700, color: '#57C9D0' },
   divider: { borderBottomWidth: 0.5, borderBottomColor: '#DDF4F6', marginBottom: 16 },
 
   badge: {
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
 
   badgeText: {
-    fontFamily: 'PretendardRegular',
+    fontFamily: 'pretendard',
     fontSize: 12,
   },
 
@@ -200,5 +200,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  addBtnText: { color: '#FFFFFF', fontFamily: 'PretendardSemiBold', fontSize: 16 },
+  addBtnText: { color: '#FFFFFF', fontFamily: 'pretendard', fontSize: 16, fontWeight: 600 },
 })

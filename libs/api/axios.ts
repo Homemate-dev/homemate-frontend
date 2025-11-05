@@ -59,7 +59,7 @@ api.interceptors.request.use((config) => {
     headers.delete('Authorization')
   }
 
-  // ✅ Axios 타입에 맞게 AxiosHeaders 인스턴스로 대입
+  // Axios 타입에 맞게 AxiosHeaders 인스턴스로 대입
   config.headers = headers
   return config
 })
@@ -67,18 +67,35 @@ api.interceptors.request.use((config) => {
 /** ─────────────────────────────────────────────────────────────
  *  refresh 로직 (단일 비행)
  *  ────────────────────────────────────────────────────────────*/
+
 async function refreshIfNeeded(): Promise<string | null> {
   if (isBad(refreshToken)) return null
 
   if (!refreshingPromise) {
+    const USE_AUTH_HEADER = true // 서버가 헤더(Authorization: Bearer <refresh>) 받으면 true
+
     refreshingPromise = api
-      .post('/auth/refresh', { refreshToken }) // ← 필요 시 엔드포인트/바디 수정
+      .post(
+        '/auth/refresh',
+        USE_AUTH_HEADER ? {} : { refreshToken }, // 바디 방식이면 여기
+        USE_AUTH_HEADER ? { headers: { Authorization: `Bearer ${refreshToken}` } } : undefined
+      )
       .then((res) => {
-        const newAccess = (res.data?.accessToken as string) || null
-        // 선택: 백엔드가 새 refreshToken도 주면 같이 갱신
-        const newRefresh = (res.data?.refreshToken as string) || null
+        // 스펙에 맞춰 파싱
+        const data = res.data as {
+          tokenType?: string
+          accessToken?: string
+          accessTokenExpiresIn?: number
+          refreshToken?: string
+          refreshTokenExpiresIn?: number
+        }
+
+        const newAccess = data.accessToken ?? null
+        const newRefresh = data.refreshToken ?? null
+
         if (newAccess) setAccessToken(newAccess)
         if (newRefresh) setRefreshToken(newRefresh)
+
         return newAccess
       })
       .catch(() => null)

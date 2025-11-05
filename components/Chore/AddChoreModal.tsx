@@ -1,3 +1,4 @@
+// AddChoreModal.tsx
 import { MaterialIcons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
@@ -5,6 +6,7 @@ import {
   ActivityIndicator,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -55,7 +57,7 @@ export default function AddChoreModal() {
   const isEdit = (modeParam ?? 'add') === 'edit'
   const instanceId = instanceIdParam ? Number(instanceIdParam) : undefined
 
-  // 안전 파싱: 백엔드가 true/'Y'/'1'/1 등으로 내려줄 수 있으니 통일
+  // 안전 파싱
   const toBool = (v: unknown) => v === true || v === 'Y' || v === 'y' || v === 1 || v === '1'
 
   const toYYMMDD = (s?: string | null) => {
@@ -64,14 +66,14 @@ export default function AddChoreModal() {
     if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
       return `${s.slice(2, 4)}.${s.slice(5, 7)}.${s.slice(8, 10)}`
     }
-    const d = new Date(s)
+    const d = new Date(s as string)
     if (!isNaN(d.getTime())) {
       const yy = String(d.getFullYear()).slice(2)
       const mm = String(d.getMonth() + 1).padStart(2, '0')
       const dd = String(d.getDate()).padStart(2, '0')
       return `${yy}.${mm}.${dd}`
     }
-    return s
+    return s || ''
   }
 
   const isYMD = (s: string | null | undefined): boolean => !!s && /^\d{4}-\d{2}-\d{2}$/.test(s)
@@ -116,25 +118,17 @@ export default function AddChoreModal() {
 
   // 추천 집안일 자동 채우기
   const applyRandomChore = (c: RandomChoreList) => {
-    // 제목
     setInputValue(c.titleKo)
-    // 공간
     setSpace(toSpaceUi(c.space))
-    // 반복주기
     setRepeat(toRepeatLabel(c.repeatType, c.repeatInterval))
-    // 시작일자
     setStartDate(c.startDate)
-    // 완료일자
     setEndDate(c.endDate)
-    // 알림
     if (c.choreEnabled) {
       setNotifyOn(true)
       setAmpm('오전')
       setHour12(9)
       setMinute(0)
-    } else {
-      setNotifyOn(false)
-    }
+    } else setNotifyOn(false)
   }
 
   useEffect(() => {
@@ -153,7 +147,7 @@ export default function AddChoreModal() {
   useEffect(() => {
     if (!isEdit || !detail) return
     setInputValue(detail.title ?? '')
-    setNotifyOn(toBool(detail.notificationYn)) // 안전 파싱으로 변경
+    setNotifyOn(toBool(detail.notificationYn))
     setRepeat(toRepeatLabel(detail.repeatType, detail.repeatInterval))
     setSpace(toSpaceUi(detail.space) ?? null)
     setStartDate(detail.startDate ?? null)
@@ -165,14 +159,13 @@ export default function AddChoreModal() {
     setMinute(parts.minute)
   }, [isEdit, detail])
 
-  // 초기값(비교 기준) — 시간도 정규화하여 현재값과 포맷 일치
   const initialValue = useMemo(() => {
     if (!isEdit || !detail) return
-    const parts = toHHmmParts(detail.notificationTime ?? '09:00') // 정규화
+    const parts = toHHmmParts(detail.notificationTime ?? '09:00')
     return {
       title: (detail.title ?? '').trim(),
       notificationYn: toBool(detail.notificationYn),
-      notificationTime: toHHmm(parts.ampm, parts.hour12, parts.minute), // "09:00" 포맷
+      notificationTime: toHHmm(parts.ampm, parts.hour12, parts.minute),
       space: toSpaceUi(detail.space) ?? null,
       repeat: toRepeatLabel(detail.repeatType, detail.repeatInterval),
       startDate: detail.startDate ?? null,
@@ -180,7 +173,6 @@ export default function AddChoreModal() {
     }
   }, [isEdit, detail])
 
-  // 현재 입력값(정규화)
   const currentValue = useMemo(() => {
     const hhmm = toHHmm(ampm, hour12, minute)
     return {
@@ -194,21 +186,15 @@ export default function AddChoreModal() {
     }
   }, [inputValue, notifyOn, ampm, hour12, minute, space, repeat, startDate, endDate])
 
-  // 변경 여부 판정 — 알림 OFF면 시간 비교 제외, 날짜 fallback 규칙 통일
   const isChanged = useMemo(() => {
     if (!isEdit) return true
     if (!initialValue) return false
-
     const same = (a: any, b: any) => String(a ?? '') === String(b ?? '')
-
     if (!same(initialValue.title, currentValue.title)) return true
     if (initialValue.notificationYn !== currentValue.notificationYn) return true
-
-    // 알림이 켜져 있을 때만 시간 비교
     if (currentValue.notificationYn) {
       if (!same(initialValue.notificationTime, currentValue.notificationTime)) return true
     }
-
     if (!same(initialValue.space, currentValue.space)) return true
     if (!same(initialValue.repeat, currentValue.repeat)) return true
 
@@ -216,10 +202,8 @@ export default function AddChoreModal() {
     const currStart = currentValue.startDate ?? null
     const initEnd = initialValue.endDate ?? initialValue.startDate ?? null
     const currEnd = currentValue.endDate ?? currentValue.startDate ?? null
-
     if (!same(initStart, currStart)) return true
     if (!same(initEnd, currEnd)) return true
-
     return false
   }, [isEdit, initialValue, currentValue])
 
@@ -271,12 +255,9 @@ export default function AddChoreModal() {
       )
     } else {
       if (!instanceId) {
-        console.warn('[update] instanceId가 없습니다. 수정 화면 진입 경로를 확인해주세요.')
+        console.warn('[update] instanceId가 없습니다.')
         return
       }
-      const instanceIdForUpdate = instanceId
-      if (!instanceIdForUpdate) return
-
       if (isRepeating && applyToAfter === null) {
         setUpdateOpen(true)
         return
@@ -284,7 +265,7 @@ export default function AddChoreModal() {
 
       updateChore(
         {
-          choreInstanceId: instanceIdForUpdate,
+          choreInstanceId: instanceId,
           dto: {
             title: inputValue.trim(),
             notificationYn: notifyOn,
@@ -332,17 +313,20 @@ export default function AddChoreModal() {
   const headerTitle = isEdit ? '집안일 수정' : '집안일 추가'
   const btnLabel = isEdit ? '수정하기' : '등록하기'
 
-  // 전역 오버레이 없이도 스크롤 잠금은 유지
-  const overlayOpen = Boolean(activeDropdown || openCalendar)
-
-  // web에서 input max length 적용
+  // 전역 오버레이는 "드롭다운"만 담당 (캘린더는 Modal로 처리)
+  const overlayOpen = Boolean(activeDropdown)
 
   const MAX_LEN = 20
-
   const handleChangeText = (text: string) => {
     const limited = Array.from(text).slice(0, MAX_LEN).join('')
     setInputValue(limited)
   }
+
+  // 시작/완료 팝오버를 서로 다른 위치에 띄우려면 padding 값을 분기
+  const modalPadding =
+    openCalendar === 'start'
+      ? { paddingTop: 333, paddingRight: 25 }
+      : { paddingTop: 383, paddingRight: 25 }
 
   return (
     <>
@@ -354,9 +338,9 @@ export default function AddChoreModal() {
       >
         <View style={styles.wrapper}>
           <TouchableWithoutFeedback
+            disabled={overlayOpen}
             onPress={() => {
-              if (activeDropdown) setActiveDropdown(null) // 바깥 클릭 시 닫기
-              if (openCalendar) setOpenCalendar(null)
+              if (activeDropdown) setActiveDropdown(null)
             }}
           >
             <View style={{ flex: 1 }}>
@@ -453,7 +437,7 @@ export default function AddChoreModal() {
                   )}
 
                   <View style={styles.card}>
-                    <View style={styles.rowBetween}>
+                    <View className="rowBetween" style={styles.rowBetween}>
                       <Text style={styles.label}>공간</Text>
                       <ChoreDropdown
                         id="space"
@@ -484,13 +468,7 @@ export default function AddChoreModal() {
                     <View style={styles.divider} />
 
                     {/* 시작일자 */}
-                    <View
-                      style={[
-                        styles.rowBetween,
-                        styles.relative,
-                        openCalendar === 'start' ? styles.z50 : styles.z10,
-                      ]}
-                    >
+                    <View style={[styles.rowBetween, styles.relative]}>
                       <Text style={styles.label}>시작일자</Text>
                       <TouchableOpacity
                         activeOpacity={0.8}
@@ -502,33 +480,12 @@ export default function AddChoreModal() {
                       >
                         <Text style={styles.dateBtnText}>{toYYMMDD(startDate ?? todayYMD)}</Text>
                       </TouchableOpacity>
-
-                      {openCalendar === 'start' && (
-                        <>
-                          <View style={styles.calendarPopover}>
-                            <DatePickerCalendar
-                              selectedDate={safeYMD(startDate, todayYMD)}
-                              onSelect={(d) => {
-                                setStartDate(d)
-                                setOpenCalendar(null)
-                              }}
-                              isOpen={openCalendar === 'start'}
-                            />
-                          </View>
-                        </>
-                      )}
                     </View>
 
                     <View style={styles.divider} />
 
                     {/* 완료일자 */}
-                    <View
-                      style={[
-                        styles.rowBetween,
-                        styles.relative,
-                        openCalendar === 'end' ? styles.z50 : styles.z10,
-                      ]}
-                    >
+                    <View style={[styles.rowBetween, styles.relative]}>
                       <Text style={styles.label}>완료일자</Text>
                       <TouchableOpacity
                         activeOpacity={0.8}
@@ -540,21 +497,6 @@ export default function AddChoreModal() {
                       >
                         <Text style={styles.dateBtnText}>{toYYMMDD(endDate ?? todayYMD)}</Text>
                       </TouchableOpacity>
-
-                      {openCalendar === 'end' && (
-                        <>
-                          <View style={styles.calendarPopover}>
-                            <DatePickerCalendar
-                              selectedDate={safeYMD(endDate, safeYMD(startDate, todayYMD))}
-                              onSelect={(d) => {
-                                setEndDate(d)
-                                setOpenCalendar(null)
-                              }}
-                              isOpen={openCalendar === 'end'}
-                            />
-                          </View>
-                        </>
-                      )}
                     </View>
 
                     {!isDateRangeValid && (
@@ -586,13 +528,14 @@ export default function AddChoreModal() {
                 </View>
               </ScrollView>
 
-              {(activeDropdown || openCalendar) && (
+              {/* 전역 오버레이: 드롭다운 전용 (캘린더는 Modal이 처리) */}
+              {activeDropdown && (
                 <Pressable
-                  onPress={() => {
-                    if (activeDropdown) setActiveDropdown(null)
-                    if (openCalendar) setOpenCalendar(null)
-                  }}
-                  style={[StyleSheet.absoluteFillObject, { backgroundColor: 'transparent' }]}
+                  onPress={() => setActiveDropdown(null)}
+                  style={[
+                    StyleSheet.absoluteFillObject,
+                    { backgroundColor: 'transparent', zIndex: 100 },
+                  ]}
                   pointerEvents="auto"
                 />
               )}
@@ -637,6 +580,60 @@ export default function AddChoreModal() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+
+      {/* 캘린더 Modal: start */}
+      <Modal
+        visible={openCalendar === 'start'}
+        transparent
+        animationType="none"
+        onRequestClose={() => setOpenCalendar(null)}
+      >
+        <Pressable style={styles.modalBackdrop} onPress={() => setOpenCalendar(null)} />
+        <View style={[styles.modalAnchorArea, modalPadding]} pointerEvents="box-none">
+          <View
+            style={styles.calendarPopover}
+            onStartShouldSetResponder={() => true}
+            onMoveShouldSetResponder={() => true}
+            onResponderTerminationRequest={() => false}
+          >
+            <DatePickerCalendar
+              selectedDate={safeYMD(startDate, todayYMD)}
+              onSelect={(d) => {
+                setStartDate(d)
+                setOpenCalendar(null)
+              }}
+              isOpen={true}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* 캘린더 Modal: end */}
+      <Modal
+        visible={openCalendar === 'end'}
+        transparent
+        animationType="none"
+        onRequestClose={() => setOpenCalendar(null)}
+      >
+        <Pressable style={styles.modalBackdrop} onPress={() => setOpenCalendar(null)} />
+        <View style={[styles.modalAnchorArea, modalPadding]} pointerEvents="box-none">
+          <View
+            style={styles.calendarPopover}
+            onStartShouldSetResponder={() => true}
+            onMoveShouldSetResponder={() => true}
+            onResponderTerminationRequest={() => false}
+          >
+            <DatePickerCalendar
+              selectedDate={safeYMD(endDate, safeYMD(startDate, todayYMD))}
+              onSelect={(d) => {
+                setEndDate(d)
+                setOpenCalendar(null)
+              }}
+              isOpen={true}
+            />
+          </View>
+        </View>
+      </Modal>
     </>
   )
 }
@@ -655,7 +652,7 @@ const styles = StyleSheet.create({
   },
   headerBack: { position: 'absolute', left: 0 },
   headerRight: { position: 'absolute', right: 0 },
-  headerTitle: { fontFamily: 'pretendard', fontSize: 20, fontWeight: 600, color: '#111111' },
+  headerTitle: { fontFamily: 'pretendard', fontSize: 20, fontWeight: 600 as any, color: '#111111' },
   deleteText: { fontFamily: 'pretendard', fontSize: 16, color: '#57C9D0', fontWeight: '600' },
 
   flex1: { flex: 1 },
@@ -704,7 +701,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     marginBottom: 12,
   },
-  chipText: { fontFamily: 'pretendard', color: '#46A1A6', fontSize: 12, fontWeight: 600 },
+  chipText: { fontFamily: 'pretendard', color: '#46A1A6', fontSize: 12, fontWeight: 600 as any },
 
   resetBtn: {
     backgroundColor: '#79D4D9',
@@ -720,7 +717,7 @@ const styles = StyleSheet.create({
   resetBtnText: {
     fontFamily: 'pretendard',
     fontSize: 12,
-    fontWeight: 600,
+    fontWeight: 600 as any,
     color: 'white',
     paddingLeft: 10,
   },
@@ -737,8 +734,6 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: '#E6E7E9', marginVertical: 12 },
 
   relative: { position: 'relative' },
-  z10: { zIndex: 10 },
-  z50: { zIndex: 50 },
 
   dateBtn: {
     backgroundColor: '#EBF9F9',
@@ -749,14 +744,7 @@ const styles = StyleSheet.create({
   dateBtnText: { fontFamily: 'pretendard', fontSize: 14, color: '#46A1A6' },
 
   calendarPopover: {
-    position: 'absolute',
-    right: -15,
     width: 340,
-    top: '100%',
-    marginTop: 8,
-    paddingTop: 4,
-    zIndex: 2000,
-    elevation: 1000,
     borderRadius: 16,
     backgroundColor: '#FFFFFF',
     shadowColor: '#000',
@@ -764,6 +752,16 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 0 },
     overflow: 'hidden',
+  },
+
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent', // 필요 시 'rgba(0,0,0,0.1)'
+  },
+  modalAnchorArea: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
   },
 
   errorMsg: { fontFamily: 'pretendard', fontSize: 12, color: '#FF0707', marginTop: 8 },
