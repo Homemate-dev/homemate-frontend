@@ -33,8 +33,8 @@ const styles = StyleSheet.create({
   wrap: { alignItems: 'center', justifyContent: 'center' },
   dot: {
     position: 'absolute',
-    top: -2,
-    right: -2,
+    top: 1,
+    right: 3,
     width: 6,
     height: 6,
     borderRadius: 5,

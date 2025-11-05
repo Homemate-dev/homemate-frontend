@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    width: 311,
+
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.09,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   },
   message: {
     flex: 1,
-    fontFamily: 'PretendardRegular',
+    fontFamily: 'Pretendard',
     fontSize: 14,
     color: '#7E7E7E',
     flexDirection: 'row',
@@ -142,7 +142,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   msgTitle: {
-    fontFamily: 'PretendardBold',
+    fontFamily: 'Pretendard',
+    fontWeight: 700,
     fontSize: 14,
     color: '#57C9D0',
   },

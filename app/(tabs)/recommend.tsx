@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     minWidth: 300,
   },
-  chore: { flexDirection: 'row', gap: 12 },
+  chore: { flexDirection: 'row', gap: 12, alignItems: 'center' },
   badge: {
     alignItems: 'center',
     justifyContent: 'center',
