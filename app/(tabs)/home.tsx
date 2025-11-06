@@ -23,7 +23,8 @@ import { useChoreByDate } from '@/libs/hooks/chore/useChoreByDate'
 import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
 import { usePatchChoreStatus } from '@/libs/hooks/chore/usePatchChoreStatus'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
-import { formatKoreanDate, getMonthRange } from '@/libs/utils/date'
+import { formatKoreanDate, getMonthRange, toYMD } from '@/libs/utils/date'
+import { styleFromRepeatColor } from '@/libs/utils/repeat'
 
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
 
@@ -93,9 +94,7 @@ export default function HomeScreen() {
 
   const todayStr = useMemo(() => {
     const t = new Date()
-    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(
-      t.getDate()
-    ).padStart(2, '0')}`
+    return toYMD(t)
   }, [])
 
   const [selectedDate, setSelectedDate] = useState(todayStr)
@@ -103,25 +102,16 @@ export default function HomeScreen() {
 
   const { data: dotDates = [] } = useChoreCalendar(range.start, range.end)
   const { data: choresList = [], isLoading, isError } = useChoreByDate(selectedDate)
+  const { data: todayChores = [] } = useChoreByDate(todayStr)
   const { mutate: choreStatus } = usePatchChoreStatus(selectedDate)
   const { data: user } = useMyPage()
 
   const progress = useMemo(() => {
-    const total = choresList.length
+    const total = todayChores.length
     if (!total) return 0
-    const done = choresList.filter((c) => c.status === 'COMPLETED').length
+    const done = todayChores.filter((c) => c.status === 'COMPLETED').length
     return Math.round((done / total) * 100)
-  }, [choresList])
-
-  const styleFromRepeatColor = (cls: string | undefined) => {
-    if (!cls) return {}
-    const bgMatch = cls.match(/bg-\[#([0-9A-Fa-f]{6})\]/)
-    const textMatch = cls.match(/text-\[#([0-9A-Fa-f]{6})\]/)
-    const style: any = {}
-    if (bgMatch) style.backgroundColor = `#${bgMatch[1]}`
-    if (textMatch) style.color = `#${textMatch[1]}`
-    return style
-  }
+  }, [todayChores])
 
   return (
     <View style={styles.container}>
