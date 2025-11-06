@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
 import {
@@ -21,7 +20,7 @@ import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import Toggle from '@/components/Toggle'
-import { postLogout } from '@/libs/api/mypage/postLogout'
+import { useLogout } from '@/libs/hooks/mypage/useLogout'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import { useNotiSetting } from '@/libs/hooks/mypage/useNotiSetting'
 import { useNotiTimeSetting } from '@/libs/hooks/mypage/useNotiTimeSetting'
@@ -39,6 +38,7 @@ export default function MyPage() {
   const { data: user, isLoading: isUserLoading, isError: isUserError } = useMyPage()
   const { mutate: notiSetting } = useNotiSetting()
   const { mutate: notiTimeSetting } = useNotiTimeSetting()
+  const { mutate: logout } = useLogout()
 
   // 로컬 UI 상태
   const [isMasterAlarm, setIsMasterAlarm] = useState(false)
@@ -102,19 +102,6 @@ export default function MyPage() {
         },
       }
     )
-  }
-
-  // 로그아웃
-  const handleLogout = async () => {
-    try {
-      await postLogout()
-      await AsyncStorage.multiRemove(['accessToken', 'refreshToken'])
-      alert('로그아웃 되었습니다.')
-      router.replace('/(auth)')
-    } catch (error) {
-      console.error('로그아웃 실패:', error)
-      alert('로그아웃 중 오류가 발생했습니다.')
-    }
   }
 
   // 로딩/에러 UI
@@ -245,7 +232,7 @@ export default function MyPage() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+      <TouchableOpacity style={styles.logoutBtn} onPress={() => logout()}>
         <Text style={styles.logoutText}>로그아웃</Text>
       </TouchableOpacity>
     </TabSafeScroll>
