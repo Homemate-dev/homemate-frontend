@@ -53,10 +53,32 @@ api.interceptors.request.use((config) => {
       ? config.headers
       : AxiosHeaders.from(config.headers || {})
 
-  if (!isBad(accessToken)) {
-    headers.set('Authorization', `Bearer ${accessToken}`)
+  //  refresh 호출인지 판단 (필요에 따라 절대경로/쿼리 포함 케이스 보완)
+  const url = config.url || ''
+  const isRefreshCall = /\/auth\/refresh(\b|\/|\?)/.test(url)
+
+  //  외부에서 명시적으로 스킵하고 싶은 경우를 위한 escape hatch
+  const skipAuth = (headers.get?.('x-skip-auth') ?? headers['x-skip-auth']) === '1'
+  if (skipAuth) {
+    headers.delete('x-skip-auth')
+    config.headers = headers
+    return config
+  }
+
+  if (isRefreshCall) {
+    //  refresh 호출에는 refreshToken으로 Authorization 설정
+    if (!isBad(refreshToken)) {
+      headers.set('Authorization', `Bearer ${refreshToken}`)
+    } else {
+      headers.delete('Authorization')
+    }
   } else {
-    headers.delete('Authorization')
+    //  그 외 모든 API에는 accessToken
+    if (!isBad(accessToken)) {
+      headers.set('Authorization', `Bearer ${accessToken}`)
+    } else {
+      headers.delete('Authorization')
+    }
   }
 
   // Axios 타입에 맞게 AxiosHeaders 인스턴스로 대입
