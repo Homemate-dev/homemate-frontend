@@ -1,5 +1,4 @@
 export type ResponseBadge = {
-  id: number
   badgeType: string
   badgeTitle: string
   description: string
@@ -7,5 +6,5 @@ export type ResponseBadge = {
   currentCount: number
   requiredCount: number
   remainingCount: number
-  imageBadgeUrl: string
+  badgeImageUrl: string
 }

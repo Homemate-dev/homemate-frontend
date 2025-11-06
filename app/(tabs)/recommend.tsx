@@ -21,7 +21,6 @@ import useRecommendChores from '@/libs/hooks/recommend/useRecommendChores'
 import { useResisterSpace } from '@/libs/hooks/recommend/useResisterSpace'
 import useSpaceChoreList from '@/libs/hooks/recommend/useSpaceChoreList'
 import useSpaceList from '@/libs/hooks/recommend/useSpaceList'
-import { toCategoryApi } from '@/libs/utils/category'
 import { styleFromRepeatColor, toRepeatFields } from '@/libs/utils/repeat'
 import { SpaceApi, SpaceUi, toSpaceUi } from '@/libs/utils/space'
 
@@ -36,16 +35,17 @@ export default function Recommend() {
   const androidTop = Platform.OS === 'android' ? 50 : 0
   // ----- 상태관리 -----
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined)
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string | undefined>(undefined)
+  const [selectedCategoryEnum, setSelectedCategoryEnum] = useState<string | undefined>(undefined)
+
   const [activeSpace, setActiveSpace] = useState<SpaceApi>('KITCHEN')
   const [selectedSpace, setSelectedSpace] = useState<string | undefined>('KITCHEN')
-
-  const categoryEnum = toCategoryApi(selectedCategory) ?? undefined
 
   // ----- api 훅 -----
   const { data: overview = [], isLoading: overLoading, isError: overError } = useRecommend()
   // const { data: categories = [], isLoading: catLoading, isError: catError } = useChoreCategory()
-  const { data: categoryChores = [], isLoading: choreLoading } = useRecommendChores(categoryEnum)
+  const { data: categoryChores = [], isLoading: choreLoading } =
+    useRecommendChores(selectedCategoryEnum)
 
   const { data: spaceList = [], isLoading: spaLoading } = useSpaceList()
   const {
@@ -108,7 +108,8 @@ export default function Recommend() {
                           key={c.code}
                           style={styles.card}
                           onPress={() => {
-                            setSelectedCategory(c.name)
+                            setSelectedCategoryEnum(c.code)
+                            setSelectedCategoryName(c.name)
                             setIsOpen(true)
                           }}
                         >
@@ -134,7 +135,7 @@ export default function Recommend() {
               <RecommendChoreModal
                 visible={isOpen}
                 onClose={() => setIsOpen(false)}
-                title={selectedCategory ?? ''}
+                title={selectedCategoryName ?? ''}
                 chores={categoryChores}
                 loading={choreLoading}
               />
@@ -183,7 +184,9 @@ export default function Recommend() {
                 </View>
               )}
 
-              {spaChoreError && <Text>집안일 내역 불러오기에 실패했습니다.</Text>}
+              {spaChoreError && (
+                <Text style={{ color: '#FF4838' }}>공간별 집안일 불러오기에 실패했습니다.</Text>
+              )}
 
               {choreRows.map((row, rIdx) => (
                 <View key={`row-${rIdx}`} style={styles.choreRow}>
