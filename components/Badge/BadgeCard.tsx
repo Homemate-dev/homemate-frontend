@@ -10,41 +10,46 @@ type BadgeCardProps = {
   acquired?: boolean
 }
 
+// BadgeCard.tsx (부모에서 크기만 한 번 지정)
 export default function BadgeCard({
   icon,
-  size = 84,
-  iconSize = 82,
-  acquired = true,
+  size = 96,
+  iconSize = 56,
+  acquired = false,
 }: BadgeCardProps) {
   const locked = !acquired
 
   return (
-    <View style={[styles.relative, { width: size, height: size }]}>
-      <GradientSurface size={size}>
-        {/* 같은 컨테이너 안에서 겹치기 */}
-        <View style={styles.inner}>
-          {/* 아이콘 */}
+    <View style={{ width: size, height: size }}>
+      <GradientSurface
+        style={{ width: size, height: size, borderRadius: 8, borderWidth: locked ? 0 : 1 }}
+      >
+        <View
+          style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+        >
           <Image source={icon} style={{ width: iconSize, height: iconSize }} resizeMode="contain" />
-
-          {/* 잠금일 때만 오버레이들 */}
           {locked && (
             <>
-              {/* Blur는 같은 컨테이너 안에서 절대 채움 */}
               <BlurView
                 intensity={25}
                 {...(Platform.OS === 'android'
                   ? { experimentalBlurMethod: 'dimezisBlurView' }
                   : {})}
-                style={styles.absoluteFillRounded}
+                style={[StyleSheet.absoluteFillObject, { borderRadius: 8 }]}
               />
-
               <View
                 pointerEvents="none"
-                style={[styles.absoluteFillRounded, styles.blackBg, { opacity: 0.7 }]}
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  { borderRadius: 8, backgroundColor: '#000', opacity: 0.7 },
+                ]}
               />
-
-              {/* 자물쇠 */}
-              <View style={styles.absoluteCenter}>
+              <View
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  { alignItems: 'center', justifyContent: 'center' },
+                ]}
+              >
                 <Image source={require('@/assets/images/lock.png')} />
               </View>
             </>
@@ -54,36 +59,3 @@ export default function BadgeCard({
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  relative: {
-    position: 'relative',
-  },
-  inner: {
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  absoluteFillRounded: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    borderRadius: 8,
-  },
-  blackBg: {
-    backgroundColor: '#000000',
-  },
-  absoluteCenter: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-})

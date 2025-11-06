@@ -88,7 +88,7 @@ export default function MyBadges() {
                       <BadgeCard
                         icon={{ uri: b.badgeImageUrl }}
                         size={100}
-                        iconSize={100}
+                        iconSize={80}
                         acquired={acquired}
                       />
                     </TouchableOpacity>
