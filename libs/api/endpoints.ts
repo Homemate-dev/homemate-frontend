@@ -1,3 +1,5 @@
+import { AlertType } from '@/types/mypage'
+
 export const AUTH_ENDPOINTS = {
   KAKAO_LOGIN: '/auth/login/kakao',
   REFRESH: '/auth/refresh',
@@ -14,20 +16,14 @@ export const MYPAGE_ENDPOINTS = {
   /** 마이페이지 정보 조회 (사용자 정보 + 알림 설정 상태) */
   GET_PROFILE: '/users/me', // GET
 
-  /** 전체 알림 설정 변경  */
-  UPDATE_ALERT_ALL: '/users/me/notification-settings/master', // PATCH
+  /** 알림 설정 변경  */
+  UPDATE_ALERT: (type: AlertType) => `/users/me/notification-settings/${type}`, // PATCH
 
-  /** 개별 알림 설정 변경 (카테고리별) */
-  UPDATE_ALERT_CATEGORY: (category: string) => `/users/me/notification-settings/${category}`, // PATCH
-
-  /** 현재 알림 시간 조회 */
+  /** 알림 시간 조회 */
   GET_ALERT_TIME: '/users/me/notification-settings/time', // GET
 
   /** 알림 시간 수정 */
   UPDATE_ALERT_TIME: '/users/me/notification-settings/time', // PATCH
-
-  /** 이용약관 / 개인정보처리방침 문서 조회 */
-  GET_POLICY: (type: 'terms' | 'privacy') => `/policies/latest/${type}`, // GET
 } as const
 
 export const CHORE_ENDPOINTS = {
