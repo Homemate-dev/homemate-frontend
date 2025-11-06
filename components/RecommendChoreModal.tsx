@@ -13,6 +13,7 @@ type Props = {
   title: string
   loading?: boolean
   chores: RecommendChores[]
+  onSubmit: (selectedIds: number[]) => void
 }
 
 export default function RecommendChoreModal({
@@ -21,6 +22,7 @@ export default function RecommendChoreModal({
   title,
   chores,
   loading = false,
+  onSubmit,
 }: Props) {
   // 개별 체크박스 선택 상태
   const [selected, setSelected] = useState<Set<number>>(new Set())
@@ -121,7 +123,7 @@ export default function RecommendChoreModal({
             )
           })}
 
-          <Pressable onPress={() => {}} style={styles.addBtn}>
+          <Pressable onPress={() => onSubmit(Array.from(selected))} style={styles.addBtn}>
             <Text style={styles.addBtnText}>추가하기</Text>
           </Pressable>
         </View>

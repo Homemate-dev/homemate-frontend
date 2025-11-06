@@ -5,7 +5,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { postResisterSpaceChore } from '@/libs/api/recommend/postResisterSpaceChore'
 import { RegisterChoreResponse, Space } from '@/types/recommend'
 
-export function useResisterSpace() {
+export function useRegisterSpace() {
   const qc = useQueryClient()
   const toast = useToast()
 

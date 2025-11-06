@@ -18,7 +18,8 @@ import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import useRecommend from '@/libs/hooks/recommend/useRecommend'
 import useRecommendChores from '@/libs/hooks/recommend/useRecommendChores'
-import { useResisterSpace } from '@/libs/hooks/recommend/useResisterSpace'
+import { useRegisterCategory } from '@/libs/hooks/recommend/useRegisterCategory'
+import { useRegisterSpace } from '@/libs/hooks/recommend/useRegisterSpace'
 import useSpaceChoreList from '@/libs/hooks/recommend/useSpaceChoreList'
 import useSpaceList from '@/libs/hooks/recommend/useSpaceList'
 import { styleFromRepeatColor, toRepeatFields } from '@/libs/utils/repeat'
@@ -39,7 +40,9 @@ export default function Recommend() {
   const [selectedCategoryEnum, setSelectedCategoryEnum] = useState<string | undefined>(undefined)
 
   const [activeSpace, setActiveSpace] = useState<SpaceApi>('KITCHEN')
-  const [selectedSpace, setSelectedSpace] = useState<string | undefined>('KITCHEN')
+  const [selectedSpace, setSelectedSpace] = useState<SpaceApi | undefined>('KITCHEN')
+
+  const [submitting, setSubmitting] = useState(false)
 
   // ----- api 훅 -----
   const { data: overview = [], isLoading: overLoading, isError: overError } = useRecommend()
@@ -54,7 +57,8 @@ export default function Recommend() {
     isError: spaChoreError,
   } = useSpaceChoreList(selectedSpace)
 
-  const { mutate } = useResisterSpace()
+  const { mutate: spaRegister } = useRegisterSpace()
+  const cateRegister = useRegisterCategory()
 
   const uiSpaces = useMemo((): { code: SpaceApi; label: SpaceUi }[] => {
     const list = (spaceList ?? []).map(({ space }) => ({
@@ -72,6 +76,22 @@ export default function Recommend() {
 
   const categoryRows = useMemo(() => chunkBy(overview, 3), [overview]) // ← 한 줄에 3개
   const choreRows = useMemo(() => chunkBy(spaceChores, 5), [spaceChores])
+
+  const handleSubmit = async (selectedIds: number[]) => {
+    if (!selectedIds.length || !selectedCategoryEnum) return
+    setSubmitting(true)
+
+    try {
+      await Promise.all(
+        selectedIds.map((categoryChoreId) =>
+          cateRegister.mutateAsync({ categoryChoreId, category: selectedCategoryEnum })
+        )
+      )
+      setIsOpen(false)
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <>
@@ -138,6 +158,7 @@ export default function Recommend() {
                 title={selectedCategoryName ?? ''}
                 chores={categoryChores}
                 loading={choreLoading}
+                onSubmit={handleSubmit}
               />
             </ScrollView>
           </View>
@@ -211,7 +232,9 @@ export default function Recommend() {
                           </View>
 
                           <Pressable
-                            onPress={() => mutate({ spaceChoreId: c.choreId, space: activeSpace })}
+                            onPress={() =>
+                              spaRegister({ spaceChoreId: c.choreId, space: activeSpace })
+                            }
                             hitSlop={8}
                           >
                             <Image
