@@ -29,7 +29,7 @@ export default function BadgeDetail({ badge, onClose }: Props) {
           <Text style={styles.desc}>{badge.description}</Text>
           <View style={styles.ImageWrap}>
             <Image
-              source={{ uri: badge.imageBadgeUrl }}
+              source={{ uri: badge.badgeImageUrl }}
               style={styles.image}
               resizeMode="contain"
             />
