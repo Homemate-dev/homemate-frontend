@@ -1,4 +1,4 @@
-import { UpdateAlert } from '@/types/mypage'
+import { AlertType } from '@/types/mypage'
 
 export const AUTH_ENDPOINTS = {
   KAKAO_LOGIN: '/auth/login/kakao',
@@ -17,7 +17,7 @@ export const MYPAGE_ENDPOINTS = {
   GET_PROFILE: '/users/me', // GET
 
   /** 알림 설정 변경  */
-  UPDATE_ALERT: (type: UpdateAlert) => `/users/me/notification-settings/${type}`, // PATCH
+  UPDATE_ALERT: (type: AlertType) => `/users/me/notification-settings/${type}`, // PATCH
 
   /** 알림 시간 조회 */
   GET_ALERT_TIME: '/users/me/notification-settings/time', // GET
