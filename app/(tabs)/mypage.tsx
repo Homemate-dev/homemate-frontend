@@ -20,6 +20,7 @@ import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import Toggle from '@/components/Toggle'
+import { useAcquiredBadges } from '@/libs/hooks/badge/useAcquiredBadges'
 import { useLogout } from '@/libs/hooks/mypage/useLogout'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import { useNotiSetting } from '@/libs/hooks/mypage/useNotiSetting'
@@ -36,6 +37,7 @@ export default function MyPage() {
 
   //  React Query
   const { data: user, isLoading: isUserLoading, isError: isUserError } = useMyPage()
+  const { data: badge = [] } = useAcquiredBadges()
   const { mutate: notiSetting } = useNotiSetting()
   const { mutate: notiTimeSetting } = useNotiTimeSetting()
   const { mutate: logout } = useLogout()
@@ -50,6 +52,11 @@ export default function MyPage() {
   const [hour, setHour] = useState(9)
   const [minute, setMinute] = useState(0)
   const [showConfirm, setShowConfirm] = useState(false)
+
+  // 뱃지 획득 개수
+  const AcquireBadgeCount = badge.filter((b) => b.acquired).length ?? 0
+  const totalBadge = badge?.length ?? 0
+  const progress = Math.round((AcquireBadgeCount / totalBadge) * 100)
 
   const TERMS_URL =
     'https://classy-group-db3.notion.site/29aaba73bec680159850c0297ddcd13f?source=copy_link'
@@ -161,13 +168,13 @@ export default function MyPage() {
 
           <Pressable onPress={() => router.push('/mybadges')} style={styles.badgeCountWrapper}>
             <Text style={styles.badgeCount}>
-              0개 <Text style={styles.badgeTotal}>/ 0개</Text>
+              {AcquireBadgeCount}개 <Text style={styles.badgeTotal}>/ {totalBadge}개</Text>
             </Text>
             <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
           </Pressable>
         </View>
         <View style={styles.badgeBarBackground}>
-          <View style={[styles.badgeBarFill, { width: '0%' }]} />
+          <View style={[styles.badgeBarFill, { width: `${progress}%` }]} />
         </View>
       </View>
 
