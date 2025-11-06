@@ -2,13 +2,8 @@
 
 import { ScrollViewStyleReset } from 'expo-router/html'
 
-// This file is web-only and used to configure the root HTML for every
-// web page during static rendering.
-// The contents of this function only run in Node.js environments and
-// do not have access to the DOM or browser APIs.
-
 export default function Root({ children }: { children: React.ReactNode }) {
-  // Maze snippet (QA 도메인에서만 실행)
+  // ✅ Maze snippet (QA 도메인에서만 실행)
   const mazeSnippet = `(function () {
     var host = location.hostname;
     if (!host.includes('qa-homemate.vercel.app')) return;
@@ -32,7 +27,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
       if (v) s.setAttribute('nonce', v);
       a.getElementsByTagName('head')[0].appendChild(s);
       m.mazeUniversalSnippetApiKey = e;
-    })(window, document, 'https://snippet.maze.co/maze-universal-loader.js', '1aeb3638-9017-4841-b0bb-3cff1742422b');
+    })(window, document, 'https://snippet.maze.co/maze-universal-loader.js', 'fb04360f-711e-4a71-adc8-af705d876aec');
   })();`
 
   return (
@@ -41,11 +36,9 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-
-        {/* Disable body scrolling on web */}
         <ScrollViewStyleReset />
 
-        {/* ✅ Maze snippet 삽입 */}
+        {/* ✅ Maze QA snippet 삽입 */}
         <script dangerouslySetInnerHTML={{ __html: mazeSnippet }} />
       </head>
       <body>{children}</body>
