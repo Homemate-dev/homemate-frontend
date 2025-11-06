@@ -22,7 +22,7 @@ import { api } from '@/libs/api/axios'
 import { useChoreByDate } from '@/libs/hooks/chore/useChoreByDate'
 import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
 import { usePatchChoreStatus } from '@/libs/hooks/chore/usePatchChoreStatus'
-import { useMyPage } from '@/libs/hooks/mypage/user'
+import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import { formatKoreanDate, getMonthRange } from '@/libs/utils/date'
 
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
