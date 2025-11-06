@@ -18,7 +18,7 @@ import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import useRecommend from '@/libs/hooks/recommend/useRecommend'
 import useRecommendChores from '@/libs/hooks/recommend/useRecommendChores'
-import { useResisterSpace } from '@/libs/hooks/recommend/useResisterSpace'
+import { useRegisterSpace } from '@/libs/hooks/recommend/useRegisterSpace'
 import useSpaceChoreList from '@/libs/hooks/recommend/useSpaceChoreList'
 import useSpaceList from '@/libs/hooks/recommend/useSpaceList'
 import { styleFromRepeatColor, toRepeatFields } from '@/libs/utils/repeat'
@@ -54,7 +54,7 @@ export default function Recommend() {
     isError: spaChoreError,
   } = useSpaceChoreList(selectedSpace)
 
-  const { mutate } = useResisterSpace()
+  const { mutate } = useRegisterSpace()
 
   const uiSpaces = useMemo((): { code: SpaceApi; label: SpaceUi }[] => {
     const list = (spaceList ?? []).map(({ space }) => ({
