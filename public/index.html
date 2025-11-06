@@ -7,8 +7,13 @@
     <script>
       ;(function () {
         var host = location.hostname
-        // QA 환경에서만 로드되게 제한 (예시: qa 도메인)
-        if (!/qa-homemate\.vercel\.app$/.test(host)) return
+
+        // 🔧 가드 완화 (끝 고정 "$" 제거, includes로 더 안전)
+        if (!host.includes('qa-homemate.vercel.app')) {
+          console.log('[Maze] skipped on host:', host)
+          return
+        }
+        console.log('[Maze] guard passed on', host)
 
         ;(function (m, a, z, e) {
           var s, t, u, v
@@ -43,6 +48,7 @@
         )
       })()
     </script>
+
     <title>%WEB_TITLE%</title>
     <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
     <style id="expo-reset">
