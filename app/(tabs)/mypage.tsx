@@ -256,11 +256,12 @@ const styles = StyleSheet.create({
   headerWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: hp('2%'),
+    height: 46,
+    marginVertical: 16,
     position: 'relative',
     flexDirection: 'row',
   },
-  headerTitle: { fontFamily: 'Pretendard', fontSize: 20, fontWeight: '700' },
+  headerTitle: { fontFamily: 'Pretendard', fontSize: 20, fontWeight: '600' },
   notificationBell: { position: 'absolute', right: 0 },
 
   headerIcon: { position: 'absolute', right: 0 },
