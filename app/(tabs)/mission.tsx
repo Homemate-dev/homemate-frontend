@@ -158,6 +158,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     position: 'relative',
     flexDirection: 'row',
+    height: 46,
   },
   headerText: { fontFamily: 'Pretendard', fontSize: 20, fontWeight: '600' },
   notificationBell: { position: 'absolute', right: 0 },

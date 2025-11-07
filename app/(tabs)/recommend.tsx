@@ -265,10 +265,10 @@ const styles = StyleSheet.create({
   screenHeader: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 16,
     position: 'relative',
     flexDirection: 'row',
-    height: 62,
+    height: 46,
+    marginVertical: 16,
   },
   headerText: { fontFamily: 'Pretendard', fontWeight: 600, fontSize: 20 },
   notificationBell: { position: 'absolute', right: 0 },

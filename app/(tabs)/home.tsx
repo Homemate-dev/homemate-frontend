@@ -270,10 +270,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F8FA' },
   headerRow: {
-    paddingVertical: 20,
+    marginVertical: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    height: 38,
   },
   contentWrap: { flexDirection: 'column', gap: 16 },
   homeCard: {
