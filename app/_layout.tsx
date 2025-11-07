@@ -1,3 +1,4 @@
+import '@/libs/firebase/init'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import * as Notifications from 'expo-notifications'
@@ -56,6 +57,20 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
+  // 웹 푸시를 위한 서비스 워커 등록 코드
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/firebase-messaging-sw.js')
+        .then((reg) => {
+          console.log('✅ Firebase messaging SW registered:', reg)
+        })
+        .catch((err) => {
+          console.error('❌ SW registration failed:', err)
+        })
+    }
+  }, [])
+
   return (
     <SafeAreaProvider>
       <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F8F8FA' }}>
