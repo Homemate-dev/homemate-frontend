@@ -1,16 +1,52 @@
 import * as Device from 'expo-device'
 import * as Notifications from 'expo-notifications'
+import { getMessaging, getToken } from 'firebase/messaging'
+import { Platform } from 'react-native'
 
 import { api } from '@/libs/api/axios'
+import { NOTIFICATION_ENDPOINTS } from '@/libs/api/endpoints'
+import { firebaseApp } from '@/libs/firebase/init'
 
 export const registerFCMToken = async () => {
   try {
+    // 💻 WEB: Firebase Messaging + VAPID
+    if (Platform.OS === 'web') {
+      const messaging = getMessaging(firebaseApp)
+
+      // 브라우저 알림 권한 요청 (안 했으면)
+      if (Notification.permission === 'default') {
+        const permission = await Notification.requestPermission()
+        if (permission !== 'granted') {
+          console.log('웹 푸시 권한 거부됨')
+          return
+        }
+      } else if (Notification.permission !== 'granted') {
+        console.log('웹 푸시 권한 거부됨')
+        return
+      }
+
+      const token = await getToken(messaging, {
+        // FCM Web Push용 VAPID 키 (expo config에 넣은 거와 동일)
+        vapidKey:
+          'BLa4XgiuPsT4-9NPqs8xbdlYnUuRP_p2K9NqHTc0ofaxEBhfw5icOclS-vOso2v9aZR8RNkR9gs2GdUryxzx3eo',
+      })
+
+      if (!token) {
+        console.log('웹 FCM 토큰 발급 실패 (빈 토큰)')
+        return
+      }
+
+      await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token })
+      console.log('✅ 웹 푸시 토큰 등록 성공:', token)
+      return
+    }
+
+    // 📱 APP: Expo Notifications (iOS / Android)
     if (!Device.isDevice) {
       console.log('푸시 알림은 실제 기기에서만 지원됩니다.')
       return
     }
 
-    // 알림 권한 확인 및 요청
     const { status: existingStatus } = await Notifications.getPermissionsAsync()
     let finalStatus = existingStatus
 
@@ -20,27 +56,29 @@ export const registerFCMToken = async () => {
     }
 
     if (finalStatus !== 'granted') {
+      console.log('푸시 알림 권한 거부됨')
       return
     }
 
-    // Expo Push Token 발급
-    const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: 'abcd1234-5678-90ef-ghij-klmnopqrstuv',
+    const { data: expoPushToken } = await Notifications.getExpoPushTokenAsync({
+      projectId: 'abcd1234-5678-90ef-ghij-klmnopqrstuv', // 네 Expo projectId
     })
 
-    const token = tokenData.data
+    if (!expoPushToken) {
+      console.log('앱 푸시 토큰 발급 실패')
+      return
+    }
 
-    // 서버에 푸시 토큰 등록
-    await api.post('/push/subscriptions', { token })
+    await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token: expoPushToken })
+    console.log('✅ 앱 푸시 토큰 등록 성공:', expoPushToken)
   } catch (error) {
-    console.error(' 푸시 토큰 등록 실패:', error)
+    console.error('❌ 푸시 토큰 등록 실패:', error)
   }
 }
 
-// 푸시 토큰 해제
 export const unregisterFCMToken = async () => {
   try {
-    await api.delete('/push/subscriptions')
+    await api.delete(NOTIFICATION_ENDPOINTS.DISABLE_PUSH)
   } catch (error) {
     console.error('푸시 토큰 해제 실패:', error)
   }

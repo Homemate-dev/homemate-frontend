@@ -81,10 +81,10 @@ export const RECOMMEND_ENDPOINTS = {
 } as const
 
 export const NOTIFICATION_ENDPOINTS = {
-  /** PWA 푸시 구독 등록 */
+  /** PCM 푸시 구독 등록 */
   ENABLE_PUSH: '/push/subscriptions', // POST
 
-  /** PWA 푸시 구독 해제 */
+  /** FCM 푸시 구독 해제 */
   DISABLE_PUSH: '/push/subscriptions', // DELETE
 
   /** 집안일 알림 리스트 조회 */

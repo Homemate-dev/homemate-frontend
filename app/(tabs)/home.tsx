@@ -18,79 +18,30 @@ import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import { useAuth } from '@/contexts/AuthContext'
-import { api } from '@/libs/api/axios'
 import { useChoreByDate } from '@/libs/hooks/chore/useChoreByDate'
 import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
 import { usePatchChoreStatus } from '@/libs/hooks/chore/usePatchChoreStatus'
+import { useFirstNotiStatus } from '@/libs/hooks/mypage/useFirstNotiStatus'
+import { useFirstNotiTimeSetting } from '@/libs/hooks/mypage/useFirstNotiTimeSetting'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import { formatKoreanDate, getMonthRange, toYMD } from '@/libs/utils/date'
 import { styleFromRepeatColor } from '@/libs/utils/repeat'
+import { toHHmm, toHHmmParts } from '@/libs/utils/time'
 
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
 
 export default function HomeScreen() {
   const router = useRouter()
   const { token } = useAuth() // 토큰 준비 이후에만 초기화 로직 실행
+
+  const androidTop = Platform.OS === 'android' ? 50 : 0
+
+  // ----- 상태관리 -----
   const [showSetupModal, setShowSetupModal] = useState(false)
   const [ampm, setAmpm] = useState<'오전' | '오후'>('오후')
   const [hour, setHour] = useState(7)
   const [minute, setMinute] = useState(0)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
-
-  // dev 토큰 발급/주입 제거. 토큰이 있을 때만 최초 설정 상태 조회
-  useEffect(() => {
-    if (!token) return
-
-    const init = async () => {
-      try {
-        const statusRes = await api.get('/users/me/notification-settings/first-setup-status')
-        const { firstSetupCompleted, notificationTime } = statusRes.data
-
-        if (!firstSetupCompleted) {
-          if (notificationTime) {
-            const [hourStr, minuteStr] = notificationTime.split(':')
-            const hourNum = parseInt(hourStr, 10)
-            const ampmValue = hourNum >= 12 ? '오후' : '오전'
-            const convertedHour = hourNum > 12 ? hourNum - 12 : hourNum
-
-            setAmpm(ampmValue)
-            setHour(convertedHour)
-            setMinute(parseInt(minuteStr, 10))
-          }
-          setShowSetupModal(true)
-        }
-      } catch (e) {
-        console.warn('[Init first-setup-status] failed:', e)
-      }
-    }
-
-    init()
-  }, [token])
-
-  const handleAllowNotification = async () => {
-    try {
-      const convertedHour = ampm === '오후' && hour < 12 ? hour + 12 : hour
-      const formattedTime = `${String(convertedHour).padStart(2, '0')}:${String(minute).padStart(
-        2,
-        '0'
-      )}`
-
-      await api.post('/users/me/notification-settings/first-setup', {
-        notificationTime: formattedTime,
-        masterEnabled: true,
-        choreEnabled: true,
-        noticeEnabled: true,
-      })
-
-      setShowSetupModal(false)
-      alert('알림 설정이 완료되었습니다!')
-      router.replace('/')
-    } catch (err) {
-      console.error('최초 알림 설정 실패:', err)
-    }
-  }
-
-  const androidTop = Platform.OS === 'android' ? 50 : 0
 
   const todayStr = useMemo(() => {
     const t = new Date()
@@ -100,11 +51,44 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState(todayStr)
   const [range, setRange] = useState(() => getMonthRange(selectedDate))
 
+  // ----- api 훅 -----
+  const { data: firstNotiStatus } = useFirstNotiStatus()
+  const { mutateAsync: firstNotiTimeSetting } = useFirstNotiTimeSetting()
+
   const { data: dotDates = [] } = useChoreCalendar(range.start, range.end)
   const { data: choresList = [], isLoading, isError } = useChoreByDate(selectedDate)
   const { data: todayChores = [] } = useChoreByDate(todayStr)
   const { mutate: choreStatus } = usePatchChoreStatus(selectedDate)
   const { data: user } = useMyPage()
+
+  useEffect(() => {
+    if (!token || !firstNotiStatus) return
+
+    const { firstSetupCompleted, notificationTime } = firstNotiStatus
+
+    if (!firstSetupCompleted) {
+      const { ampm, hour12, minute } = toHHmmParts(notificationTime) // 알림 시간 기본값 셋팅
+
+      setAmpm(ampm)
+      setHour(hour12)
+      setMinute(minute)
+      setShowSetupModal(true)
+    }
+  }, [token, firstNotiStatus])
+
+  const handleAllowNotification = async () => {
+    try {
+      const notificationTime = toHHmm(ampm, hour, minute)
+
+      await firstNotiTimeSetting({ notificationTime })
+
+      setShowSetupModal(false)
+      alert('알림 설정이 완료되었습니다!')
+      router.replace('/')
+    } catch (err) {
+      console.error('최초 알림 설정 실패:', err)
+    }
+  }
 
   const progress = useMemo(() => {
     const total = todayChores.length
