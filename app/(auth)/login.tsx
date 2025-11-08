@@ -176,14 +176,12 @@ const styles = StyleSheet.create({
   },
   kakaoIcon: { width: 32, height: 32, marginRight: 8 },
   kakaoText: {
-    fontFamily: 'Pretendard',
     fontSize: 16,
     color: '#FFFFFF',
     fontWeight: '600',
   },
   loadingIndicator: { marginTop: hp('2%') },
   footerText: {
-    fontFamily: 'Pretendard',
     fontSize: 12,
     color: '#FFFFFF',
     textAlign: 'center',

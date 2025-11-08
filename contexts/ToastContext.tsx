@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   },
   message: {
     flex: 1,
-    fontFamily: 'Pretendard',
+
     fontSize: 14,
     color: '#7E7E7E',
     flexDirection: 'row',
@@ -142,7 +142,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   msgTitle: {
-    fontFamily: 'Pretendard',
     fontWeight: 700,
     fontSize: 14,
     color: '#57C9D0',

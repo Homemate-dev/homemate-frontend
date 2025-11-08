@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
   },
-  primaryBtnText: { fontFamily: 'pretendard', color: '#46A1A6', fontWeight: '600', fontSize: 16 },
+  primaryBtnText: { color: '#46A1A6', fontWeight: '600', fontSize: 16 },
 
   mt12: { marginTop: 12 },
   mb8: { marginBottom: 8 },
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 12,
     color: '#9B9FA6',
-    fontFamily: 'pretendard',
+
     fontWeight: '600',
     fontSize: 16,
   },

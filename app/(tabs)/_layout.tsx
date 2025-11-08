@@ -44,7 +44,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: '#57C9D0',
         tabBarInactiveTintColor: '#B4B7BC',
-        tabBarLabelStyle: { fontFamily: 'Pretendard', fontSize: 12, fontWeight: 700, marginTop: 3 },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: 700, marginTop: 3 },
         sceneContainerStyle: { backgroundColor: '#F8F8FA' },
         tabBarStyle: {
           height:

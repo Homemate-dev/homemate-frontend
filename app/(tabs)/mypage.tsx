@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     flexDirection: 'row',
   },
-  headerTitle: { fontFamily: 'Pretendard', fontSize: 20, fontWeight: '600' },
+  headerTitle: { fontSize: 20, fontWeight: '600' },
   notificationBell: { position: 'absolute', right: 0 },
 
   headerIcon: { position: 'absolute', right: 0 },
@@ -287,8 +287,8 @@ const styles = StyleSheet.create({
     height: 40,
   },
   userInfo: { alignItems: 'flex-start', justifyContent: 'center', gap: 4 },
-  userName: { fontFamily: 'Pretendard', fontSize: 16, color: '#FFFFFF', fontWeight: '700' },
-  userid: { fontFamily: 'Pretendard', fontSize: 12, color: '#FFFFFF' },
+  userName: { fontSize: 16, color: '#FFFFFF', fontWeight: '700' },
+  userid: { fontSize: 12, color: '#FFFFFF' },
   badgeSection: {
     marginTop: hp('3%'),
     backgroundColor: '#FFFFFF',
@@ -297,9 +297,8 @@ const styles = StyleSheet.create({
   },
   badgeHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: hp('1%') },
   badgeCountWrapper: { flexDirection: 'row', alignItems: 'center' },
-  badgeCount: { fontFamily: 'Pretendard', fontSize: 14, color: '#57C9D0', fontWeight: '600' },
+  badgeCount: { fontSize: 14, color: '#57C9D0', fontWeight: '600' },
   badgeTotal: {
-    fontFamily: 'Pretendard',
     fontSize: 14,
     color: '#B4B7BC',
     marginRight: hp('1%'),
@@ -328,7 +327,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E6E7E9',
     paddingBottom: hp('2%'),
   },
-  sectionTitle: { fontFamily: 'Pretendard', fontSize: 18, fontWeight: '700' },
+  sectionTitle: { fontSize: 18, fontWeight: '700' },
   settingChore: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -355,7 +354,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
 
-  settingText: { fontFamily: 'Pretendard', fontSize: 14, color: '#686F79' },
+  settingText: { fontSize: 14, color: '#686F79' },
   divider: { borderBottomWidth: 1, borderBottomColor: '#E6E7E9' },
   timeSetting: { marginTop: hp('1.5%') },
   confirmBtn: {
@@ -367,8 +366,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: hp('2%'),
   },
-  confirmText: { fontFamily: 'Pretendard', color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
+  confirmText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
   logoutBtn: { alignItems: 'center', marginTop: hp('3%') },
-  logoutText: { fontFamily: 'Pretendard', color: '#9B9FA6', fontSize: 12 },
+  logoutText: { color: '#9B9FA6', fontSize: 12 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 })

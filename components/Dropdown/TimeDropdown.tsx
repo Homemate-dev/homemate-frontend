@@ -163,7 +163,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  boxText: { fontFamily: 'pretendard', color: '#46A1A6', fontSize: 14 },
+  boxText: { color: '#46A1A6', fontSize: 14 },
 
   dropdownPanel: {
     position: 'relative',
@@ -190,9 +190,9 @@ const s = StyleSheet.create({
     borderRadius: 4,
   },
   optionSelected: { backgroundColor: '#EBF9F9' },
-  optionText: { color: '#46A1A6', fontSize: 14, fontFamily: 'pretendard' },
+  optionText: { color: '#46A1A6', fontSize: 14 },
 
-  unitText: { fontFamily: 'pretendard', fontSize: 14, marginTop: 10, color: '#686F79' },
+  unitText: { fontSize: 14, marginTop: 10, color: '#686F79' },
   ml5: { marginLeft: 5 },
   mr5: { marginRight: 5 },
   mr14: { marginRight: 14 },
