@@ -86,7 +86,7 @@ export default function MyBadges() {
                       onPress={() => setSelectedId(b.badgeTitle)}
                     >
                       <BadgeCard
-                        icon={{ uri: b.badgeImageUrl }}
+                        icon={b.badgeImageUrl}
                         size={100}
                         iconSize={80}
                         acquired={acquired}
