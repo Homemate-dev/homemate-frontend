@@ -111,7 +111,6 @@ const styles = StyleSheet.create({
     borderRadius: 0,
   },
   bannerText: {
-    fontFamily: 'pretendard',
     color: '#686F79',
     fontSize: 14,
   },
@@ -127,7 +126,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   primaryBtnText: {
-    fontFamily: 'pretendard',
     color: '#46A1A6',
     fontWeight: '600',
     fontSize: 16,
@@ -145,8 +143,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   cancelBtnText: {
-    fontFamily: 'pretendard',
-    color: '#9B9FA6',
     fontWeight: '600',
     fontSize: 16,
   },

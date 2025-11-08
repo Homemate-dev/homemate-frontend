@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  headerText: { fontFamily: 'pretendard', fontSize: 18, fontWeight: '600', color: '#040F20B2' },
+  headerText: { fontSize: 18, fontWeight: '600', color: '#040F20B2' },
   dayButton: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   todayBtn: {
     borderWidth: 1,
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     marginLeft: 8,
   },
-  todayBtnText: { fontFamily: 'pretendard', color: '#81878F', fontSize: 12 },
+  todayBtnText: { color: '#81878F', fontSize: 12 },
   dayCircle: {
     width: 32,
     height: 32,
@@ -228,5 +228,5 @@ const styles = StyleSheet.create({
     width: 320,
   },
 
-  dayText: { fontFamily: 'pretendard', fontSize: 14, fontWeight: 400 },
+  dayText: { fontSize: 14, fontWeight: 400 },
 })
