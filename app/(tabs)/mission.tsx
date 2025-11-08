@@ -16,44 +16,18 @@ import BadgeCard from '@/components/Badge/BadgeCard'
 import BadgeDetail from '@/components/BadgeDetail'
 import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
+import { useTopBadges } from '@/libs/hooks/badge/useTopBadges'
 import { useMonthlyMissions } from '@/libs/hooks/mission/useMonthlyMissions'
-import { inferUnitFromTitle } from '@/libs/utils/mission'
-
-const mockBadges = [
-  {
-    id: 1,
-    title: '미션 7회 달성',
-    current: 6,
-    target: 7,
-    desc: '7개의 미션을 완료하면 받을 수 있는 도전 뱃지예요.',
-    icon: require('@/assets/images/chore-home.png'),
-    acquired: false,
-  },
-  {
-    id: 2,
-    title: '욕실 깔끔이',
-    current: 28,
-    target: 30,
-    desc: '욕실 청소 미션을 30회 완수하면 획득할 수 있는 청결의 상징 뱃지예요.',
-    icon: require('@/assets/images/chore-home.png'),
-    acquired: false,
-  },
-  {
-    id: 3,
-    title: '침실 반짝이',
-    current: 89,
-    target: 90,
-    desc: '침실 정리 미션을 90회 달성하면 얻을 수 있는 정리왕 뱃지예요.',
-    icon: require('@/assets/images/chore-home.png'),
-    acquired: false,
-  },
-]
+import { ResponseBadge } from '@/types/badge'
 
 export default function Mission() {
   const androidTop = Platform.OS === 'android' ? 50 : 0
+
   const { data: missions, isLoading, isError } = useMonthlyMissions()
-  const [selectedId, setSelectedId] = useState<number | null>(null)
-  const selected = mockBadges.find((badge) => badge.id === selectedId)
+  const { data: TopBadges, isLoading: badgeLoading, isError: badgeError } = useTopBadges()
+
+  const [selected, setSelected] = useState<ResponseBadge | null>(null)
+
   const progress = (cur: number, tgt: number) =>
     tgt ? Math.min(100, Math.round((cur * 100) / tgt)) : 0
 
@@ -92,14 +66,13 @@ export default function Mission() {
                 missions?.map((m, idx) => (
                   <View key={m.id} style={idx !== missions.length - 1 && styles.mb12}>
                     <View style={styles.missionRow}>
-                      <Text style={styles.missionTitle}>{m.title}</Text>
+                      <Text style={styles.missionTitle}>
+                        {m.existsInRecommend ? '⭐ ' : ''}
+                        {m.title}
+                      </Text>
                       <Text style={styles.missionCountText}>
-                        <Text style={styles.missionCurrent}>
-                          {m.currentCount}
-                          {inferUnitFromTitle(m.title)}{' '}
-                        </Text>
-                        / {m.targetCount}
-                        {inferUnitFromTitle(m.title)}
+                        <Text style={styles.missionCurrent}>{m.currentCount}회 </Text>/{' '}
+                        {m.targetCount}회
                       </Text>
                     </View>
 
@@ -132,18 +105,32 @@ export default function Mission() {
             <Text style={styles.sectionTitle}>곧 획득하는 뱃지</Text>
             <View style={styles.badgeBox}>
               <View style={styles.badgeRow}>
-                {mockBadges.map((b) => (
-                  <View key={b.id} style={styles.badgeItem}>
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => setSelectedId(b.id)}>
+                {badgeLoading && (
+                  <View style={styles.loadingBox}>
+                    <ActivityIndicator />
+                  </View>
+                )}
+
+                {badgeError && !badgeLoading && (
+                  <Text style={styles.errorText}>뱃지를 불러오지 못했어요.</Text>
+                )}
+
+                {TopBadges?.map((b) => (
+                  <View key={b.badgeTitle} style={styles.badgeItem}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => setSelected(b)}>
                       <BadgeCard
-                        icon={require('@/assets/images/chore-home.png')}
+                        icon={{ uri: b.badgeImageUrl }}
                         size={84}
                         iconSize={82}
+                        acquired={b.currentCount === b.requiredCount}
                       />
                     </TouchableOpacity>
-                    <Text style={styles.badgeTitle}>{b.acquired === true ? b.title : '???'}</Text>
+                    <Text style={styles.badgeTitle}>
+                      {b.acquired === true ? b.badgeTitle : '???'}
+                    </Text>
                     <Text style={styles.badgeCount}>
-                      <Text style={styles.badgeCurrent}>{b.current}회</Text> / {b.target}회
+                      <Text style={styles.badgeCurrent}>{b.currentCount}회</Text> /{' '}
+                      {b.requiredCount}회
                     </Text>
                   </View>
                 ))}
@@ -156,7 +143,7 @@ export default function Mission() {
           </View>
         </View>
       </TabSafeScroll>
-      {selected && <BadgeDetail badge={selected} onClose={() => setSelectedId(null)} />}
+      {selected && <BadgeDetail badge={selected} onClose={() => setSelected(null)} />}
     </>
   )
 }
@@ -169,20 +156,21 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     position: 'relative',
     flexDirection: 'row',
+    height: 46,
   },
-  headerText: { fontSize: 20, fontWeight: '600' },
+  headerText: { fontFamily: 'Pretendard', fontSize: 20, fontWeight: '600' },
   notificationBell: { position: 'absolute', right: 0 },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 10 },
+  sectionTitle: { fontFamily: 'Pretendard', fontSize: 18, fontWeight: '700', marginBottom: 10 },
   missionBox: { backgroundColor: '#FFFFFF', padding: 20, borderRadius: 12, marginBottom: 10 },
   loadingBox: { paddingVertical: 24, alignItems: 'center', justifyContent: 'center' },
   errorText: { color: '#D64545' },
   noMissionText: { color: '#686F79' },
   mb12: { marginBottom: 12 },
   missionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  missionTitle: { fontSize: 14 },
-  missionCountText: { fontSize: 14, color: '#B4B7BC' },
-  missionCurrent: { fontWeight: '600', color: '#57C9D0' },
+  missionTitle: { fontFamily: 'Pretendard', fontSize: 14 },
+  missionCountText: { fontFamily: 'Pretendard', fontSize: 14, color: '#B4B7BC' },
+  missionCurrent: { fontFamily: 'Pretendard', fontWeight: '600', color: '#57C9D0' },
   progressBar: {
     marginTop: 12,
     marginBottom: 8,
@@ -196,14 +184,14 @@ const styles = StyleSheet.create({
   tipRow: { flexDirection: 'row', alignItems: 'center' },
   star: { marginRight: 4 },
   tipInner: { flexDirection: 'row', alignItems: 'center' },
-  tipText: { fontSize: 12, color: '#686F79' },
+  tipText: { fontFamily: 'Pretendard', fontSize: 12, color: '#686F79' },
   tipArrow: { width: 16, height: 16 },
   badgeBox: { backgroundColor: '#FFFFFF', padding: 20, borderRadius: 12, marginBottom: 12 },
   badgeRow: { flexDirection: 'row', justifyContent: 'space-between' },
   badgeItem: { alignItems: 'center' },
-  badgeTitle: { fontSize: 14, color: '#4F5763', marginTop: 8 },
-  badgeCount: { fontSize: 14, color: '#B4B7BC', marginTop: 8 },
-  badgeCurrent: { color: '#57C9D0', fontWeight: '600' },
+  badgeTitle: { fontFamily: 'Pretendard', fontSize: 14, color: '#4F5763', marginTop: 8 },
+  badgeCount: { fontFamily: 'Pretendard', fontSize: 14, color: '#B4B7BC', marginTop: 8 },
+  badgeCurrent: { fontFamily: 'Pretendard', color: '#57C9D0', fontWeight: '600' },
   moreBtn: {
     height: 52,
     backgroundColor: '#DDF4F6',
@@ -211,5 +199,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 12,
   },
-  moreText: { color: '#46A1A6', fontSize: 16, fontWeight: '600' },
+  moreText: { color: '#46A1A6', fontFamily: 'Pretendard', fontSize: 16, fontWeight: '600' },
 })

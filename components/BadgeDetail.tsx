@@ -1,17 +1,9 @@
-import { Image, ImageSourcePropType, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
-export type Badge = {
-  id: number
-  title: string
-  desc: string
-  current: number
-  target: number
-  icon: ImageSourcePropType
-  acquired: boolean
-}
+import { ResponseBadge } from '@/types/badge'
 
 type Props = {
-  badge: Badge
+  badge: ResponseBadge
   onClose: () => void
 }
 
@@ -33,15 +25,25 @@ export default function BadgeDetail({ badge, onClose }: Props) {
       {/* 중앙 카드 */}
       <View style={styles.centerWrapper} pointerEvents="box-none">
         <View style={styles.card}>
-          <Text style={styles.title}>{badge.acquired === true ? badge.title : '???'}</Text>
-          <Text style={styles.desc}>{badge.desc}</Text>
+          <Text style={styles.title}>{badge.acquired === true ? badge.badgeTitle : '???'}</Text>
+          <Text style={styles.desc}>{badge.description}</Text>
           <View style={styles.ImageWrap}>
-            <Image source={badge.icon} style={styles.image} resizeMode="contain" />
+            <Image
+              source={{ uri: badge.badgeImageUrl }}
+              style={styles.image}
+              resizeMode="contain"
+            />
           </View>
           <View style={styles.progressRow}>
             <Text style={styles.progressLabel}>달성도</Text>
             <Text style={styles.progressText}>
-              <Text style={styles.progressValue}>{badge.current}회</Text> / {badge.target}회
+              <Text style={styles.progressValue}>
+                {badge.currentCount > badge.requiredCount
+                  ? badge.requiredCount
+                  : badge.currentCount}
+                회
+              </Text>{' '}
+              / {badge.requiredCount}회
             </Text>
           </View>
 
@@ -84,11 +86,13 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   title: {
+    fontFamily: 'Pretendard',
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 8,
   },
   desc: {
+    fontFamily: 'Pretendard',
     fontSize: 14,
     color: '#686F79',
     textAlign: 'center',
@@ -100,13 +104,16 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#57C9D0',
     width: '100%',
+    height: 52,
     alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 12,
     paddingVertical: 15,
   },
   buttonText: {
+    fontFamily: 'Pretendard',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#FFFFFF',
   },
   progressRow: {
@@ -114,15 +121,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   progressLabel: {
+    fontFamily: 'Pretendard',
     fontSize: 14,
     fontWeight: '600',
     marginRight: 8,
   },
   progressText: {
+    fontFamily: 'Pretendard',
     fontSize: 14,
     color: '#B4B7BC',
   },
   progressValue: {
+    fontFamily: 'Pretendard',
     fontWeight: '600',
     color: '#57C9D0',
   },

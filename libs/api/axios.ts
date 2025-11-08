@@ -35,6 +35,8 @@ export const clearAuthTokens = () => {
   refreshToken = null
 }
 
+export const getAccessToken = () => accessToken
+
 /** 401/419 최종 실패 시 호출할 전역 콜백(예: 로그인 화면 이동) */
 export const setOnUnauthorized = (handler: (() => void) | null) => {
   onUnauthorized = handler
@@ -53,13 +55,35 @@ api.interceptors.request.use((config) => {
       ? config.headers
       : AxiosHeaders.from(config.headers || {})
 
-  if (!isBad(accessToken)) {
-    headers.set('Authorization', `Bearer ${accessToken}`)
-  } else {
-    headers.delete('Authorization')
+  //  refresh 호출인지 판단 (필요에 따라 절대경로/쿼리 포함 케이스 보완)
+  const url = config.url || ''
+  const isRefreshCall = /\/auth\/refresh(\b|\/|\?)/.test(url)
+
+  //  외부에서 명시적으로 스킵하고 싶은 경우를 위한 escape hatch
+  const skipAuth = (headers.get?.('x-skip-auth') ?? headers['x-skip-auth']) === '1'
+  if (skipAuth) {
+    headers.delete('x-skip-auth')
+    config.headers = headers
+    return config
   }
 
-  // ✅ Axios 타입에 맞게 AxiosHeaders 인스턴스로 대입
+  if (isRefreshCall) {
+    //  refresh 호출에는 refreshToken으로 Authorization 설정
+    if (!isBad(refreshToken)) {
+      headers.set('Authorization', `Bearer ${refreshToken}`)
+    } else {
+      headers.delete('Authorization')
+    }
+  } else {
+    //  그 외 모든 API에는 accessToken
+    if (!isBad(accessToken)) {
+      headers.set('Authorization', `Bearer ${accessToken}`)
+    } else {
+      headers.delete('Authorization')
+    }
+  }
+
+  // Axios 타입에 맞게 AxiosHeaders 인스턴스로 대입
   config.headers = headers
   return config
 })
@@ -67,18 +91,35 @@ api.interceptors.request.use((config) => {
 /** ─────────────────────────────────────────────────────────────
  *  refresh 로직 (단일 비행)
  *  ────────────────────────────────────────────────────────────*/
+
 async function refreshIfNeeded(): Promise<string | null> {
   if (isBad(refreshToken)) return null
 
   if (!refreshingPromise) {
+    const USE_AUTH_HEADER = true // 서버가 헤더(Authorization: Bearer <refresh>) 받으면 true
+
     refreshingPromise = api
-      .post('/auth/refresh', { refreshToken }) // ← 필요 시 엔드포인트/바디 수정
+      .post(
+        '/auth/refresh',
+        USE_AUTH_HEADER ? {} : { refreshToken }, // 바디 방식이면 여기
+        USE_AUTH_HEADER ? { headers: { Authorization: `Bearer ${refreshToken}` } } : undefined
+      )
       .then((res) => {
-        const newAccess = (res.data?.accessToken as string) || null
-        // 선택: 백엔드가 새 refreshToken도 주면 같이 갱신
-        const newRefresh = (res.data?.refreshToken as string) || null
+        // 스펙에 맞춰 파싱
+        const data = res.data as {
+          tokenType?: string
+          accessToken?: string
+          accessTokenExpiresIn?: number
+          refreshToken?: string
+          refreshTokenExpiresIn?: number
+        }
+
+        const newAccess = data.accessToken ?? null
+        const newRefresh = data.refreshToken ?? null
+
         if (newAccess) setAccessToken(newAccess)
         if (newRefresh) setRefreshToken(newRefresh)
+
         return newAccess
       })
       .catch(() => null)
@@ -100,38 +141,40 @@ api.interceptors.response.use(
     const original = error.config as
       | (InternalAxiosRequestConfig & { _retried?: boolean })
       | undefined
-
-    // 네트워크 완전 실패거나 원본 요청 없음 → 그대로 전달
     if (!original) return Promise.reject(error)
 
-    // 인증 만료로 간주할 상태코드
-    const isAuthExpired = status === 401 || status === 419
+    const isRefreshEndpoint = /\/auth\/refresh(\b|\/|\?)/.test(original.url || '')
 
-    if (isAuthExpired && !original._retried) {
-      // 중복 재시도 방지 플래그
+    // 1) refresh 요청 자체가 실패했다면 → 즉시 로그아웃
+    if (isRefreshEndpoint) {
+      clearAuthTokens()
+      onUnauthorized?.()
+      return Promise.reject(error)
+    }
+
+    // 2) 인증 만료로 간주할 케이스 (백엔드가 500을 던지는 경우를 포함)
+    const isAuthExpired = status === 401 || status === 419 || status === 403
+    const treatAsAuthFail = isAuthExpired || status === 500
+
+    if (treatAsAuthFail && !original._retried) {
       original._retried = true
 
       const newAccess = await refreshIfNeeded()
       if (newAccess) {
-        // 새 토큰으로 Authorization 교체 후 재시도
-        // original.headers가 AxiosHeaders일 수도, 평범한 객체일 수도 있으므로 안전 처리
         const retryHeaders =
           original.headers instanceof AxiosHeaders
             ? original.headers
             : AxiosHeaders.from(original.headers || {})
-
         retryHeaders.set('Authorization', `Bearer ${newAccess}`)
         original.headers = retryHeaders
-
         return api.request(original)
       }
 
-      // refresh 실패 → 토큰 정리 + 콜백 호출
+      // 3) refresh 실패 → 즉시 로그아웃
       clearAuthTokens()
       onUnauthorized?.()
     }
 
-    // 그 외는 원래 에러 반환
     return Promise.reject(error)
   }
 )

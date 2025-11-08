@@ -1,3 +1,5 @@
+import { AlertType } from '@/types/mypage'
+
 export const AUTH_ENDPOINTS = {
   KAKAO_LOGIN: '/auth/login/kakao',
   REFRESH: '/auth/refresh',
@@ -14,20 +16,14 @@ export const MYPAGE_ENDPOINTS = {
   /** 마이페이지 정보 조회 (사용자 정보 + 알림 설정 상태) */
   GET_PROFILE: '/users/me', // GET
 
-  /** 전체 알림 설정 변경  */
-  UPDATE_ALERT_ALL: '/users/me/notification-settings/master', // PATCH
+  /** 알림 설정 변경  */
+  UPDATE_ALERT: (type: AlertType) => `/users/me/notification-settings/${type}`, // PATCH
 
-  /** 개별 알림 설정 변경 (카테고리별) */
-  UPDATE_ALERT_CATEGORY: (category: string) => `/users/me/notification-settings/${category}`, // PATCH
-
-  /** 현재 알림 시간 조회 */
+  /** 알림 시간 조회 */
   GET_ALERT_TIME: '/users/me/notification-settings/time', // GET
 
   /** 알림 시간 수정 */
   UPDATE_ALERT_TIME: '/users/me/notification-settings/time', // PATCH
-
-  /** 이용약관 / 개인정보처리방침 문서 조회 */
-  GET_POLICY: (type: 'terms' | 'privacy') => `/policies/latest/${type}`, // GET
 } as const
 
 export const CHORE_ENDPOINTS = {
@@ -56,19 +52,20 @@ export const CHORE_ENDPOINTS = {
 
 export const RECOMMEND_ENDPOINTS = {
   /** 추천 화면 개요 조회 */
-  OVERVIEW: '/reco/overview', // GET (query: ?limitTrending=number)
+  OVERVIEW: '/recommend/trend', // GET (query: ?limitTrending=number)
 
   /** 카테고리 하위 집안일 목록 조회 */
-  CATEGORY_CHORES: (categoryId: number) => `/recommend/categories/${categoryId}/chores`, // GET
+  CATEGORY_CHORES: (category: string) => `/recommend/categories/${category}/chores`, // GET
 
   /** 선택한 집안일 등록 (카테고리 기준) */
-  REGISTER_CATEGORY: (categoryId: number) => `/recommend/categories/${categoryId}/register`, // POST
+  REGISTER_CATEGORY: (categoryChoreId: number) =>
+    `/recommend/categories/${categoryChoreId}/register`, // POST
 
   /** 공간별 하위 집안일 목록 조회 */
   SPACE_CHORES: (space: string) => `/recommend/spaces/${space}/chores`, // GET
 
   /** 선택한 집안일 등록 (공간 기준) */
-  REGISTER_SPACE: (space: string) => `/recommend/spaces/${space}/register`, // POST
+  REGISTER_SPACE: (spaceChoreId: number) => `/recommend/spaces/${spaceChoreId}/register`, // POST
 
   /** 공간 리스트 조회 */
   SPACES: '/recommend/spaces', // GET
@@ -78,13 +75,16 @@ export const RECOMMEND_ENDPOINTS = {
 
   /** 랜덤 집안일 추천 조회 */
   RANDOM: '/recommend/random', // GET
+
+  /** 랜덤 집안일 추천 정보 가져오기 */
+  RANDOM_CHORES: (spaceChoreId: number) => `/recommend/spaces/${spaceChoreId}`, // GET
 } as const
 
 export const NOTIFICATION_ENDPOINTS = {
-  /** PWA 푸시 구독 등록 */
+  /** PCM 푸시 구독 등록 */
   ENABLE_PUSH: '/push/subscriptions', // POST
 
-  /** PWA 푸시 구독 해제 */
+  /** FCM 푸시 구독 해제 */
   DISABLE_PUSH: '/push/subscriptions', // DELETE
 
   /** 집안일 알림 리스트 조회 */
@@ -110,8 +110,8 @@ export const BADGE_ENDPOINTS = {
   ACHIEVE: '',
 
   /** 뱃지 획득 조건부 상위 3개 리스트 조회 */
-  TOP3_CANDIDATES: '/badge/closest', // GET
+  TOP3_CANDIDATES: '/badges/closest', // GET
 
   /** 획득한 벳지 목록 조회 */
-  GET_BADGES: '/badge/acquired', // GET
+  GET_BADGES: '/badges/acquired', // GET
 } as const

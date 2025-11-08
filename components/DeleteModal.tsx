@@ -40,38 +40,22 @@ export default function DeleteModal({
             <Text style={styles.bannerText}>일정을 삭제하시겠습니까?</Text>
           </View>
         ) : (
-          <Pressable
-            disabled={loading}
-            onPress={onDeleteOnly}
-            style={[styles.primaryBtn, styles.mb8]}
-          >
+          <Pressable onPress={onDeleteOnly} style={[styles.primaryBtn, styles.mb8]}>
             <Text style={styles.primaryBtnText}>이 일정만 삭제</Text>
           </Pressable>
         )}
 
         {noneRepeat ? (
-          <Pressable
-            disabled={loading}
-            onPress={onDeleteOnly}
-            style={[styles.primaryBtn, styles.mb8]}
-          >
+          <Pressable onPress={onDeleteOnly} style={[styles.primaryBtn, styles.mb8]}>
             <Text style={styles.primaryBtnText}>일정 삭제</Text>
           </Pressable>
         ) : (
-          <Pressable
-            disabled={loading}
-            onPress={onDeleteAll}
-            style={[styles.primaryBtn, styles.mb8]}
-          >
-            <Text style={styles.primaryBtnText}>전체 반복 일정 삭제</Text>
+          <Pressable onPress={onDeleteAll} style={[styles.primaryBtn, styles.mb8]}>
+            <Text style={styles.primaryBtnText}>향후 일정 삭제</Text>
           </Pressable>
         )}
 
-        <Pressable
-          disabled={loading}
-          onPress={!loading ? onClose : undefined}
-          style={styles.cancelBtn}
-        >
+        <Pressable onPress={onClose} style={styles.cancelBtn}>
           <Text style={styles.cancelBtnText}>취소</Text>
         </Pressable>
       </View>
@@ -108,7 +92,7 @@ const styles = StyleSheet.create({
   },
   sheetHandle: {
     alignSelf: 'center',
-    width: 36,
+    width: 60,
     height: 4,
     borderRadius: 2,
     backgroundColor: '#E6E7E9',
@@ -127,6 +111,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
   },
   bannerText: {
+    fontFamily: 'pretendard',
     color: '#686F79',
     fontSize: 14,
   },
@@ -134,14 +119,15 @@ const styles = StyleSheet.create({
   // primary buttons
   primaryBtn: {
     width: '100%',
+    height: 52,
     backgroundColor: '#DDF4F6',
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    height: 48,
   },
   primaryBtnText: {
+    fontFamily: 'pretendard',
     color: '#46A1A6',
     fontWeight: '600',
     fontSize: 16,
@@ -151,14 +137,15 @@ const styles = StyleSheet.create({
   // cancel button
   cancelBtn: {
     width: '100%',
+    height: 52,
     backgroundColor: '#040F200D',
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    height: 48,
   },
   cancelBtnText: {
+    fontFamily: 'pretendard',
     color: '#9B9FA6',
     fontWeight: '600',
     fontSize: 16,

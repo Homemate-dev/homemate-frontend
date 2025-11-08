@@ -1,174 +1,346 @@
-import * as Linking from 'expo-linking'
 import { useRouter } from 'expo-router'
-import * as WebBrowser from 'expo-web-browser'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
-  ActivityIndicator,
+  Dimensions,
+  FlatList,
   Image,
-  Platform,
+  ImageSourcePropType,
+  ImageStyle,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native'
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen'
+import Animated, {
+  Easing,
+  useAnimatedProps,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated'
+import Svg, { Circle } from 'react-native-svg'
 
-import { useAuth } from '@/contexts/AuthContext'
+const SCREEN_WIDTH = Dimensions.get('window').width
+const AnimatedCircle = Animated.createAnimatedComponent(Circle)
 
-export default function Login() {
-  const [loading, setLoading] = useState(false)
+/* ---------- 타입 ---------- */
+type SlideImageItem = { source: ImageSourcePropType; style: ImageStyle }
+type SlideBase = { id: number; title: string; subtitle: string; showQuote?: boolean }
+type SlideSingle = SlideBase & {
+  image: ImageSourcePropType
+  imageStyle: ImageStyle
+  images?: undefined
+}
+type SlideMultiple = SlideBase & { images: SlideImageItem[]; image?: undefined }
+type Slide = SlideSingle | SlideMultiple
+/* ------------------------- */
+
+export default function OnboardingScreen() {
   const router = useRouter()
-  const { login } = useAuth()
+  const listRef = useRef<FlatList<Slide>>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
 
-  const KAKAO_REST_API_KEY = process.env.EXPO_PUBLIC_KAKAO_REST_API_KEY!
-  const KAKAO_WEB_REDIRECT_URI = process.env.EXPO_PUBLIC_KAKAO_REDIRECT_URI!
-  const KAKAO_NATIVE_REDIRECT_URI = 'homematefrontend://'
-  const KAKAO_REDIRECT_URI =
-    Platform.OS === 'web' ? KAKAO_WEB_REDIRECT_URI : KAKAO_NATIVE_REDIRECT_URI
-
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL!
-
-  const codeVerifier = 'buxcAKiNFcQ8Kslcm5NrKq6pm8JgFULeujc2usyw0g4'
-  const codeChallenge = 'jrHilj7qFqhxKHKKM8AoQsqociZfnv-QJQjXrSyT0jU'
-
+  // 원형 진행바
+  const percentage = 86.9
+  const radius = 40
+  const strokeWidth = 8
+  const circumference = 2 * Math.PI * radius
+  const progress = useSharedValue(0)
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: circumference * (1 - progress.value),
+  }))
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      const parsed = Linking.parse(window.location.href)
-      const raw = parsed.queryParams?.code
-      const code = Array.isArray(raw) ? raw[0] : raw
-      if (code) fetchKakaoToken(code)
-    }
+    progress.value = withTiming(percentage / 100, {
+      duration: 1500,
+      easing: Easing.out(Easing.cubic),
+    })
   }, [])
 
-  const fetchKakaoToken = async (code: string | string[]) => {
-    const codeString = Array.isArray(code) ? code[0] : code
+  const slides: Slide[] = [
+    {
+      id: 1,
+      title: '여러분의 갓생은 어떠신가요?',
+      subtitle: '우리의 멋진 일상은\n깨끗한 집에서부터 시작해요.',
+      image: require('../../assets/images/card/ironing1.png'),
+      showQuote: true,
+      imageStyle: { width: 215, height: 320, position: 'absolute', right: 20, bottom: 20 },
+    },
+    {
+      id: 2,
+      title: '홈메이트가 집안일을 추천해드려요',
+      subtitle: '여러분의 건강과 관련된 집안일 설정을 위해\n다양한 집안일을 추천해요.',
+      image: require('../../assets/images/card/ironing2.png'),
+      showQuote: false,
+      imageStyle: {
+        width: 270,
+        height: 380,
+        position: 'relative',
+        alignSelf: 'center',
+        bottom: -30,
+      },
+    },
+    {
+      id: 3,
+      title: '직접 집안일을 추가할 수 있어요',
+      subtitle: '이미 알고 있는 일이 있다면 직접\n집안일 일정을 세우고 수정할 수 있어요.',
+      images: [
+        {
+          source: require('../../assets/images/card/ironing3.png'),
+          style: { width: 270, height: 380, position: 'relative', alignSelf: 'center', top: -30 },
+        },
+        {
+          source: require('../../assets/images/card/ironing4.png'),
+          style: {
+            width: 270,
+            height: 380,
+            position: 'relative',
+            alignSelf: 'center',
+            bottom: 360,
+          },
+        },
+      ],
+    },
+  ]
 
-    try {
-      setLoading(true)
-      const response = await fetch(`${API_BASE_URL}/auth/login/kakao`, {
-        // CHANGED
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          authorizationCode: codeString,
-          redirectUri: KAKAO_REDIRECT_URI,
-          codeVerifier: codeVerifier,
-        }),
-      })
+  /* ---------- 인덱스 동기화 (스와이프 시 실시간 반영) ---------- */
+  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const x = e.nativeEvent.contentOffset.x
+    const idx = Math.round(x / SCREEN_WIDTH)
+    if (idx !== activeIndex) setActiveIndex(idx)
+  }
 
-      const data = await response.json()
+  const handleMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const x = e.nativeEvent.contentOffset.x
+    const idx = Math.round(x / SCREEN_WIDTH)
+    if (idx !== activeIndex) setActiveIndex(idx)
+  }
 
-      if (data.accessToken) {
-        await login(data.accessToken, data.user)
-        router.replace('/home')
-      } else {
-        alert('로그인에 실패했습니다. 다시 시도해주세요.')
-      }
-    } catch (err) {
-      console.error('로그인 오류:', err)
-      alert('카카오 로그인 중 문제가 발생했습니다.')
-    } finally {
-      setLoading(false)
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: { index?: number | null }[] }) => {
+      const i = viewableItems?.[0]?.index
+      if (typeof i === 'number' && i !== activeIndex) setActiveIndex(i)
+    }
+  ).current
+
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 }).current
+  /* ----------------------------------------------------------- */
+
+  const handleNext = () => {
+    if (activeIndex < slides.length - 1) {
+      const next = activeIndex + 1
+      listRef.current?.scrollToIndex({ index: next, animated: true })
+      setActiveIndex(next) // 안전장치
+    } else {
+      router.replace('/login')
     }
   }
 
-  const handleKakaoLogin = async () => {
-    setLoading(true)
-    try {
-      const kakaoAuthUrl =
-        `https://kauth.kakao.com/oauth/authorize` +
-        `?client_id=${KAKAO_REST_API_KEY}` +
-        `&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}` +
-        `&response_type=code` +
-        `&code_challenge=${codeChallenge}` +
-        `&code_challenge_method=S256`
+  const renderItem = ({ item }: { item: Slide }) => (
+    <View style={styles.slide}>
+      <View style={styles.slideInner}>
+        <View style={styles.headerBox}>
+          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.subtitle}>{item.subtitle}</Text>
+        </View>
 
-      if (Platform.OS === 'web') {
-        window.location.href = kakaoAuthUrl
-        return
-      }
+        <View style={styles.card}>
+          {item.showQuote && (
+            <>
+              <Text style={styles.quote}>“ 살림은 내 일상을{'\n'} 잘 만들어가는 과정이다 ”</Text>
+              <View style={styles.rowContainer}>
+                <View style={styles.circleContainer}>
+                  <Svg width={radius * 2 + strokeWidth} height={radius * 2 + strokeWidth}>
+                    <Circle
+                      cx={radius + strokeWidth / 2}
+                      cy={radius + strokeWidth / 2}
+                      r={radius}
+                      stroke="#B3F3F4"
+                      strokeWidth={strokeWidth}
+                      fill="none"
+                    />
+                    <AnimatedCircle
+                      cx={radius + strokeWidth / 2}
+                      cy={radius + strokeWidth / 2}
+                      r={radius}
+                      stroke="#3E7B7F"
+                      strokeWidth={strokeWidth}
+                      strokeDasharray={circumference}
+                      animatedProps={animatedProps}
+                      strokeLinecap="butt"
+                      rotation="-90"
+                      originX={radius + strokeWidth / 2}
+                      originY={radius + strokeWidth / 2}
+                      fill="none"
+                    />
+                  </Svg>
 
-      const result = await WebBrowser.openAuthSessionAsync(kakaoAuthUrl, KAKAO_REDIRECT_URI)
-      if (result.type === 'success' && result.url) {
-        const parsed = Linking.parse(result.url)
-        const raw = parsed.queryParams?.code
-        const code = Array.isArray(raw) ? raw[0] : raw
-        if (code) await fetchKakaoToken(code)
-      }
-    } catch (error) {
-      console.error('Kakao 로그인 오류:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+                  <View style={styles.circleTextBox}>
+                    <Text style={styles.percentTop}>그렇다</Text>
+                    <Text style={styles.percentBottom}>{percentage}%</Text>
+                  </View>
+                </View>
+              </View>
+            </>
+          )}
+
+          {'images' in item && item.images ? (
+            item.images.map((img: SlideImageItem, idx: number) => (
+              <Image key={idx} source={img.source} style={img.style} resizeMode="contain" />
+            ))
+          ) : 'image' in item && item.image ? (
+            <Image source={item.image} style={item.imageStyle} resizeMode="contain" />
+          ) : null}
+        </View>
+      </View>
+    </View>
+  )
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../../assets/images/logo/logo-white.png')}
-        style={{ width: 208, height: 40, marginBottom: 24 }}
-        resizeMode="contain"
-      />
-      <Text style={styles.subtitle}>주기적인 청소생활 시작</Text>
+      {/* 로고 */}
+      <View style={styles.logoRow}>
+        <Image
+          source={require('../../assets/images/logo/logo.png')}
+          style={{ width: 148, height: 42 }}
+          resizeMode="contain"
+        />
+      </View>
 
-      <Image
-        source={require('../../assets/images/start/mop.png')}
-        style={styles.image}
-        resizeMode="contain"
-      />
+      {/* 슬라이드 */}
+      <View style={styles.slideWrapper}>
+        <FlatList
+          ref={listRef}
+          data={slides}
+          keyExtractor={(it) => String(it.id)}
+          renderItem={renderItem}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          pagingEnabled
+          decelerationRate="fast"
+          snapToAlignment="center"
+          snapToInterval={SCREEN_WIDTH}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          onMomentumScrollEnd={handleMomentumEnd}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          getItemLayout={(_, index) => ({
+            length: SCREEN_WIDTH,
+            offset: SCREEN_WIDTH * index,
+            index,
+          })}
+        />
+      </View>
 
-      <TouchableOpacity style={styles.kakaoButton} onPress={handleKakaoLogin} disabled={loading}>
-        <Image source={require('../../assets/images/icon/kakao.png')} style={styles.kakaoIcon} />
-        <Text style={styles.kakaoText}>카카오톡으로 로그인</Text>
+      {/* 고정 도트 */}
+      <View style={styles.dotsRow}>
+        {slides.map((_, i) => (
+          <View key={i} style={[styles.dot, i === activeIndex && styles.dotActive]} />
+        ))}
+      </View>
+
+      {/* 버튼 */}
+      <TouchableOpacity style={styles.button} onPress={handleNext}>
+        <Text style={styles.buttonText}>
+          {activeIndex === slides.length - 1 ? '시작하기' : '계속'}
+        </Text>
       </TouchableOpacity>
-
-      {loading && (
-        <ActivityIndicator size="large" color="#57C9D0" style={styles.loadingIndicator} />
-      )}
-
-      <Text style={styles.footerText}>
-        서비스 시작은 <Text style={styles.link}>서비스 이용약관{'\n'}</Text>
-        <Text style={styles.link}>개인정보 처리방침</Text> 동의를 의미합니다
-      </Text>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#57C9D0',
+  container: { flex: 1, backgroundColor: '#fff', paddingTop: 12, paddingBottom: 16 },
+
+  logoRow: {
+    width: '100%',
+    height: 62,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
-    height: '100%',
+    marginBottom: 26,
   },
 
-  subtitle: { fontFamily: 'SeoulNamsanEB', fontSize: 20, color: '#fff', marginBottom: 48 },
-  image: { width: 200, height: 300, marginBottom: 48 },
-  kakaoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#79D4D9',
-    borderRadius: 100,
-    paddingVertical: 12,
-    width: '100%',
-    justifyContent: 'center',
-    marginBottom: 44,
-  },
-  kakaoIcon: { width: 32, height: 32, marginRight: 8 },
-  kakaoText: {
-    fontFamily: 'PretendardSemiBold',
-    fontSize: 16,
-    color: '#FFFFFF',
+  slideWrapper: { flex: 1, width: '100%', marginBottom: 16 },
+
+  slide: { width: SCREEN_WIDTH, alignItems: 'center', justifyContent: 'flex-start' },
+  slideInner: { width: '100%', paddingHorizontal: 20, alignItems: 'center' },
+
+  headerBox: { alignItems: 'center', marginTop: 6, marginBottom: 30 },
+  title: {
+    fontFamily: 'Pretendard',
+    fontSize: 20,
     fontWeight: '600',
+    color: '#1D2736',
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  loadingIndicator: { marginTop: hp('2%') },
-  footerText: {
-    fontFamily: 'PretendardRegular',
-    fontSize: 12,
-    color: '#FFFFFF',
+  subtitle: {
+    fontFamily: 'Pretendard',
+    fontSize: 14,
+    color: '#686F79',
     textAlign: 'center',
     lineHeight: 20,
   },
-  link: { textDecorationLine: 'underline', color: '#fff' },
+
+  card: {
+    width: 311,
+    height: 420,
+    backgroundColor: '#57C9D0',
+    borderRadius: 20,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    marginBottom: 0,
+    alignSelf: 'center',
+    overflow: 'hidden',
+  },
+
+  quote: {
+    fontFamily: 'Pretendard',
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: '600',
+    marginBottom: 20,
+    textAlign: 'left',
+    lineHeight: 24,
+  },
+  rowContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+
+  circleContainer: { alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  circleTextBox: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 90,
+    height: 90,
+  },
+  percentTop: { color: '#F5FCFC', fontFamily: 'Pretendard', fontSize: 12, fontWeight: '600' },
+  percentBottom: { color: '#34797D', fontFamily: 'Pretendard', fontSize: 12, fontWeight: '600' },
+
+  dotsRow: {
+    height: 20,
+    marginTop: 8,
+    marginBottom: 26,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#DADADA', marginHorizontal: 3 },
+  dotActive: { backgroundColor: '#57C9D0' },
+
+  button: {
+    height: 48,
+    backgroundColor: '#57C9D0',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignSelf: 'stretch',
+    marginHorizontal: 20,
+  },
+  buttonText: {
+    color: '#fff',
+    fontFamily: 'Pretendard',
+    fontWeight: '600',
+    fontSize: 16,
+    textAlign: 'center',
+  },
 })

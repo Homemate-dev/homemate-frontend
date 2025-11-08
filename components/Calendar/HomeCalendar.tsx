@@ -56,13 +56,22 @@ export default function HomeCalendar({ onSelect, dotDates = [], onMonthChangeRan
 
   const themeObj = useMemo(
     () => ({
+      // ---- 기본 텍스트 스타일 ----
       textDayFontSize: 14,
+      textDayFontFamily: 'Pretendard',
       textDayHeaderFontSize: 14,
+      textDayHeaderFontFamily: 'Pretendard',
       textMonthFontSize: 16,
+      textMonthFontFamily: 'Pretendard',
       textMonthFontWeight: '600',
+
+      // ---- 색상 ----
       monthTextColor: '#0F172A',
       arrowColor: '#57C9D0',
+
+      // ---- 캘린더 구조 커스텀 ----
       'stylesheet.calendar.main': {
+        container: { padding: 20, backgroundColor: '#FFFFFF' },
         week: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 0 },
       },
       'stylesheet.calendar.header': {
@@ -73,7 +82,7 @@ export default function HomeCalendar({ onSelect, dotDates = [], onMonthChangeRan
           marginBottom: 8,
           paddingHorizontal: 6,
         },
-        dayHeader: { fontSize: 16, marginBottom: 8, color: '#040F2080' },
+        dayHeader: { fontFamily: 'Pretendard', fontSize: 16, marginBottom: 8, color: '#040F2080' },
       },
     }),
     []
@@ -141,7 +150,6 @@ export default function HomeCalendar({ onSelect, dotDates = [], onMonthChangeRan
             />
           )
         }
-        style={styles.calendarOuter}
         renderHeader={(date) => {
           const y = date.getFullYear()
           const m = date.getMonth() + 1
@@ -197,14 +205,13 @@ export default function HomeCalendar({ onSelect, dotDates = [], onMonthChangeRan
 
 const styles = StyleSheet.create({
   container: { borderRadius: 16, overflow: 'hidden' },
-  calendarOuter: { padding: 20 },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 4,
   },
-  headerTitle: { fontSize: 18, fontWeight: '600', color: '#040F20B2' },
+  headerTitle: { fontFamily: 'pretendard', fontSize: 18, fontWeight: '600', color: '#040F20B2' },
   todayBtn: {
     borderWidth: 1,
     borderColor: '#E6E7E9',
@@ -213,7 +220,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     marginLeft: 5,
   },
-  todayBtnText: { color: '#81878F', fontSize: 12 },
+  todayBtnText: { fontFamily: 'pretendard', color: '#81878F', fontSize: 12 },
   dayBtn: {
     flex: 1,
     width: '100%',
@@ -230,7 +237,8 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   dayLabel: {
-    fontSize: 16,
+    fontFamily: 'pretendard',
+    fontSize: 14,
     fontWeight: '400',
     includeFontPadding: false,
     textAlignVertical: 'center',

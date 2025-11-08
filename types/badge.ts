@@ -1,5 +1,12 @@
-export type ResponseTopBadge = {
-  type: string // ex) 'LARGE_J', 'EXPERT_KITCHEN', 'SEED_CHORE'
+import { ImageSourcePropType } from 'react-native'
+
+export type ResponseBadge = {
+  badgeType: string
+  badgeTitle: string
+  description: string
   acquired: boolean
+  currentCount: number
+  requiredCount: number
   remainingCount: number
+  badgeImageUrl: ImageSourcePropType
 }

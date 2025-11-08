@@ -19,20 +19,31 @@ export type CreateChoreDTO = {
  * 집안일 생성 응답
  */
 
-export type ResponseChore = {
+export interface MissionResult {
   id: number
   title: string
-  notificationYn: boolean // 알림 여부
-  notificationTime: string | null
-  space: string
-  repeatType: RepeatType
-  repeatInterval: number
-  startDate: string
-  endDate: string
-  isDeleted: boolean
-  createdAt: string
-  updatedAt: string | null
-  deletedAt: string | null
+  targetCount: number
+  currentCount: number
+  completed: boolean
+}
+
+export interface ResponseChore {
+  data: {
+    id: number
+    title: string
+    notificationYn: boolean
+    notificationTime: string | null
+    repeatType: RepeatType
+    repeatInterval: number
+    startDate: string
+    endDate: string
+    isDeleted: boolean
+    space: string
+    createdAt: string
+    updatedAt: string
+    deletedAt: string | null
+  }
+  missionResults: MissionResult[]
 }
 
 /**

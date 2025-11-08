@@ -1,6 +1,4 @@
 import { Ionicons } from '@expo/vector-icons'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
 import {
@@ -10,7 +8,6 @@ import {
   Linking,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -21,14 +18,15 @@ import { heightPercentageToDP as hp } from 'react-native-responsive-screen'
 
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import NotificationBell from '@/components/notification/NotificationBell'
+import TabSafeScroll from '@/components/TabSafeScroll'
 import Toggle from '@/components/Toggle'
-import {
-  fetchNotificationTime,
-  patchNotificationSetting,
-  patchNotificationTime,
-  postLogout,
-} from '@/libs/api/user'
-import { useMyPage } from '@/libs/hooks/mypage/user' // ✅ 훅 사용
+import { useAcquiredBadges } from '@/libs/hooks/badge/useAcquiredBadges'
+import { useLogout } from '@/libs/hooks/mypage/useLogout'
+import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
+import { useNotiSetting } from '@/libs/hooks/mypage/useNotiSetting'
+import { useNotiTimeSetting } from '@/libs/hooks/mypage/useNotiTimeSetting'
+import { toHHmm, toHHmmParts } from '@/libs/utils/time'
+import { AlertType } from '@/types/mypage'
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true)
@@ -36,18 +34,17 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 export default function MyPage() {
   const router = useRouter()
-  const qc = useQueryClient()
 
-  // ✅ React Query
+  //  React Query
   const { data: user, isLoading: isUserLoading, isError: isUserError } = useMyPage()
-  const { data: notifTimeData, isLoading: isTimeLoading } = useQuery({
-    queryKey: ['user', 'notificationTime'],
-    queryFn: fetchNotificationTime,
-  })
+  const { data: badge = [] } = useAcquiredBadges()
+  const { mutate: notiSetting } = useNotiSetting()
+  const { mutate: notiTimeSetting } = useNotiTimeSetting()
+  const { mutate: logout } = useLogout()
 
   // 로컬 UI 상태
-  const [isNotificationEnabled, setIsNotificationEnabled] = useState(false)
-  const [isHouseAlarm, setIsHouseAlarm] = useState(false)
+  const [isMasterAlarm, setIsMasterAlarm] = useState(false)
+  const [isChoreAlarm, setIsChoreAlarm] = useState(false)
   const [isNoticeAlarm, setIsNoticeAlarm] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
@@ -56,77 +53,66 @@ export default function MyPage() {
   const [minute, setMinute] = useState(0)
   const [showConfirm, setShowConfirm] = useState(false)
 
+  // 뱃지 획득 개수
+  const AcquireBadgeCount = badge.filter((b) => b.acquired).length ?? 0
+  const totalBadge = badge?.length ?? 0
+  const progress = Math.round((AcquireBadgeCount / totalBadge) * 100)
+
   const TERMS_URL =
     'https://classy-group-db3.notion.site/29aaba73bec680159850c0297ddcd13f?source=copy_link'
   const PRIVACY_URL =
     'https://classy-group-db3.notion.site/29aaba73bec6807fbb64c4b38eae9f7a?source=copy_link'
 
-  // 서버 데이터 수신 → 토글/시간 초기화
+  // 초기 서버 데이터 수신 → 토글/시간 초기화
   useEffect(() => {
     if (!user) return
-    setIsNotificationEnabled(!!user.masterEnabled)
-    setIsHouseAlarm(!!user.choreEnabled)
+    setIsMasterAlarm(!!user.masterEnabled)
+    setIsChoreAlarm(!!user.choreEnabled)
     setIsNoticeAlarm(!!user.noticeEnabled)
-  }, [user])
 
-  useEffect(() => {
-    const time = notifTimeData?.notificationTime || user?.notificationTime // 우선순위: 단일 time API > 마이페이지의 기본값
-    if (!time) return
-    const [hourStr, minuteStr] = time.split(':')
-    const hourNum = parseInt(hourStr, 10)
-    const ampmValue: '오전' | '오후' = hourNum >= 12 ? '오후' : '오전'
-    const convertedHour = hourNum > 12 ? hourNum - 12 : hourNum === 0 ? 12 : hourNum
-    setAmpm(ampmValue)
-    setHour(convertedHour)
-    setMinute(parseInt(minuteStr, 10))
-  }, [notifTimeData, user])
+    if (user.notificationTime) {
+      const parsed = toHHmmParts(user.notificationTime)
+      setAmpm(parsed.ampm)
+      setHour(parsed.hour12)
+      setMinute(parsed.minute)
+    }
+  }, [user])
 
   useEffect(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
   }, [activeDropdown])
 
-  const handleToggleChange = async (type: 'master' | 'chore' | 'notice', value: boolean) => {
-    try {
-      await patchNotificationSetting(type, value)
-      // 로컬 즉시 반영
-      if (type === 'master') setIsNotificationEnabled(value)
-      if (type === 'chore') setIsHouseAlarm(value)
-      if (type === 'notice') setIsNoticeAlarm(value)
-      // 서버 최신화
-      qc.invalidateQueries({ queryKey: ['user', 'me'] })
-    } catch {
-      alert('알림 설정 변경 중 오류가 발생했습니다.')
+  // 토글 상태 핸들러
+  const handleToggle = (type: AlertType, next: boolean) => {
+    if (type === 'master') {
+      setIsMasterAlarm(next)
+      setIsChoreAlarm(next)
+      setIsNoticeAlarm(next)
+    } else if (type === 'chore') {
+      setIsChoreAlarm(next)
+    } else if (type === 'notice') {
+      setIsNoticeAlarm(next)
     }
+
+    notiSetting({ type, enabled: next })
   }
 
-  const handleConfirm = async () => {
-    try {
-      await patchNotificationTime(hour, minute, ampm)
-      alert('알림 시간이 변경되었습니다')
-      setShowConfirm(false)
-      setActiveDropdown(null)
-      // 시간 재조회
-      qc.invalidateQueries({ queryKey: ['user', 'notificationTime'] })
-    } catch (error) {
-      console.error('알림 시간 변경 실패:', error)
-      alert('알림 시간 변경 중 오류가 발생했습니다.')
-    }
+  const handleConfirm = () => {
+    const notificationTime = toHHmm(ampm, hour, minute)
+
+    notiTimeSetting(
+      { notificationTime },
+      {
+        onSuccess: () => {
+          setShowConfirm(false)
+          setActiveDropdown(null)
+        },
+      }
+    )
   }
 
-  const handleLogout = async () => {
-    try {
-      await postLogout()
-      await AsyncStorage.multiRemove(['accessToken', 'refreshToken'])
-      alert('로그아웃 되었습니다.')
-      router.replace('/(auth)')
-    } catch (error) {
-      console.error('로그아웃 실패:', error)
-      alert('로그아웃 중 오류가 발생했습니다.')
-    }
-  }
-
-  // ✅ 로딩/에러 UI
-  if (isUserLoading || isTimeLoading) {
+  // 로딩/에러 UI
+  if (isUserLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#57C9D0" />
@@ -144,8 +130,7 @@ export default function MyPage() {
   }
 
   return (
-    <ScrollView
-      style={[styles.container, { overflow: 'visible' }]}
+    <TabSafeScroll
       contentContainerStyle={{
         paddingBottom: Platform.OS === 'android' ? 100 : 90,
         overflow: 'visible',
@@ -183,13 +168,13 @@ export default function MyPage() {
 
           <Pressable onPress={() => router.push('/mybadges')} style={styles.badgeCountWrapper}>
             <Text style={styles.badgeCount}>
-              0개 <Text style={styles.badgeTotal}>/ 0개</Text>
+              {AcquireBadgeCount}개 <Text style={styles.badgeTotal}>/ {totalBadge}개</Text>
             </Text>
             <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
           </Pressable>
         </View>
         <View style={styles.badgeBarBackground}>
-          <View style={[styles.badgeBarFill, { width: '0%' }]} />
+          <View style={[styles.badgeBarFill, { width: `${progress}%` }]} />
         </View>
       </View>
 
@@ -197,17 +182,17 @@ export default function MyPage() {
       <View style={styles.sectionWithDropdown}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>알림</Text>
-          <Toggle value={isNotificationEnabled} onChange={(v) => handleToggleChange('master', v)} />
+          <Toggle value={isMasterAlarm} onChange={(next) => handleToggle('master', next)} />
         </View>
 
         <View style={styles.settingChore}>
           <Text style={styles.settingText}>집안일 알림</Text>
-          <Toggle value={isHouseAlarm} onChange={(v) => handleToggleChange('chore', v)} />
+          <Toggle value={isChoreAlarm} onChange={(next) => handleToggle('chore', next)} />
         </View>
 
         <View style={styles.settingNotice}>
           <Text style={styles.settingText}>공지 알림</Text>
-          <Toggle value={isNoticeAlarm} onChange={(v) => handleToggleChange('notice', v)} />
+          <Toggle value={isNoticeAlarm} onChange={(next) => handleToggle('notice', next)} />
         </View>
 
         <View style={styles.divider} />
@@ -254,10 +239,10 @@ export default function MyPage() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+      <TouchableOpacity style={styles.logoutBtn} onPress={() => logout()}>
         <Text style={styles.logoutText}>로그아웃</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </TabSafeScroll>
   )
 }
 
@@ -271,11 +256,12 @@ const styles = StyleSheet.create({
   headerWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: hp('2%'),
+    height: 46,
+    marginVertical: 16,
     position: 'relative',
     flexDirection: 'row',
   },
-  headerTitle: { fontSize: 20, fontWeight: '700' },
+  headerTitle: { fontFamily: 'Pretendard', fontSize: 20, fontWeight: '600' },
   notificationBell: { position: 'absolute', right: 0 },
 
   headerIcon: { position: 'absolute', right: 0 },
@@ -301,8 +287,8 @@ const styles = StyleSheet.create({
     height: 40,
   },
   userInfo: { alignItems: 'flex-start', justifyContent: 'center', gap: 4 },
-  userName: { fontSize: 16, color: '#FFFFFF', fontWeight: '700' },
-  userid: { fontSize: 12, color: '#FFFFFF' },
+  userName: { fontFamily: 'Pretendard', fontSize: 16, color: '#FFFFFF', fontWeight: '700' },
+  userid: { fontFamily: 'Pretendard', fontSize: 12, color: '#FFFFFF' },
   badgeSection: {
     marginTop: hp('3%'),
     backgroundColor: '#FFFFFF',
@@ -311,8 +297,14 @@ const styles = StyleSheet.create({
   },
   badgeHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: hp('1%') },
   badgeCountWrapper: { flexDirection: 'row', alignItems: 'center' },
-  badgeCount: { fontSize: 14, color: '#57C9D0', fontWeight: '600' },
-  badgeTotal: { fontSize: 14, color: '#B4B7BC', marginRight: hp('1%'), fontWeight: 400 },
+  badgeCount: { fontFamily: 'Pretendard', fontSize: 14, color: '#57C9D0', fontWeight: '600' },
+  badgeTotal: {
+    fontFamily: 'Pretendard',
+    fontSize: 14,
+    color: '#B4B7BC',
+    marginRight: hp('1%'),
+    fontWeight: 400,
+  },
   badgeBarBackground: { height: 8, backgroundColor: '#040F2014', borderRadius: 100 },
   badgeBarFill: { height: '100%', backgroundColor: '#57C9D0', borderRadius: 100 },
   sectionWithDropdown: {
@@ -336,7 +328,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E6E7E9',
     paddingBottom: hp('2%'),
   },
-  sectionTitle: { fontSize: 18, fontWeight: '700' },
+  sectionTitle: { fontFamily: 'Pretendard', fontSize: 18, fontWeight: '700' },
   settingChore: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -363,7 +355,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
 
-  settingText: { fontSize: 14, color: '#686F79' },
+  settingText: { fontFamily: 'Pretendard', fontSize: 14, color: '#686F79' },
   divider: { borderBottomWidth: 1, borderBottomColor: '#E6E7E9' },
   timeSetting: { marginTop: hp('1.5%') },
   confirmBtn: {
@@ -375,8 +367,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: hp('2%'),
   },
-  confirmText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
+  confirmText: { fontFamily: 'Pretendard', color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
   logoutBtn: { alignItems: 'center', marginTop: hp('3%') },
-  logoutText: { color: '#9B9FA6', fontSize: 12 },
+  logoutText: { fontFamily: 'Pretendard', color: '#9B9FA6', fontSize: 12 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 })

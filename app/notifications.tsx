@@ -1,7 +1,14 @@
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 
 import { useChoreNotifications } from '@/libs/hooks/notification/useChoreNotifications'
 import { usePatchChoreReadNotification } from '@/libs/hooks/notification/useChoreReadNotification'
@@ -38,6 +45,9 @@ export default function Notifications() {
   const { data: choreData = [], isLoading: isChoreLoading } = useChoreNotifications()
 
   const { data: noticeData = [], isLoading: isNoticeLoading } = useNoticeNotifications()
+
+  const choreUnread = useMemo(() => choreData.filter((n: any) => !n.isREad).length, [choreData])
+  const noticeUnread = useMemo(() => noticeData.filter((n: any) => !n.isREad).length, [noticeData])
 
   const raw = activeTab === 'chore' ? choreData : noticeData
   const isLoading = activeTab === 'chore' ? isChoreLoading : isNoticeLoading
@@ -86,7 +96,10 @@ export default function Notifications() {
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
-          <MaterialIcons name="chevron-left" size={28} color="#686F79" />
+          <Image
+            source={require('@/assets/images/arrow/chevron-left.png')}
+            style={{ width: 24, height: 24 }}
+          />
         </TouchableOpacity>
         <Text style={styles.header}>알림</Text>
       </View>
@@ -100,6 +113,8 @@ export default function Notifications() {
           <Text style={activeTab === 'chore' ? styles.tabTextActive : styles.tabChoreText}>
             집안일
           </Text>
+
+          {activeTab !== 'chore' && choreUnread > 0 && <View style={styles.dot} />}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -109,6 +124,8 @@ export default function Notifications() {
           <Text style={activeTab === 'notice' ? styles.tabTextActive : styles.tabNoticeText}>
             공지
           </Text>
+
+          {activeTab !== 'notice' && noticeUnread > 0 && <View style={styles.dot} />}
         </TouchableOpacity>
       </View>
 
@@ -133,7 +150,10 @@ export default function Notifications() {
           </>
         ) : (
           <View style={styles.emptyWrapper}>
-            <Ionicons name="alert-circle-outline" size={72} color="#CCCCCC" />
+            <Image
+              source={require('@/assets/images/no-alert.png')}
+              style={{ width: 72, height: 72 }}
+            />
             <Text style={styles.emptyText}>아직 알림이 없어요</Text>
           </View>
         )}
@@ -143,7 +163,7 @@ export default function Notifications() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF', paddingHorizontal: 20, paddingTop: 24 },
+  container: { flex: 1, backgroundColor: '#F8F8FA', paddingHorizontal: 20, paddingTop: 24 },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -151,8 +171,19 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     position: 'relative',
   },
-  header: { fontSize: 18, fontWeight: '700', color: '#1A1A1A' },
+  header: { fontFamily: 'Pretendard', fontSize: 18, fontWeight: '700', color: '#1A1A1A' },
   headerBack: { position: 'absolute', left: 0 },
+
+  dot: {
+    position: 'absolute',
+    top: -4,
+    right: -3,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#57C9D0',
+  },
+
   tabRow: { flexDirection: 'row', marginBottom: 16 },
   tabChoreButton: {
     paddingVertical: 5,
@@ -189,13 +220,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 32,
   },
-  tabChoreText: { fontSize: 14, color: '#9B9FA6' },
-  tabNoticeText: { fontSize: 14, color: '#9B9FA6' },
+  tabChoreText: { fontFamily: 'Pretendard', fontSize: 14, color: '#9B9FA6' },
+  tabNoticeText: { fontFamily: 'Pretendard', fontSize: 14, color: '#9B9FA6' },
   tabTextActive: { color: '#FFFFFF' },
 
   contentArea: { flex: 1 },
-  unreadText: { fontSize: 14, color: '#686F79', marginBottom: 8 },
-  unreadNumber: { fontWeight: '600', color: '#00ADB5' },
+  unreadText: { fontFamily: 'Pretendard', fontSize: 14, color: '#686F79', marginBottom: 8 },
+  unreadNumber: { fontFamily: 'Pretendard', fontWeight: '600', color: '#00ADB5' },
 
   card: {
     backgroundColor: '#F5FCFC',
@@ -206,12 +237,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 12,
   },
-  cardRead: { backgroundColor: '#FFFFFF' },
+  cardRead: { backgroundColor: '#FFFFFF', borderColor: '#FFFFFF' },
 
-  cardTitle: { fontWeight: '600', fontSize: 14, color: '#1D2736', marginBottom: 4 },
-  cardMessage: { fontSize: 14, color: '#686F79' },
-  cardTime: { fontSize: 12, color: '#9B9FA6', textAlign: 'right', marginTop: 6 },
+  cardTitle: {
+    fontFamily: 'Pretendard',
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#1D2736',
+    marginBottom: 4,
+  },
+  cardMessage: { fontFamily: 'Pretendard', fontSize: 14, color: '#686F79' },
+  cardTime: {
+    fontFamily: 'Pretendard',
+    fontSize: 12,
+    color: '#9B9FA6',
+    textAlign: 'right',
+    marginTop: 6,
+  },
   emptyWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyText: { color: '#B4B7BC', fontSize: 16, marginTop: 8, fontWeight: 600 },
+  emptyText: {
+    color: '#B4B7BC',
+    fontFamily: 'Pretendard',
+    fontSize: 16,
+    marginTop: 8,
+    fontWeight: 600,
+  },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 })

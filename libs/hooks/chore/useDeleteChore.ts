@@ -22,6 +22,9 @@ export function useDeleteChore() {
       qc.invalidateQueries({ queryKey: ['chore', 'calendar'] })
 
       qc.invalidateQueries({ queryKey: ['chore', 'detail', choreInstanceId] })
+
+      qc.invalidateQueries({ queryKey: ['mission', 'monthly'] })
+      qc.invalidateQueries({ queryKey: ['badge', 'acquired'] })
     },
   })
 }

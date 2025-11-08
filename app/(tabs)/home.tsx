@@ -18,68 +18,71 @@ import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import { useAuth } from '@/contexts/AuthContext'
-import { api } from '@/libs/api/axios'
 import { useChoreByDate } from '@/libs/hooks/chore/useChoreByDate'
 import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
 import { usePatchChoreStatus } from '@/libs/hooks/chore/usePatchChoreStatus'
-import { useMyPage } from '@/libs/hooks/mypage/user'
-import { formatKoreanDate, getMonthRange } from '@/libs/utils/date'
+import { useFirstNotiStatus } from '@/libs/hooks/mypage/useFirstNotiStatus'
+import { useFirstNotiTimeSetting } from '@/libs/hooks/mypage/useFirstNotiTimeSetting'
+import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
+import { formatKoreanDate, getMonthRange, toYMD } from '@/libs/utils/date'
+import { styleFromRepeatColor } from '@/libs/utils/repeat'
+import { toHHmm, toHHmmParts } from '@/libs/utils/time'
 
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
 
 export default function HomeScreen() {
   const router = useRouter()
   const { token } = useAuth() // 토큰 준비 이후에만 초기화 로직 실행
+
+  const androidTop = Platform.OS === 'android' ? 50 : 0
+
+  // ----- 상태관리 -----
   const [showSetupModal, setShowSetupModal] = useState(false)
   const [ampm, setAmpm] = useState<'오전' | '오후'>('오후')
   const [hour, setHour] = useState(7)
   const [minute, setMinute] = useState(0)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
-  // dev 토큰 발급/주입 제거. 토큰이 있을 때만 최초 설정 상태 조회
+  const todayStr = useMemo(() => {
+    const t = new Date()
+    return toYMD(t)
+  }, [])
+
+  const [selectedDate, setSelectedDate] = useState(todayStr)
+  const [range, setRange] = useState(() => getMonthRange(selectedDate))
+
+  // ----- api 훅 -----
+  const { data: firstNotiStatus } = useFirstNotiStatus()
+  const { mutateAsync: firstNotiTimeSetting } = useFirstNotiTimeSetting()
+
+  const { data: dotDates = [] } = useChoreCalendar(range.start, range.end)
+  const { data: choresData = [], isLoading, isError } = useChoreByDate(selectedDate)
+  const choresList = choresData ?? []
+
+  const { data: todayChores = [] } = useChoreByDate(todayStr)
+  const { mutate: choreStatus } = usePatchChoreStatus(selectedDate)
+  const { data: user } = useMyPage()
+
   useEffect(() => {
-    if (!token) return
+    if (!token || !firstNotiStatus) return
 
-    const init = async () => {
-      try {
-        const statusRes = await api.get('/users/me/notification-settings/first-setup-status')
-        const { firstSetupCompleted, notificationTime } = statusRes.data
+    const { firstSetupCompleted, notificationTime } = firstNotiStatus
 
-        if (!firstSetupCompleted) {
-          if (notificationTime) {
-            const [hourStr, minuteStr] = notificationTime.split(':')
-            const hourNum = parseInt(hourStr, 10)
-            const ampmValue = hourNum >= 12 ? '오후' : '오전'
-            const convertedHour = hourNum > 12 ? hourNum - 12 : hourNum
+    if (!firstSetupCompleted) {
+      const { ampm, hour12, minute } = toHHmmParts(notificationTime) // 알림 시간 기본값 셋팅
 
-            setAmpm(ampmValue)
-            setHour(convertedHour)
-            setMinute(parseInt(minuteStr, 10))
-          }
-          setShowSetupModal(true)
-        }
-      } catch (e) {
-        console.warn('[Init first-setup-status] failed:', e)
-      }
+      setAmpm(ampm)
+      setHour(hour12)
+      setMinute(minute)
+      setShowSetupModal(true)
     }
-
-    init()
-  }, [token])
+  }, [token, firstNotiStatus])
 
   const handleAllowNotification = async () => {
     try {
-      const convertedHour = ampm === '오후' && hour < 12 ? hour + 12 : hour
-      const formattedTime = `${String(convertedHour).padStart(2, '0')}:${String(minute).padStart(
-        2,
-        '0'
-      )}`
+      const notificationTime = toHHmm(ampm, hour, minute)
 
-      await api.post('/users/me/notification-settings/first-setup', {
-        notificationTime: formattedTime,
-        masterEnabled: true,
-        choreEnabled: true,
-        noticeEnabled: true,
-      })
+      await firstNotiTimeSetting({ notificationTime })
 
       setShowSetupModal(false)
       alert('알림 설정이 완료되었습니다!')
@@ -89,39 +92,12 @@ export default function HomeScreen() {
     }
   }
 
-  const androidTop = Platform.OS === 'android' ? 50 : 0
-
-  const todayStr = useMemo(() => {
-    const t = new Date()
-    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(
-      t.getDate()
-    ).padStart(2, '0')}`
-  }, [])
-
-  const [selectedDate, setSelectedDate] = useState(todayStr)
-  const [range, setRange] = useState(() => getMonthRange(selectedDate))
-
-  const { data: dotDates = [] } = useChoreCalendar(range.start, range.end)
-  const { data: choresList = [], isLoading, isError } = useChoreByDate(selectedDate)
-  const { mutate: choreStatus } = usePatchChoreStatus(selectedDate)
-  const { data: user } = useMyPage()
-
   const progress = useMemo(() => {
-    const total = choresList.length
+    const total = todayChores.length
     if (!total) return 0
-    const done = choresList.filter((c) => c.status === 'COMPLETED').length
+    const done = todayChores.filter((c) => c.status === 'COMPLETED').length
     return Math.round((done / total) * 100)
-  }, [choresList])
-
-  const styleFromRepeatColor = (cls: string | undefined) => {
-    if (!cls) return {}
-    const bgMatch = cls.match(/bg-\[#([0-9A-Fa-f]{6})\]/)
-    const textMatch = cls.match(/text-\[#([0-9A-Fa-f]{6})\]/)
-    const style: any = {}
-    if (bgMatch) style.backgroundColor = `#${bgMatch[1]}`
-    if (textMatch) style.color = `#${textMatch[1]}`
-    return style
-  }
+  }, [todayChores])
 
   return (
     <View style={styles.container}>
@@ -186,16 +162,26 @@ export default function HomeScreen() {
                       style={[styles.itemRow, index !== choresList.length - 1 && styles.mb12]}
                     >
                       <View style={styles.itemLeftRow}>
-                        <Text
+                        <View
                           style={[
-                            styles.badgeText,
+                            styles.badge,
+                            styleFromRepeatColor(repeat.color),
                             item.status === 'COMPLETED'
                               ? styles.badgeDone
                               : styleFromRepeatColor(repeat.color),
                           ]}
                         >
-                          {repeat.label}
-                        </Text>
+                          <Text
+                            style={[
+                              styles.badgeText,
+                              item.status === 'COMPLETED'
+                                ? styles.badgeDone
+                                : styleFromRepeatColor(repeat.color),
+                            ]}
+                          >
+                            {repeat.label}
+                          </Text>
+                        </View>
                         <TouchableOpacity
                           activeOpacity={0.8}
                           onPress={() =>
@@ -286,10 +272,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F8FA' },
   headerRow: {
-    paddingVertical: 20,
+    marginVertical: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    height: 38,
   },
   contentWrap: { flexDirection: 'column', gap: 16 },
   homeCard: {
@@ -300,9 +287,9 @@ const styles = StyleSheet.create({
   },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   colGap2: { flexDirection: 'column', gap: 8 },
-  helloTitle: { fontWeight: '600', fontSize: 18 },
-  baseText: { fontSize: 14 },
-  progressNum: { fontWeight: '700', color: '#46A1A6' },
+  helloTitle: { fontFamily: 'Pretendard', fontWeight: '600', fontSize: 18 },
+  baseText: { fontFamily: 'Pretendard', fontSize: 14 },
+  progressNum: { fontFamily: 'Pretendard', fontWeight: '700', color: '#46A1A6' },
   progressBar: {
     marginTop: 12,
     marginBottom: 8,
@@ -315,23 +302,27 @@ const styles = StyleSheet.create({
   progressFill: { height: '100%', backgroundColor: '#57C9D0' },
   flex: { flex: 1 },
   listHeaderRow: { flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 12 },
-  listHeaderTitle: { fontSize: 18, fontWeight: '700' },
-  listHeaderSub: { fontSize: 16 },
+  listHeaderTitle: { fontFamily: 'Pretendard', fontSize: 18, fontWeight: '700' },
+  listHeaderSub: { fontFamily: 'Pretendard', fontSize: 16 },
   listBox: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20 },
   itemRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   mb12: { marginBottom: 12 },
   itemLeftRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  badgeText: {
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    fontSize: 12,
+  badge: {
+    alignItems: 'center',
+    justifyContent: 'center',
     width: 42,
     height: 23,
+    borderRadius: 6,
+  },
+  badgeText: {
+    fontFamily: 'Pretendard',
+    fontSize: 12,
     textAlign: 'center',
   },
+
   badgeDone: { backgroundColor: '#CDCFD2', color: '#9B9FA6' },
-  itemTitle: { fontSize: 14 },
+  itemTitle: { fontFamily: 'Pretendard', fontSize: 14 },
   itemTitleActive: { color: '#000000' },
   itemTitleDone: { color: '#CDCFD2', textDecorationLine: 'line-through' },
   overlay: {
@@ -349,14 +340,14 @@ const styles = StyleSheet.create({
     maxHeight: '80%',
     zIndex: 999,
   },
-  modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-  modalDesc: { fontSize: 14, textAlign: 'center', marginVertical: 24 },
+  modalTitle: { fontFamily: 'Pretendard', fontSize: 18, fontWeight: '700', marginBottom: 12 },
+  modalDesc: { fontFamily: 'Pretendard', fontSize: 14, textAlign: 'center', marginVertical: 24 },
   allowBtn: {
     backgroundColor: '#57C9D0',
     borderRadius: 12,
     paddingVertical: 15,
     width: '100%',
   },
-  allowText: { color: '#fff', fontWeight: '700', textAlign: 'center' },
+  allowText: { color: '#fff', fontFamily: 'Pretendard', fontWeight: '700', textAlign: 'center' },
   highlightText: { color: '#46A1A6' },
 })

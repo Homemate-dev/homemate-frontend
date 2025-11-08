@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { createChore } from '@/libs/api/chore/addChore'
+import { postCreateChore } from '@/libs/api/chore/postCreateChore'
 import { CreateChoreDTO, ResponseChore } from '@/types/chore'
 
 export default function useCreateChore() {
   const qc = useQueryClient()
 
   return useMutation<ResponseChore, unknown, CreateChoreDTO>({
-    mutationFn: (dto) => createChore(dto),
-    onSuccess: (_resp, dto) => {
+    mutationFn: (dto) => postCreateChore(dto),
+    onSuccess: async (resp, dto) => {
       // 해당 날짜의 집안일 리스트 갱신
       qc.invalidateQueries({ queryKey: ['chore', 'byDate', dto.startDate] })
 

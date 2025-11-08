@@ -17,9 +17,12 @@ export function useChoreByDate(date: string) {
     queryFn: () => getChoreByDate(date),
     enabled: !!date,
 
+    // 이전 데이터 유지 → 새로 클릭해도 잠깐 비는 구간 안 만듦
+    placeholderData: (previousData) => previousData,
+
     // 자동 리패치/포커스 리패치 방지
     staleTime: 60 * 1000, // 60s 동안 신선 → 바로 리패치 안 함
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     refetchOnReconnect: false,
     refetchOnMount: false,
     retry: false,
