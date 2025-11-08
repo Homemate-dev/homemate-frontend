@@ -3,5 +3,6 @@ export type MonthlyMission = {
   title: string
   targetCount: number
   currentCount: number
+  existsInRecommend: boolean
   isCompleted: boolean
 }
