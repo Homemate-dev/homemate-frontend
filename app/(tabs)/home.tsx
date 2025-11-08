@@ -56,7 +56,9 @@ export default function HomeScreen() {
   const { mutateAsync: firstNotiTimeSetting } = useFirstNotiTimeSetting()
 
   const { data: dotDates = [] } = useChoreCalendar(range.start, range.end)
-  const { data: choresList = [], isLoading, isError } = useChoreByDate(selectedDate)
+  const { data: choresData = [], isLoading, isError } = useChoreByDate(selectedDate)
+  const choresList = choresData ?? []
+
   const { data: todayChores = [] } = useChoreByDate(todayStr)
   const { mutate: choreStatus } = usePatchChoreStatus(selectedDate)
   const { data: user } = useMyPage()
