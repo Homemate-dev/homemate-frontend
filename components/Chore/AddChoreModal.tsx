@@ -701,8 +701,8 @@ const styles = StyleSheet.create({
   },
   headerBack: { position: 'absolute', left: 0 },
   headerRight: { position: 'absolute', right: 0 },
-  headerTitle: { fontFamily: 'pretendard', fontSize: 20, fontWeight: 600 as any, color: '#111111' },
-  deleteText: { fontFamily: 'pretendard', fontSize: 16, color: '#57C9D0', fontWeight: '600' },
+  headerTitle: { fontSize: 20, fontWeight: 600 as any, color: '#111111' },
+  deleteText: { fontSize: 16, color: '#57C9D0', fontWeight: '600' },
 
   flex1: { flex: 1 },
 
@@ -716,17 +716,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   textInput: {
-    fontFamily: 'pretendard',
     fontSize: 14,
     flex: 1,
     minWidth: 0,
     padding: 0,
     color: '#000',
   },
-  counterText: { fontFamily: 'pretendard', fontSize: 12, color: '#B4B7BC' },
+  counterText: { fontSize: 12, color: '#B4B7BC' },
 
   warnText: {
-    fontFamily: 'pretendard',
     fontSize: 12,
     color: '#FF4838',
     marginBottom: 12,
@@ -750,7 +748,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     marginBottom: 12,
   },
-  chipText: { fontFamily: 'pretendard', color: '#46A1A6', fontSize: 12, fontWeight: 600 as any },
+  chipText: { color: '#46A1A6', fontSize: 12, fontWeight: 600 as any },
 
   resetBtn: {
     backgroundColor: '#79D4D9',
@@ -764,7 +762,6 @@ const styles = StyleSheet.create({
   },
   resetContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   resetBtnText: {
-    fontFamily: 'pretendard',
     fontSize: 12,
     fontWeight: 600 as any,
     color: 'white',
@@ -779,7 +776,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  label: { fontFamily: 'pretendard', fontSize: 16, fontWeight: '500', color: '#363F4D' },
+  label: { fontSize: 16, fontWeight: '500', color: '#363F4D' },
   divider: { height: 1, backgroundColor: '#E6E7E9', marginVertical: 12 },
 
   relative: { position: 'relative' },
@@ -790,7 +787,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 6,
   },
-  dateBtnText: { fontFamily: 'pretendard', fontSize: 14, color: '#46A1A6' },
+  dateBtnText: { fontSize: 14, color: '#46A1A6' },
 
   calendarPopover: {
     width: 340,
@@ -813,7 +810,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
 
-  errorMsg: { fontFamily: 'pretendard', fontSize: 12, color: '#FF0707', marginTop: 8 },
+  errorMsg: { fontSize: 12, color: '#FF0707', marginTop: 8 },
 
   submitBtn: {
     height: 52,
@@ -824,7 +821,7 @@ const styles = StyleSheet.create({
   },
   submitBtnActive: { backgroundColor: '#57C9D0' },
   submitBtnDisabled: { backgroundColor: '#E6E7E9' },
-  submitText: { fontFamily: 'pretendard', fontSize: 16, fontWeight: '600' },
+  submitText: { fontSize: 16, fontWeight: '600' },
   submitTextActive: { color: '#FFFFFF' },
   submitTextDisabled: { color: '#B4B7BC' },
 })

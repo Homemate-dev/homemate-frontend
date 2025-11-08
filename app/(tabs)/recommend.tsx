@@ -272,11 +272,11 @@ const styles = StyleSheet.create({
     height: 46,
     marginVertical: 16,
   },
-  headerText: { fontFamily: 'Pretendard', fontWeight: 600, fontSize: 20 },
+  headerText: { fontWeight: 600, fontSize: 20 },
   notificationBell: { position: 'absolute', right: 0 },
 
   section: { marginBottom: 24 },
-  sectionTitle: { fontFamily: 'Pretendard', fontSize: 18, fontWeight: '700', marginBottom: 12 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
 
   scrollContainer: {
     flexDirection: 'column',
@@ -309,14 +309,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardTitle: {
-    fontFamily: 'Pretendard',
     fontSize: 16,
     fontWeight: 600,
     color: '#46A1A6',
     flexShrink: 1,
   },
   cardSub: {
-    fontFamily: 'Pretendard',
     fontSize: 14,
     color: '#4F5763',
   },
@@ -343,11 +341,11 @@ const styles = StyleSheet.create({
 
   spaceTextActive: {
     color: '#FFFFFF',
-    fontFamily: 'Pretendard',
+
     fontWeight: 600,
   },
 
-  spaceText: { color: '#9B9FA6', fontFamily: 'Pretendard', fontSize: 14 },
+  spaceText: { color: '#9B9FA6', fontSize: 14 },
 
   scrollChore: {
     flexDirection: 'row',
@@ -376,12 +374,10 @@ const styles = StyleSheet.create({
   },
 
   badgeText: {
-    fontFamily: 'Pretendard',
     fontSize: 12,
   },
 
   choreTitle: {
-    fontFamily: 'Pretendard',
     fontSize: 14,
   },
 

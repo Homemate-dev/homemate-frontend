@@ -78,7 +78,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontFamily: 'pretendard',
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 8,
@@ -86,7 +85,6 @@ const styles = StyleSheet.create({
     lineHeight: 30,
   },
   desc: {
-    fontFamily: 'pretendard',
     fontSize: 14,
     color: '#686F79',
     textAlign: 'center',
@@ -120,7 +118,6 @@ const styles = StyleSheet.create({
     height: 52,
   },
   btnGhostText: {
-    fontFamily: 'pretendard',
     fontSize: 14,
     color: '#686F79',
   },
@@ -129,7 +126,6 @@ const styles = StyleSheet.create({
     height: 52,
   },
   btnPrimaryText: {
-    fontFamily: 'pretendard',
     fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',

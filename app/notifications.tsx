@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     position: 'relative',
   },
-  header: { fontFamily: 'Pretendard', fontSize: 18, fontWeight: '700', color: '#1A1A1A' },
+  header: { fontSize: 18, fontWeight: '700', color: '#1A1A1A' },
   headerBack: { position: 'absolute', left: 0 },
 
   dot: {
@@ -220,13 +220,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 32,
   },
-  tabChoreText: { fontFamily: 'Pretendard', fontSize: 14, color: '#9B9FA6' },
-  tabNoticeText: { fontFamily: 'Pretendard', fontSize: 14, color: '#9B9FA6' },
+  tabChoreText: { fontSize: 14, color: '#9B9FA6' },
+  tabNoticeText: { fontSize: 14, color: '#9B9FA6' },
   tabTextActive: { color: '#FFFFFF' },
 
   contentArea: { flex: 1 },
-  unreadText: { fontFamily: 'Pretendard', fontSize: 14, color: '#686F79', marginBottom: 8 },
-  unreadNumber: { fontFamily: 'Pretendard', fontWeight: '600', color: '#00ADB5' },
+  unreadText: { fontSize: 14, color: '#686F79', marginBottom: 8 },
+  unreadNumber: { fontWeight: '600', color: '#00ADB5' },
 
   card: {
     backgroundColor: '#F5FCFC',
@@ -240,15 +240,13 @@ const styles = StyleSheet.create({
   cardRead: { backgroundColor: '#FFFFFF', borderColor: '#FFFFFF' },
 
   cardTitle: {
-    fontFamily: 'Pretendard',
     fontWeight: '600',
     fontSize: 14,
     color: '#1D2736',
     marginBottom: 4,
   },
-  cardMessage: { fontFamily: 'Pretendard', fontSize: 14, color: '#686F79' },
+  cardMessage: { fontSize: 14, color: '#686F79' },
   cardTime: {
-    fontFamily: 'Pretendard',
     fontSize: 12,
     color: '#9B9FA6',
     textAlign: 'right',
@@ -257,7 +255,7 @@ const styles = StyleSheet.create({
   emptyWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   emptyText: {
     color: '#B4B7BC',
-    fontFamily: 'Pretendard',
+
     fontSize: 16,
     marginTop: 8,
     fontWeight: 600,

@@ -120,10 +120,10 @@ const styles = StyleSheet.create({
   loadingBox: { paddingVertical: 24, alignItems: 'center', justifyContent: 'center' },
   errorText: { color: '#D64545' },
   backBtn: { position: 'absolute', left: 0 },
-  headerTitle: { fontFamily: 'Pretendard', fontSize: 20, fontWeight: '600' },
+  headerTitle: { fontSize: 20, fontWeight: '600' },
   sectionWrap: { marginBottom: 24 },
-  sectionTitle: { fontFamily: 'Pretendard', fontSize: 16, fontWeight: '600', marginBottom: 18 },
+  sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 18 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between' },
   badgeCol: { alignItems: 'center' },
-  badgeText: { fontFamily: 'Pretendard', fontSize: 14, marginTop: 8, color: '#4F5763' },
+  badgeText: { fontSize: 14, marginTop: 8, color: '#4F5763' },
 })
