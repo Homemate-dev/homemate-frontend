@@ -10,7 +10,7 @@ type AchievementPayload = {
   kind: AchievementKind
   title: string
   desc?: string
-  icon?: ImageSourcePropType | string
+  icon?: ImageSourcePropType
 }
 
 // 리덕스에 들고 있을 전체 모달 상태
@@ -19,7 +19,7 @@ type AchievementModalState = {
   kind: AchievementKind | null
   title: string
   desc?: string
-  icon?: ImageSourcePropType | string
+  icon?: ImageSourcePropType
   queue: AchievementPayload[] // 다음에 보여줄 모달들
 }
 

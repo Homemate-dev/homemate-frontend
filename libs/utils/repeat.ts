@@ -10,6 +10,18 @@ export function toRepeatFields(label: string | null) {
   return { repeatType: 'NONE' as const, repeatInterval: 0 }
 }
 
+export function toRepeat(label: string | null) {
+  if (!label || label === '한번') return { repeatType: 'NONE' as const, repeatInterval: 0 }
+  if (label === '매일') return { repeatType: 'DAILY' as const, repeatInterval: 1 }
+  if (label === '1주') return { repeatType: 'WEEKLY' as const, repeatInterval: 1 }
+  if (label === '2주') return { repeatType: 'WEEKLY' as const, repeatInterval: 2 }
+  if (label === '매달') return { repeatType: 'MONTHLY' as const, repeatInterval: 1 }
+  if (label === '3개월') return { repeatType: 'MONTHLY' as const, repeatInterval: 3 }
+  if (label === '6개월') return { repeatType: 'MONTHLY' as const, repeatInterval: 6 }
+  if (label === '1년') return { repeatType: 'YEARLY' as const, repeatInterval: 1 }
+  return { repeatType: 'NONE' as const, repeatInterval: 0 }
+}
+
 // API 필드 → 드롭다운 라벨 변환
 export function toRepeatLabel(type: string, interval: number) {
   if (type === 'NONE') return '한번'

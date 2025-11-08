@@ -25,6 +25,7 @@ export function useRegisterCategory() {
       onSuccess: async (resp) => {
         qc.invalidateQueries({ queryKey: ['chore', 'calendar'], type: 'active' })
         qc.invalidateQueries({ queryKey: ['chore', 'byDate', resp.data.startDate] })
+        qc.invalidateQueries({ queryKey: ['mission', 'monthly'] })
         const title = resp?.data?.title
 
         toast.show({
@@ -48,6 +49,7 @@ export function useRegisterCategory() {
         })
 
         // 뱃지 획득 시 모달
+        // 뱃지 데이터 최신화
         const prevBadge = qc.getQueryData<ResponseBadge[]>(['badge', 'acquired']) ?? []
 
         const nextBadge = await qc.fetchQuery<ResponseBadge[]>({
@@ -60,7 +62,7 @@ export function useRegisterCategory() {
         newlyAcquired.forEach((badge) => {
           dispatch(
             openAchievementModal({
-              kind: 'mission',
+              kind: 'badge',
               title: `${badge.badgeTitle} 뱃지 획득`,
               desc: getBadgeDesc(badge, nextBadge),
               icon: badge.badgeImageUrl,

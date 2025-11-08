@@ -35,6 +35,8 @@ export const clearAuthTokens = () => {
   refreshToken = null
 }
 
+export const getAccessToken = () => accessToken
+
 /** 401/419 최종 실패 시 호출할 전역 콜백(예: 로그인 화면 이동) */
 export const setOnUnauthorized = (handler: (() => void) | null) => {
   onUnauthorized = handler

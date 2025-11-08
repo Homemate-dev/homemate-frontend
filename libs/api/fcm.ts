@@ -7,7 +7,17 @@ import { api } from '@/libs/api/axios'
 import { NOTIFICATION_ENDPOINTS } from '@/libs/api/endpoints'
 import { firebaseApp } from '@/libs/firebase/init'
 
-export const registerFCMToken = async () => {
+export const registerFCMToken = async (accessToken: string) => {
+  console.log('[FCM] registerFCMToken 호출됨')
+  // 로그인(액세스 토큰) 안 되어 있으면 아예 호출 안 함 → 401 예방
+
+  console.log('[FCM] 현재 accessToken 존재?', !!accessToken)
+
+  if (!accessToken) {
+    console.log('🔒 accessToken 없음: 로그인 전이라 푸시 토큰 등록 스킵')
+    return
+  }
+
   try {
     // 💻 WEB: Firebase Messaging + VAPID
     if (Platform.OS === 'web') {
@@ -37,7 +47,7 @@ export const registerFCMToken = async () => {
       }
 
       await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token })
-      console.log('✅ 웹 푸시 토큰 등록 성공:', token)
+      console.log('✅ 웹 푸시 토큰 등록 성공')
       return
     }
 

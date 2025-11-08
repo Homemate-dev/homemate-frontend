@@ -25,6 +25,7 @@ export function useRegisterSpace() {
     onSuccess: async (resp) => {
       qc.invalidateQueries({ queryKey: ['chore', 'calendar'], type: 'active' })
       qc.invalidateQueries({ queryKey: ['chore', 'byDate', resp.data.startDate] })
+      qc.invalidateQueries({ queryKey: ['mission', 'monthly'] })
       const title = resp?.data?.title
 
       toast.show({

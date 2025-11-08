@@ -1,3 +1,5 @@
+import { ImageSourcePropType } from 'react-native'
+
 export type ResponseBadge = {
   badgeType: string
   badgeTitle: string
@@ -6,5 +8,5 @@ export type ResponseBadge = {
   currentCount: number
   requiredCount: number
   remainingCount: number
-  badgeImageUrl: string
+  badgeImageUrl: ImageSourcePropType
 }
