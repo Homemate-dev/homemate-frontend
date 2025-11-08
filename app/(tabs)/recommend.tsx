@@ -22,6 +22,7 @@ import { useRegisterCategory } from '@/libs/hooks/recommend/useRegisterCategory'
 import { useRegisterSpace } from '@/libs/hooks/recommend/useRegisterSpace'
 import useSpaceChoreList from '@/libs/hooks/recommend/useSpaceChoreList'
 import useSpaceList from '@/libs/hooks/recommend/useSpaceList'
+import { CategoryApi } from '@/libs/utils/category'
 import { styleFromRepeatColor, toRepeatFields } from '@/libs/utils/repeat'
 import { SpaceApi, SpaceUi, toSpaceUi } from '@/libs/utils/space'
 
@@ -47,8 +48,9 @@ export default function Recommend() {
   // ----- api 훅 -----
   const { data: overview = [], isLoading: overLoading, isError: overError } = useRecommend()
   // const { data: categories = [], isLoading: catLoading, isError: catError } = useChoreCategory()
-  const { data: categoryChores = [], isLoading: choreLoading } =
-    useRecommendChores(selectedCategoryEnum)
+  const { data: categoryChores = [], isLoading: choreLoading } = useRecommendChores(
+    isOpen ? (selectedCategoryEnum as CategoryApi | undefined) : undefined
+  )
 
   const { data: spaceList = [], isLoading: spaLoading } = useSpaceList()
   const {
@@ -125,10 +127,10 @@ export default function Recommend() {
                     {row.map((c) => {
                       return (
                         <Pressable
-                          key={c.code}
+                          key={c.category}
                           style={styles.card}
                           onPress={() => {
-                            setSelectedCategoryEnum(c.code)
+                            setSelectedCategoryEnum(c.category)
                             setSelectedCategoryName(c.name)
                             setIsOpen(true)
                           }}

@@ -53,7 +53,7 @@ function RootNavigator() {
         <Stack.Screen name="(tabs)" />
       ) : (
         // ✅ 아니면 auth 그룹으로
-        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(auth)/onboarding.tsx" />
       )}
     </Stack>
   )

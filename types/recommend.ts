@@ -6,7 +6,7 @@ export type Space = 'KITCHEN' | 'BATHROOM' | 'BEDROOM' | 'PORCH' | 'ETC'
 // 추천 화면 개요
 export type Recommend = {
   name: string
-  code: string
+  category: string
   count: string
 }
 
@@ -71,7 +71,7 @@ export interface RegisterChoreResponse {
     title: string
     notificationYn: boolean
     notificationTime: string | null
-    repeatType: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE'
+    repeatType: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE' | 'YEARLY'
     repeatInterval: number
     startDate: string
     endDate: string

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
-import { styleFromRepeatColor, toRepeatFields } from '@/libs/utils/repeat'
+import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
 import { RecommendChores } from '@/types/recommend'
 
 import Checkbox from './Checkbox'
@@ -92,7 +92,7 @@ export default function RecommendChoreModal({
           <View style={styles.divider} />
 
           {chores.map((c) => {
-            const { repeatType, repeatInterval } = toRepeatFields(c.frequency)
+            const { repeatType, repeatInterval } = toRepeat(c.frequency)
             const key = getRepeatKey(repeatType, repeatInterval)
             const repeat = REPEAT_STYLE[key] ?? REPEAT_STYLE['NONE-0']
             const isChecked = selected.has(c.choreId)
