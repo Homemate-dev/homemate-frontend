@@ -37,8 +37,13 @@ export default function BadgeDetail({ badge, onClose }: Props) {
           <View style={styles.progressRow}>
             <Text style={styles.progressLabel}>달성도</Text>
             <Text style={styles.progressText}>
-              <Text style={styles.progressValue}>{badge.currentCount}회</Text> /{' '}
-              {badge.requiredCount}회
+              <Text style={styles.progressValue}>
+                {badge.currentCount > badge.requiredCount
+                  ? badge.requiredCount
+                  : badge.currentCount}
+                회
+              </Text>{' '}
+              / {badge.requiredCount}회
             </Text>
           </View>
 
