@@ -81,3 +81,41 @@ export const SECTION_ORDER = [
 
 // badgeType → 섹션명 반환 함수
 export const getBadgeSection = (badgeType: string): string => BADGE_SECTION_MAP[badgeType] ?? '기타'
+
+// 섹션명 -> 문장 앞부분 표현 함수
+const SPACE_SECTIONS = new Set(['주방', '욕실', '침실', '현관'])
+const CHORE_SECTIONS = new Set([
+  '빨래하기',
+  '거울/수전 물때 닦기',
+  '소화기 점검',
+  '바닥 청소기 돌리기',
+  '기상후 침구 정리하기',
+  '쓰레기통 비우기',
+])
+
+export function getBadgeTargetPhrase(section: string) {
+  if (SPACE_SECTIONS.has(section)) {
+    return `${section} 공간 청소를`
+  }
+
+  if (CHORE_SECTIONS.has(section)) {
+    return `${section}를`
+  }
+
+  // 나머지
+  switch (section) {
+    case '전체 집안일':
+      return '집안일'
+
+    case '집안일 등록':
+      return '집안일 등록을'
+
+    case '미션 달성':
+      return '미션 달성을'
+
+    case '시작':
+      return '집안일을'
+    default:
+      return `${section}를`
+  }
+}

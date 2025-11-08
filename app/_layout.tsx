@@ -6,10 +6,13 @@ import { Stack } from 'expo-router'
 import { useEffect } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
+import { Provider } from 'react-redux'
 
+import AchievementModal from '@/components/AchievementModal'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { registerFCMToken } from '@/libs/api/fcm'
+import { store } from '@/store'
 
 const queryClient = new QueryClient()
 
@@ -72,17 +75,20 @@ export default function RootLayout() {
   }, [])
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F8F8FA' }}>
-        <QueryClientProvider client={queryClient}>
-          <ToastProvider>
-            <AuthProvider>
-              <RootNavigator />
-            </AuthProvider>
-          </ToastProvider>
-        </QueryClientProvider>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F8F8FA' }}>
+          <QueryClientProvider client={queryClient}>
+            <ToastProvider>
+              <AuthProvider>
+                <RootNavigator />
+                <AchievementModal />
+              </AuthProvider>
+            </ToastProvider>
+          </QueryClientProvider>
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </Provider>
   )
 }
 
