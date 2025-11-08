@@ -1,5 +1,6 @@
 // AddChoreModal.tsx
 import { MaterialIcons } from '@expo/vector-icons'
+import { useQueryClient } from '@tanstack/react-query'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -18,11 +19,13 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native'
+import { useDispatch } from 'react-redux'
 
 import DatePickerCalendar from '@/components/Calendar/DatePickerCalendar'
 import ChoreDropdown from '@/components/Dropdown/ChoreDropdown'
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import Toggle from '@/components/Toggle'
+import { getAcquiredBadges } from '@/libs/api/badge/getAcquiredBadges'
 import { toApiError } from '@/libs/api/error'
 import { useChoreDetail } from '@/libs/hooks/chore/useChoreDetail'
 import useCreateChore from '@/libs/hooks/chore/useCreateChore'
@@ -31,9 +34,13 @@ import useUpdateChore from '@/libs/hooks/chore/useUpdateChore'
 import useRandomChoreInfo from '@/libs/hooks/recommend/useRandomChoreInfo'
 import useRandomChores from '@/libs/hooks/recommend/useRandomChores'
 import { isDateCompare, toYMD } from '@/libs/utils/date'
+import { getBadgeDesc } from '@/libs/utils/getBadgeDesc'
+import { getNewlyAcquiredBadge } from '@/libs/utils/getNewlyAcquiredBadges'
 import { toRepeatFields, toRepeatLabel } from '@/libs/utils/repeat'
 import { SPACE_UI_OPTIONS, toSpaceApi, toSpaceUi } from '@/libs/utils/space'
 import { toHHmm, toHHmmParts } from '@/libs/utils/time'
+import { openAchievementModal } from '@/store/slices/achievementModalSlice'
+import { ResponseBadge } from '@/types/badge'
 import { RandomChoreList } from '@/types/recommend'
 
 import DeleteModal from '../DeleteModal'
@@ -41,6 +48,8 @@ import UpdateModal from '../UpdateModal'
 
 // 이모지(특수문자) 불가
 const EMOJI_RE = /[\p{Extended_Pictographic}]/u
+
+const missionIcon = require('../../assets/images/icon/missionIcon.png')
 
 export default function AddChoreModal() {
   const {
@@ -115,6 +124,9 @@ export default function AddChoreModal() {
   const { data: detail, isLoading: loadingDetail } = useChoreDetail(instanceKey)
 
   const isDateRangeValid = isDateCompare(startDate, endDate)
+
+  const dispatch = useDispatch()
+  const qc = useQueryClient()
 
   // 추천 집안일 자동 채우기
   const applyRandomChore = (c: RandomChoreList) => {
@@ -246,7 +258,43 @@ export default function AddChoreModal() {
           endDate: endDate ?? baseDate,
         },
         {
-          onSuccess: () => router.back(),
+          onSuccess: async (resp) => {
+            router.back()
+
+            const completedMissions = resp.missionResults?.filter((m) => m.completed) ?? []
+
+            completedMissions.forEach((mission) => {
+              dispatch(
+                openAchievementModal({
+                  kind: 'mission',
+                  title: '미션 달성!',
+                  desc: `이달의 미션 \n ${mission.title} 미션을 완료했어요!`,
+                  icon: missionIcon,
+                })
+              )
+            })
+
+            // 뱃지 획득 시 모달
+            const prevBadge = qc.getQueryData<ResponseBadge[]>(['badge', 'acquired']) ?? []
+
+            const nextBadge = await qc.fetchQuery<ResponseBadge[]>({
+              queryKey: ['badge', 'acquired'],
+              queryFn: getAcquiredBadges,
+            })
+
+            const newlyAcquired = getNewlyAcquiredBadge(prevBadge, nextBadge)
+
+            newlyAcquired.forEach((badge) => {
+              dispatch(
+                openAchievementModal({
+                  kind: 'mission',
+                  title: `${badge.badgeTitle} 뱃지 획득`,
+                  desc: getBadgeDesc(badge, nextBadge),
+                  icon: badge.badgeImageUrl,
+                })
+              )
+            })
+          },
           onError: (error) => {
             const { code, message, details } = toApiError(error)
             console.warn('[createChore error]', code, details?.[0]?.message ?? message)
