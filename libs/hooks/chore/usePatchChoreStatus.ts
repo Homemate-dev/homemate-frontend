@@ -1,11 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useDispatch } from 'react-redux'
 
 import { patchChoreStatus } from '@/libs/api/chore/patchChoreStatus'
+import { openAchievementModal } from '@/store/slices/achievementModalSlice'
 
 import type { ToggleResp } from '@/types/chore'
 
+const missionIcon = require('../../../assets/images/icon/missionIcon.png')
+
 export function usePatchChoreStatus(selectedDate: string) {
   const qc = useQueryClient()
+  const dispatch = useDispatch()
   const queryKey = ['chore', 'byDate', selectedDate]
 
   return useMutation<ToggleResp, unknown, number>({
@@ -33,6 +38,19 @@ export function usePatchChoreStatus(selectedDate: string) {
           Number(item.id) === Number(choreInstanceId) ? { ...item, status: serverStatus } : item
         )
       )
+
+      const completedMissions = resp.missionResult?.filter((m) => m.completed) ?? []
+
+      completedMissions.forEach((mission) => {
+        dispatch(
+          openAchievementModal({
+            kind: 'mission',
+            title: '미션 달성!',
+            desc: `이달의 미션 \n ${mission.title} 미션을 완료했어요!`,
+            icon: missionIcon,
+          })
+        )
+      })
     },
 
     // 3) 최종 동기화
