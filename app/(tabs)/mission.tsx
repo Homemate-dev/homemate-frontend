@@ -18,7 +18,6 @@ import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { useTopBadges } from '@/libs/hooks/badge/useTopBadges'
 import { useMonthlyMissions } from '@/libs/hooks/mission/useMonthlyMissions'
-import { inferUnitFromTitle } from '@/libs/utils/mission'
 import { ResponseBadge } from '@/types/badge'
 
 export default function Mission() {
@@ -67,14 +66,13 @@ export default function Mission() {
                 missions?.map((m, idx) => (
                   <View key={m.id} style={idx !== missions.length - 1 && styles.mb12}>
                     <View style={styles.missionRow}>
-                      <Text style={styles.missionTitle}>{m.title}</Text>
+                      <Text style={styles.missionTitle}>
+                        {m.existsInRecommend ? '⭐ ' : ''}
+                        {m.title}
+                      </Text>
                       <Text style={styles.missionCountText}>
-                        <Text style={styles.missionCurrent}>
-                          {m.currentCount}
-                          {inferUnitFromTitle(m.title)}{' '}
-                        </Text>
-                        / {m.targetCount}
-                        {inferUnitFromTitle(m.title)}
+                        <Text style={styles.missionCurrent}>{m.currentCount}회 </Text>/{' '}
+                        {m.targetCount}회
                       </Text>
                     </View>
 
