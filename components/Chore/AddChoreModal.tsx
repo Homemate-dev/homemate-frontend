@@ -140,7 +140,9 @@ export default function AddChoreModal() {
       setAmpm('오전')
       setHour12(9)
       setMinute(0)
-    } else setNotifyOn(false)
+    } else {
+      setNotifyOn(false)
+    }
   }
 
   useEffect(() => {
@@ -201,12 +203,16 @@ export default function AddChoreModal() {
   const isChanged = useMemo(() => {
     if (!isEdit) return true
     if (!initialValue) return false
+
     const same = (a: any, b: any) => String(a ?? '') === String(b ?? '')
+
     if (!same(initialValue.title, currentValue.title)) return true
     if (initialValue.notificationYn !== currentValue.notificationYn) return true
+
     if (currentValue.notificationYn) {
       if (!same(initialValue.notificationTime, currentValue.notificationTime)) return true
     }
+
     if (!same(initialValue.space, currentValue.space)) return true
     if (!same(initialValue.repeat, currentValue.repeat)) return true
 
@@ -214,8 +220,10 @@ export default function AddChoreModal() {
     const currStart = currentValue.startDate ?? null
     const initEnd = initialValue.endDate ?? initialValue.startDate ?? null
     const currEnd = currentValue.endDate ?? currentValue.startDate ?? null
+
     if (!same(initStart, currStart)) return true
     if (!same(initEnd, currEnd)) return true
+
     return false
   }, [isEdit, initialValue, currentValue])
 
@@ -231,6 +239,7 @@ export default function AddChoreModal() {
     (!notifyOn || (ampm && hour12 && minute >= 0))
 
   const canSubmit = baseValid && (!isEdit || isChanged)
+
   const submitDisabled =
     !canSubmit || creating || updating || (isEdit && (loadingDetail || !initialValue || !isChanged))
 
@@ -238,9 +247,11 @@ export default function AddChoreModal() {
 
   const onSubmit = () => {
     if (!canSubmit) return
+
     const hhmm = toHHmm(ampm, hour12, minute)
     const baseDate = startDate ?? todayYMD
     if (!repeat) return
+
     const { repeatType, repeatInterval } = toRepeatFields(repeat)
     const spaceApi = toSpaceApi(space)
     if (!spaceApi) return
@@ -262,7 +273,6 @@ export default function AddChoreModal() {
             router.back()
 
             const completedMissions = resp.missionResults?.filter((m) => m.completed) ?? []
-
             completedMissions.forEach((mission) => {
               dispatch(
                 openAchievementModal({
@@ -274,14 +284,11 @@ export default function AddChoreModal() {
               )
             })
 
-            // 뱃지 획득 시 모달
             const prevBadge = qc.getQueryData<ResponseBadge[]>(['badge', 'acquired']) ?? []
-
             const nextBadge = await qc.fetchQuery<ResponseBadge[]>({
               queryKey: ['badge', 'acquired'],
               queryFn: getAcquiredBadges,
             })
-
             const newlyAcquired = getNewlyAcquiredBadge(prevBadge, nextBadge)
 
             newlyAcquired.forEach((badge) => {
@@ -306,6 +313,7 @@ export default function AddChoreModal() {
         console.warn('[update] instanceId가 없습니다.')
         return
       }
+
       if (isRepeating && applyToAfter === null) {
         setUpdateOpen(true)
         return
@@ -327,7 +335,9 @@ export default function AddChoreModal() {
           },
         },
         {
-          onSuccess: () => router.back(),
+          onSuccess: () => {
+            router.back()
+          },
           onError: (error) => {
             const { code, message, details } = toApiError(error)
             console.warn('[updateChore error]', code, details?.[0]?.message ?? message)
@@ -340,6 +350,7 @@ export default function AddChoreModal() {
   const handleDelete = (applyToAfter: boolean) => {
     if (!isEdit || !instanceId) return
     if (!selectedDateParam) return
+
     deleteChore(
       { choreInstanceId: instanceId, selectedDate: selectedDateParam, applyToAfter },
       {
@@ -361,8 +372,13 @@ export default function AddChoreModal() {
   const headerTitle = isEdit ? '집안일 수정' : '집안일 추가'
   const btnLabel = isEdit ? '수정하기' : '등록하기'
 
-  // 전역 오버레이는 "드롭다운"만 담당 (캘린더는 Modal로 처리)
-  const overlayOpen = Boolean(activeDropdown)
+  // 드롭다운이 열려 있으면(공간/반복/시간 모두) 오버레이 활성화
+  const overlayOpen =
+    activeDropdown === 'space' ||
+    activeDropdown === 'repeat' ||
+    activeDropdown === 'ampm' ||
+    activeDropdown === 'hour' ||
+    activeDropdown === 'minute'
 
   const MAX_LEN = 20
   const handleChangeText = (text: string) => {
@@ -370,7 +386,6 @@ export default function AddChoreModal() {
     setInputValue(limited)
   }
 
-  // 시작/완료 팝오버를 서로 다른 위치에 띄우려면 padding 값을 분기
   const modalPadding =
     openCalendar === 'start'
       ? { paddingTop: 333, paddingRight: 25 }
@@ -388,7 +403,7 @@ export default function AddChoreModal() {
           <TouchableWithoutFeedback
             disabled={overlayOpen}
             onPress={() => {
-              if (activeDropdown) setActiveDropdown(null)
+              if (activeDropdown && overlayOpen) setActiveDropdown(null)
             }}
           >
             <View style={{ flex: 1 }}>
@@ -397,6 +412,7 @@ export default function AddChoreModal() {
                 scrollEnabled={!overlayOpen}
                 keyboardShouldPersistTaps="handled"
               >
+                {/* 헤더 */}
                 <View style={styles.headerRow}>
                   <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
                     <MaterialIcons name="chevron-left" size={28} color="#686F79" />
@@ -425,7 +441,9 @@ export default function AddChoreModal() {
                   )}
                 </View>
 
+                {/* 내용 */}
                 <View style={styles.flex1}>
+                  {/* 집안일 입력 */}
                   <View style={styles.inputRow}>
                     <TextInput
                       placeholder="집안일을 입력해주세요"
@@ -447,6 +465,7 @@ export default function AddChoreModal() {
                     <Text style={styles.warnText}>*특수문자를 제외해주세요</Text>
                   )}
 
+                  {/* 추천 집안일 chips */}
                   {isLoading ? (
                     <View style={styles.loadingRow}>
                       <ActivityIndicator />
@@ -484,8 +503,10 @@ export default function AddChoreModal() {
                     </ScrollView>
                   )}
 
+                  {/* 카드 */}
                   <View style={styles.card}>
-                    <View className="rowBetween" style={styles.rowBetween}>
+                    {/* 공간 */}
+                    <View style={styles.rowBetween}>
                       <Text style={styles.label}>공간</Text>
                       <ChoreDropdown
                         id="space"
@@ -500,6 +521,7 @@ export default function AddChoreModal() {
 
                     <View style={styles.divider} />
 
+                    {/* 반복주기 */}
                     <View style={styles.rowBetween}>
                       <Text style={styles.label}>반복주기</Text>
                       <ChoreDropdown
@@ -553,6 +575,7 @@ export default function AddChoreModal() {
 
                     <View style={styles.divider} />
 
+                    {/* 알림 토글 */}
                     <View style={styles.rowBetween}>
                       <Text style={styles.label}>알림</Text>
                       <Toggle value={notifyOn} onChange={setNotifyOn} />
@@ -576,13 +599,16 @@ export default function AddChoreModal() {
                 </View>
               </ScrollView>
 
-              {/* 전역 오버레이: 드롭다운 전용 (캘린더는 Modal이 처리) */}
-              {activeDropdown && (
+              {/* 드롭다운 바깥 영역 클릭 시 닫기 */}
+              {overlayOpen && (
                 <Pressable
                   onPress={() => setActiveDropdown(null)}
                   style={[
                     StyleSheet.absoluteFillObject,
-                    { backgroundColor: 'transparent', zIndex: 100 },
+                    {
+                      backgroundColor: 'transparent',
+                      zIndex: 100,
+                    },
                   ]}
                   pointerEvents="auto"
                 />
@@ -590,6 +616,7 @@ export default function AddChoreModal() {
             </View>
           </TouchableWithoutFeedback>
 
+          {/* 반복 일정 수정 모달 */}
           <UpdateModal
             visible={updateOpen}
             onClose={() => {
@@ -609,6 +636,7 @@ export default function AddChoreModal() {
             loading={updating}
           />
 
+          {/* 하단 버튼 */}
           <Pressable
             onPress={onSubmit}
             disabled={submitDisabled}
@@ -775,7 +803,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     position: 'relative',
   },
-  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  rowBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   label: { fontSize: 16, fontWeight: '500', color: '#363F4D' },
   divider: { height: 1, backgroundColor: '#E6E7E9', marginVertical: 12 },
 
@@ -802,7 +834,7 @@ const styles = StyleSheet.create({
 
   modalBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'transparent', // 필요 시 'rgba(0,0,0,0.1)'
+    backgroundColor: 'transparent',
   },
   modalAnchorArea: {
     ...StyleSheet.absoluteFillObject,
