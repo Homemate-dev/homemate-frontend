@@ -23,6 +23,7 @@ export default function TabSafeScroll({ children, contentContainerStyle }: Props
         ...contentContainerStyle,
       }}
       keyboardShouldPersistTaps="handled" // 키보드 열려도 클릭 가능하게
+      showsVerticalScrollIndicator={false}
     >
       {children}
     </ScrollView>
