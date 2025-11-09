@@ -66,7 +66,7 @@ export default function AddChoreModal() {
   const isEdit = (modeParam ?? 'add') === 'edit'
   const instanceId = instanceIdParam ? Number(instanceIdParam) : undefined
 
-  // 안전 파싱
+  // ----- 유틸 -----
   const toBool = (v: unknown) => v === true || v === 'Y' || v === 'y' || v === 1 || v === '1'
 
   const toYYMMDD = (s?: string | null) => {
@@ -111,7 +111,7 @@ export default function AddChoreModal() {
   const [updateOpen, setUpdateOpen] = useState(false)
   const [applyToAfter, setApplyToAfter] = useState<boolean | null>(null)
 
-  // ----- api 훅 ------
+  // ----- api 훅 -----
   const { mutate: createChore, isPending: creating } = useCreateChore()
   const { mutate: updateChore, isPending: updating } = useUpdateChore()
   const { mutate: deleteChore, isPending: deleting } = useDeleteChore()
@@ -128,7 +128,7 @@ export default function AddChoreModal() {
   const dispatch = useDispatch()
   const qc = useQueryClient()
 
-  // 추천 집안일 자동 채우기
+  // ----- 추천 집안일 자동 채우기 -----
   const applyRandomChore = (c: RandomChoreList) => {
     setInputValue(c.titleKo)
     setSpace(toSpaceUi(c.space))
@@ -173,6 +173,7 @@ export default function AddChoreModal() {
     setMinute(parts.minute)
   }, [isEdit, detail])
 
+  // ----- 변경 여부 비교 -----
   const initialValue = useMemo(() => {
     if (!isEdit || !detail) return
     const parts = toHHmmParts(detail.notificationTime ?? '09:00')
@@ -227,6 +228,7 @@ export default function AddChoreModal() {
     return false
   }, [isEdit, initialValue, currentValue])
 
+  // ----- 유효성 / 버튼 disabled -----
   const hasForbiddenChar = useMemo(() => EMOJI_RE.test(inputValue), [inputValue])
 
   const baseValid =
@@ -245,6 +247,11 @@ export default function AddChoreModal() {
 
   const isRepeating = (detail?.repeatType ?? 'NONE') !== 'NONE'
 
+  // ----- 오버레이: 공간/반복 전용 -----
+  const overlayOpen = activeDropdown === 'space' || activeDropdown === 'repeat'
+  // 🔴 시간 드롭다운(ampm/hour/minute)은 제외해서, 안에서 터치/스크롤 가능하게 유지
+
+  // ----- 제출 -----
   const onSubmit = () => {
     if (!canSubmit) return
 
@@ -294,7 +301,7 @@ export default function AddChoreModal() {
             newlyAcquired.forEach((badge) => {
               dispatch(
                 openAchievementModal({
-                  kind: 'mission',
+                  kind: 'mission', // 필요시 'badge'로 변경
                   title: `${badge.badgeTitle} 뱃지 획득`,
                   desc: getBadgeDesc(badge, nextBadge),
                   icon: badge.badgeImageUrl,
@@ -347,6 +354,7 @@ export default function AddChoreModal() {
     }
   }
 
+  // ----- 삭제 -----
   const handleDelete = (applyToAfter: boolean) => {
     if (!isEdit || !instanceId) return
     if (!selectedDateParam) return
@@ -372,14 +380,6 @@ export default function AddChoreModal() {
   const headerTitle = isEdit ? '집안일 수정' : '집안일 추가'
   const btnLabel = isEdit ? '수정하기' : '등록하기'
 
-  // 드롭다운이 열려 있으면(공간/반복/시간 모두) 오버레이 활성화
-  const overlayOpen =
-    activeDropdown === 'space' ||
-    activeDropdown === 'repeat' ||
-    activeDropdown === 'ampm' ||
-    activeDropdown === 'hour' ||
-    activeDropdown === 'minute'
-
   const MAX_LEN = 20
   const handleChangeText = (text: string) => {
     const limited = Array.from(text).slice(0, MAX_LEN).join('')
@@ -403,14 +403,16 @@ export default function AddChoreModal() {
           <TouchableWithoutFeedback
             disabled={overlayOpen}
             onPress={() => {
-              if (activeDropdown && overlayOpen) setActiveDropdown(null)
+              if (overlayOpen && activeDropdown) setActiveDropdown(null)
             }}
           >
             <View style={{ flex: 1 }}>
               <ScrollView
                 style={styles.scroll}
+                contentContainerStyle={styles.scrollContent}
                 scrollEnabled={!overlayOpen}
                 keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
               >
                 {/* 헤더 */}
                 <View style={styles.headerRow}>
@@ -599,7 +601,7 @@ export default function AddChoreModal() {
                 </View>
               </ScrollView>
 
-              {/* 드롭다운 바깥 영역 클릭 시 닫기 */}
+              {/* 공간/반복 드롭다운 바깥 클릭 시 닫기용 오버레이 */}
               {overlayOpen && (
                 <Pressable
                   onPress={() => setActiveDropdown(null)}
@@ -716,8 +718,20 @@ export default function AddChoreModal() {
 
 const styles = StyleSheet.create({
   kbView: { flex: 1, backgroundColor: '#F8F8FA' },
-  wrapper: { flex: 1, position: 'relative', paddingHorizontal: 20 },
-  scroll: { flex: 1, paddingTop: 24, backgroundColor: '#F8F8FA' },
+  wrapper: {
+    flex: 1,
+    position: 'relative',
+    paddingHorizontal: 20,
+  },
+
+  scroll: {
+    flex: 1,
+    paddingTop: 24,
+    backgroundColor: '#F8F8FA',
+  },
+  scrollContent: {
+    paddingBottom: 120, // 하단 버튼 영역 만큼 확보
+  },
 
   headerRow: {
     flexDirection: 'row',

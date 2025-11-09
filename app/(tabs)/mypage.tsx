@@ -114,10 +114,6 @@ export default function MyPage() {
     )
   }
 
-  // 타임 드롭다운 열림 여부
-  const overlayOpen =
-    activeDropdown === 'ampm' || activeDropdown === 'hour' || activeDropdown === 'minute'
-
   // 로딩/에러 UI
   if (isUserLoading) {
     return (
@@ -256,20 +252,7 @@ export default function MyPage() {
         </TouchableOpacity>
       </TabSafeScroll>
 
-      {/* 타임 드롭다운 바깥 클릭 시 닫히는 오버레이 */}
-      {overlayOpen && (
-        <Pressable
-          onPress={() => setActiveDropdown(null)}
-          style={[
-            StyleSheet.absoluteFillObject,
-            {
-              backgroundColor: 'transparent',
-              zIndex: 100,
-            },
-          ]}
-          pointerEvents="auto"
-        />
-      )}
+      {/* 🔥 오버레이 제거: TimeDropdown 클릭/스크롤 막지 않도록 */}
     </View>
   )
 }
