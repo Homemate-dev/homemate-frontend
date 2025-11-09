@@ -35,7 +35,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 export default function MyPage() {
   const router = useRouter()
 
-  //  React Query
+  // React Query
   const { data: user, isLoading: isUserLoading, isError: isUserError } = useMyPage()
   const { data: badge = [] } = useAcquiredBadges()
   const { mutate: notiSetting } = useNotiSetting()
@@ -46,8 +46,9 @@ export default function MyPage() {
   const [isMasterAlarm, setIsMasterAlarm] = useState(false)
   const [isChoreAlarm, setIsChoreAlarm] = useState(false)
   const [isNoticeAlarm, setIsNoticeAlarm] = useState(false)
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
+  // 타임 드롭다운 상태
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [ampm, setAmpm] = useState<'오전' | '오후'>('오전')
   const [hour, setHour] = useState(9)
   const [minute, setMinute] = useState(0)
@@ -56,16 +57,17 @@ export default function MyPage() {
   // 뱃지 획득 개수
   const AcquireBadgeCount = badge.filter((b) => b.acquired).length ?? 0
   const totalBadge = badge?.length ?? 0
-  const progress = Math.round((AcquireBadgeCount / totalBadge) * 100)
+  const progress = totalBadge ? Math.round((AcquireBadgeCount / totalBadge) * 100) : 0
 
   const TERMS_URL =
     'https://classy-group-db3.notion.site/29aaba73bec680159850c0297ddcd13f?source=copy_link'
   const PRIVACY_URL =
     'https://classy-group-db3.notion.site/29aaba73bec6807fbb64c4b38eae9f7a?source=copy_link'
 
-  // 초기 서버 데이터 수신 → 토글/시간 초기화
+  // 초기 서버 데이터 → 토글/시간 초기화
   useEffect(() => {
     if (!user) return
+
     setIsMasterAlarm(!!user.masterEnabled)
     setIsChoreAlarm(!!user.choreEnabled)
     setIsNoticeAlarm(!!user.noticeEnabled)
@@ -78,6 +80,7 @@ export default function MyPage() {
     }
   }, [user])
 
+  // 드롭다운 열고 닫힐 때 부드러운 애니메이션
   useEffect(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
   }, [activeDropdown])
@@ -111,6 +114,10 @@ export default function MyPage() {
     )
   }
 
+  // 타임 드롭다운 열림 여부
+  const overlayOpen =
+    activeDropdown === 'ampm' || activeDropdown === 'hour' || activeDropdown === 'minute'
+
   // 로딩/에러 UI
   if (isUserLoading) {
     return (
@@ -130,119 +137,140 @@ export default function MyPage() {
   }
 
   return (
-    <TabSafeScroll
-      contentContainerStyle={{
-        paddingBottom: Platform.OS === 'android' ? 100 : 90,
-        overflow: 'visible',
-      }}
-    >
-      <View style={styles.headerWrapper}>
-        <Text style={styles.headerTitle}>마이페이지</Text>
-        <View style={styles.notificationBell}>
-          <NotificationBell />
+    <View style={{ flex: 1 }}>
+      <TabSafeScroll
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === 'android' ? 100 : 90,
+          overflow: 'visible',
+        }}
+      >
+        <View style={styles.headerWrapper}>
+          <Text style={styles.headerTitle}>마이페이지</Text>
+          <View style={styles.notificationBell}>
+            <NotificationBell />
+          </View>
         </View>
-      </View>
 
-      {/* 프로필 카드 */}
-      <View style={styles.profileCard}>
-        <View style={styles.profileArea}>
-          <Image
-            source={
-              user.profileImageUrl
-                ? { uri: user.profileImageUrl }
-                : require('../../assets/images/icon/default_profile.png')
-            }
-            style={styles.profileImage}
-          />
+        {/* 프로필 카드 */}
+        <View style={styles.profileCard}>
+          <View style={styles.profileArea}>
+            <Image
+              source={
+                user.profileImageUrl
+                  ? { uri: user.profileImageUrl }
+                  : require('../../assets/images/icon/default_profile.png')
+              }
+              style={styles.profileImage}
+            />
+          </View>
+          <View style={styles.userInfo}>
+            <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
+            <Text style={styles.userid}>@{user.id}</Text>
+          </View>
         </View>
-        <View style={styles.userInfo}>
-          <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
-          <Text style={styles.userid}>@{user.id}</Text>
+
+        {/* 뱃지 섹션 */}
+        <View style={styles.badgeSection}>
+          <View style={styles.badgeHeader}>
+            <Text style={styles.sectionTitle}>나의 뱃지</Text>
+
+            <Pressable onPress={() => router.push('/mybadges')} style={styles.badgeCountWrapper}>
+              <Text style={styles.badgeCount}>
+                {AcquireBadgeCount}개 <Text style={styles.badgeTotal}>/ {totalBadge}개</Text>
+              </Text>
+              <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
+            </Pressable>
+          </View>
+          <View style={styles.badgeBarBackground}>
+            <View style={[styles.badgeBarFill, { width: `${progress}%` }]} />
+          </View>
         </View>
-      </View>
 
-      {/* 뱃지 */}
-      <View style={styles.badgeSection}>
-        <View style={styles.badgeHeader}>
-          <Text style={styles.sectionTitle}>나의 뱃지</Text>
+        {/* 알림 설정 */}
+        <View style={styles.sectionWithDropdown}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>알림</Text>
+            <Toggle value={isMasterAlarm} onChange={(next) => handleToggle('master', next)} />
+          </View>
 
-          <Pressable onPress={() => router.push('/mybadges')} style={styles.badgeCountWrapper}>
-            <Text style={styles.badgeCount}>
-              {AcquireBadgeCount}개 <Text style={styles.badgeTotal}>/ {totalBadge}개</Text>
-            </Text>
+          <View style={styles.settingChore}>
+            <Text style={styles.settingText}>집안일 알림</Text>
+            <Toggle value={isChoreAlarm} onChange={(next) => handleToggle('chore', next)} />
+          </View>
+
+          <View style={styles.settingNotice}>
+            <Text style={styles.settingText}>공지 알림</Text>
+            <Toggle value={isNoticeAlarm} onChange={(next) => handleToggle('notice', next)} />
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.timeSetting}>
+            <Text style={[styles.settingText, { marginBottom: 8 }]}>알림 시간 설정</Text>
+            <TimeDropdown
+              ampm={ampm}
+              hour={hour}
+              minute={minute}
+              onChange={(v) => {
+                setAmpm(v.ampm)
+                setHour(v.hour)
+                setMinute(v.minute)
+                setShowConfirm(true)
+              }}
+              activeDropdown={activeDropdown}
+              setActiveDropdown={(v) => {
+                setActiveDropdown(v)
+                if (v) setShowConfirm(true)
+              }}
+            />
+            {showConfirm && (
+              <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
+                <Text style={styles.confirmText}>확인</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* 약관 / 개인정보 처리방침 */}
+        <View style={styles.sectionBelow}>
+          <TouchableOpacity
+            style={styles.settingBelowTop}
+            onPress={() => Linking.openURL(TERMS_URL)}
+          >
+            <Text style={styles.settingText}>이용 약관</Text>
             <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
-          </Pressable>
-        </View>
-        <View style={styles.badgeBarBackground}>
-          <View style={[styles.badgeBarFill, { width: `${progress}%` }]} />
-        </View>
-      </View>
-
-      {/* 알림 설정 */}
-      <View style={styles.sectionWithDropdown}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>알림</Text>
-          <Toggle value={isMasterAlarm} onChange={(next) => handleToggle('master', next)} />
+          </TouchableOpacity>
+          <View style={styles.divider} />
+          <TouchableOpacity
+            style={styles.settingBelowBottom}
+            onPress={() => Linking.openURL(PRIVACY_URL)}
+          >
+            <Text style={styles.settingText}>개인정보 처리방침</Text>
+            <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.settingChore}>
-          <Text style={styles.settingText}>집안일 알림</Text>
-          <Toggle value={isChoreAlarm} onChange={(next) => handleToggle('chore', next)} />
-        </View>
-
-        <View style={styles.settingNotice}>
-          <Text style={styles.settingText}>공지 알림</Text>
-          <Toggle value={isNoticeAlarm} onChange={(next) => handleToggle('notice', next)} />
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.timeSetting}>
-          <Text style={[styles.settingText, { marginBottom: 8 }]}>알림 시간 설정</Text>
-          <TimeDropdown
-            ampm={ampm}
-            hour={hour}
-            minute={minute}
-            onChange={(v) => {
-              setAmpm(v.ampm)
-              setHour(v.hour)
-              setMinute(v.minute)
-              setShowConfirm(true)
-            }}
-            activeDropdown={activeDropdown}
-            setActiveDropdown={(v) => {
-              setActiveDropdown(v)
-              if (v) setShowConfirm(true)
-            }}
-          />
-          {showConfirm && (
-            <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
-              <Text style={styles.confirmText}>확인</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-
-      {/* 정책 + 로그아웃 */}
-      <View style={styles.sectionBelow}>
-        <TouchableOpacity style={styles.settingBelowTop} onPress={() => Linking.openURL(TERMS_URL)}>
-          <Text style={styles.settingText}>이용 약관</Text>
-          <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
+        {/* 로그아웃 */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={() => logout()}>
+          <Text style={styles.logoutText}>로그아웃</Text>
         </TouchableOpacity>
-        <View style={styles.divider} />
-        <TouchableOpacity
-          style={styles.settingBelowBottom}
-          onPress={() => Linking.openURL(PRIVACY_URL)}
-        >
-          <Text style={styles.settingText}>개인정보 처리방침</Text>
-          <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
-        </TouchableOpacity>
-      </View>
+      </TabSafeScroll>
 
-      <TouchableOpacity style={styles.logoutBtn} onPress={() => logout()}>
-        <Text style={styles.logoutText}>로그아웃</Text>
-      </TouchableOpacity>
-    </TabSafeScroll>
+      {/* 타임 드롭다운 바깥 클릭 시 닫히는 오버레이 */}
+      {overlayOpen && (
+        <Pressable
+          onPress={() => setActiveDropdown(null)}
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              backgroundColor: 'transparent',
+              zIndex: 100,
+            },
+          ]}
+          pointerEvents="auto"
+        />
+      )}
+    </View>
   )
 }
 
@@ -264,7 +292,6 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: '600' },
   notificationBell: { position: 'absolute', right: 0 },
 
-  headerIcon: { position: 'absolute', right: 0 },
   profileCard: {
     backgroundColor: '#57C9D0',
     borderRadius: 12,
@@ -289,6 +316,7 @@ const styles = StyleSheet.create({
   userInfo: { alignItems: 'flex-start', justifyContent: 'center', gap: 4 },
   userName: { fontSize: 16, color: '#FFFFFF', fontWeight: '700' },
   userid: { fontSize: 12, color: '#FFFFFF' },
+
   badgeSection: {
     marginTop: hp('3%'),
     backgroundColor: '#FFFFFF',
@@ -302,10 +330,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#B4B7BC',
     marginRight: hp('1%'),
-    fontWeight: 400,
+    fontWeight: '400',
   },
   badgeBarBackground: { height: 8, backgroundColor: '#040F2014', borderRadius: 100 },
   badgeBarFill: { height: '100%', backgroundColor: '#57C9D0', borderRadius: 100 },
+
   sectionWithDropdown: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -319,6 +348,7 @@ const styles = StyleSheet.create({
     padding: 20,
     marginTop: hp('2%'),
   },
+
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -328,6 +358,7 @@ const styles = StyleSheet.create({
     paddingBottom: hp('2%'),
   },
   sectionTitle: { fontSize: 18, fontWeight: '700' },
+
   settingChore: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -356,6 +387,7 @@ const styles = StyleSheet.create({
 
   settingText: { fontSize: 14, color: '#686F79' },
   divider: { borderBottomWidth: 1, borderBottomColor: '#E6E7E9' },
+
   timeSetting: { marginTop: hp('1.5%') },
   confirmBtn: {
     backgroundColor: '#57C9D0',
@@ -367,7 +399,9 @@ const styles = StyleSheet.create({
     marginTop: hp('2%'),
   },
   confirmText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
+
   logoutBtn: { alignItems: 'center', marginTop: hp('3%') },
   logoutText: { color: '#9B9FA6', fontSize: 12 },
+
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 })
