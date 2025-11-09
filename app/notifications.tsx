@@ -46,8 +46,8 @@ export default function Notifications() {
 
   const { data: noticeData = [], isLoading: isNoticeLoading } = useNoticeNotifications()
 
-  const choreUnread = useMemo(() => choreData.filter((n: any) => !n.isREad).length, [choreData])
-  const noticeUnread = useMemo(() => noticeData.filter((n: any) => !n.isREad).length, [noticeData])
+  const choreUnread = useMemo(() => choreData.filter((n: any) => !n.isRead).length, [choreData])
+  const noticeUnread = useMemo(() => noticeData.filter((n: any) => !n.isRead).length, [noticeData])
 
   const raw = activeTab === 'chore' ? choreData : noticeData
   const isLoading = activeTab === 'chore' ? isChoreLoading : isNoticeLoading
