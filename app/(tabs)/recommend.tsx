@@ -137,6 +137,7 @@ export default function Recommend() {
                         >
                           <View style={styles.cardHeader}>
                             <Text style={styles.cardTitle} numberOfLines={2}>
+                              {c.category === 'MISSIONS' ? '⭐ ' : ''}
                               {c.name}
                             </Text>
                             <MaterialIcons name="chevron-right" size={18} color="#B4B7BC" />
