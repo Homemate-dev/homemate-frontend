@@ -77,6 +77,8 @@ export function usePatchChoreStatus(selectedDate: string) {
           })
         )
       })
+
+      qc.invalidateQueries({ queryKey: ['mission', 'monthly'] })
     },
 
     // 3) 최종 동기화
