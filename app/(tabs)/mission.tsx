@@ -70,10 +70,15 @@ export default function Mission() {
                         {m.existsInRecommend ? '⭐ ' : ''}
                         {m.title}
                       </Text>
-                      <Text style={styles.missionCountText}>
-                        <Text style={styles.missionCurrent}>{m.currentCount}회 </Text>/{' '}
-                        {m.targetCount}회
-                      </Text>
+
+                      {m.isCompleted ? (
+                        <Text style={styles.missionCountText}>완료</Text>
+                      ) : (
+                        <Text style={styles.missionCountText}>
+                          <Text style={styles.missionCurrent}>{m.currentCount}회 </Text>/{' '}
+                          {m.targetCount}회
+                        </Text>
+                      )}
                     </View>
 
                     <View style={styles.progressBar}>
