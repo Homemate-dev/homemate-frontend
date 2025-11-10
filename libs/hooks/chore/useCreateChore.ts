@@ -14,6 +14,9 @@ export default function useCreateChore() {
 
       // 캘린더 갱신(화면에 보이는 달만)
       qc.invalidateQueries({ queryKey: ['chore', 'calendar'], type: 'active' })
+
+      qc.invalidateQueries({ queryKey: ['mission', 'monthly'] })
+      qc.invalidateQueries({ queryKey: ['badge', 'acquired'] })
     },
   })
 }
