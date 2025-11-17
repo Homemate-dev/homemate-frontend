@@ -3,5 +3,17 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
-  }
+  },
+  "cSpell.words": [
+    "ampm",
+    "dimezis",
+    "homemate",
+    "mybadges",
+    "Namsan",
+    "Noti",
+    "Pressable",
+    "prestandard",
+    "Prestendard",
+    "Pretendard"
+  ]
 }
