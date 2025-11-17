@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons'
+import { router } from 'expo-router'
 import { useMemo, useState } from 'react'
 import {
   ActivityIndicator,
@@ -16,6 +17,7 @@ import NotificationBell from '@/components/notification/NotificationBell'
 import RecommendChoreModal from '@/components/RecommendChoreModal'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
+import { useToast } from '@/contexts/ToastContext'
 import useRecommend from '@/libs/hooks/recommend/useRecommend'
 import useRecommendChores from '@/libs/hooks/recommend/useRecommendChores'
 import { useRegisterCategory } from '@/libs/hooks/recommend/useRegisterCategory'
@@ -23,6 +25,7 @@ import { useRegisterSpace } from '@/libs/hooks/recommend/useRegisterSpace'
 import useSpaceChoreList from '@/libs/hooks/recommend/useSpaceChoreList'
 import useSpaceList from '@/libs/hooks/recommend/useSpaceList'
 import { CategoryApi } from '@/libs/utils/category'
+import { withSubjectJosa } from '@/libs/utils/getSubjectJosa'
 import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
 import { SpaceApi, SpaceUi, toSpaceUi } from '@/libs/utils/space'
 
@@ -44,6 +47,8 @@ export default function Recommend() {
   const [selectedSpace, setSelectedSpace] = useState<SpaceApi | undefined>('KITCHEN')
 
   const [submitting, setSubmitting] = useState(false)
+
+  const toast = useToast()
 
   // ----- api 훅 -----
   const { data: overview = [], isLoading: overLoading, isError: overError } = useRecommend()
@@ -79,6 +84,7 @@ export default function Recommend() {
   const categoryRows = useMemo(() => chunkBy(overview, 3), [overview]) // ← 한 줄에 3개
   const choreRows = useMemo(() => chunkBy(spaceChores, 5), [spaceChores])
 
+  // 카테고리 집안일 등록 핸들러
   const handleSubmit = async (selectedIds: number[]) => {
     if (!selectedIds.length || !selectedCategoryEnum) return
     setSubmitting(true)
@@ -90,6 +96,15 @@ export default function Recommend() {
         )
       )
       setIsOpen(false)
+
+      if (selectedCategoryName) {
+        toast.show({
+          message: `${withSubjectJosa(selectedCategoryName)} 추가되었어요`,
+          onPress: () => {
+            router.push('/(tabs)/home')
+          },
+        })
+      }
     } finally {
       setSubmitting(false)
     }
