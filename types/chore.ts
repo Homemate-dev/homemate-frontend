@@ -2,7 +2,7 @@
  * 집안일 생성 요청 DTO
  */
 
-export type RepeatType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
+export type RepeatType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
 
 export type CreateChoreDTO = {
   title: string
