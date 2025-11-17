@@ -251,7 +251,7 @@ export default function AddChoreModal() {
 
   // ----- 오버레이: 공간/반복 전용 -----
   const overlayOpen = activeDropdown === 'space' || activeDropdown === 'repeat'
-  // 🔴 시간 드롭다운(ampm/hour/minute)은 제외해서, 안에서 터치/스크롤 가능하게 유지
+  // 시간 드롭다운(ampm/hour/minute)은 제외해서, 안에서 터치/스크롤 가능하게 유지
 
   // ----- 제출 -----
   const onSubmit = () => {
@@ -377,7 +377,16 @@ export default function AddChoreModal() {
   }
 
   const spaceOptions = SPACE_UI_OPTIONS
-  const repeatOptions = ['한번', '매일', '1주마다', '2주마다', '매달', '3개월마다', '6개월마다']
+  const repeatOptions = [
+    '한번',
+    '매일',
+    '1주마다',
+    '2주마다',
+    '매달',
+    '3개월마다',
+    '6개월마다',
+    '매년',
+  ]
 
   const headerTitle = isEdit ? '집안일 수정' : '집안일 추가'
   const btnLabel = isEdit ? '수정하기' : '등록하기'
