@@ -29,12 +29,14 @@ export default function RecommendChoreModal({
 
   const [sheetAnim] = useState(new Animated.Value(300))
 
+  const hasSelection = selected.size > 0
+
   // 모달 열렸을태 상태 및 전체 선택 기능
   useEffect(() => {
     if (!visible) return
 
-    // 초기 체크박스 false
-    setSelected(new Set())
+    // 초기 체크박스 전체 true
+    setSelected(new Set(chores.map((c) => c.choreId)))
 
     // 바텀시트 애니메이션
     sheetAnim.setValue(300)
@@ -142,8 +144,22 @@ export default function RecommendChoreModal({
             )
           })}
 
-          <Pressable onPress={() => onSubmit(Array.from(selected))} style={styles.addBtn}>
-            <Text style={styles.addBtnText}>등록하기</Text>
+          <Pressable
+            onPress={() => {
+              if (!hasSelection) return
+              onSubmit(Array.from(selected))
+            }}
+            disabled={!hasSelection}
+            style={[styles.addBtn, !hasSelection && styles.addBtnDisabled]}
+          >
+            <Text
+              style={[
+                styles.addBtnText,
+                !hasSelection && styles.addBtnTextDisabled, // 선택 없을 땐 텍스트도 흐리게
+              ]}
+            >
+              등록하기
+            </Text>
           </Pressable>
         </View>
       </Animated.View>
@@ -220,5 +236,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
+  addBtnDisabled: {
+    backgroundColor: '#E6E7E9',
+  },
+
   addBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: 600 },
+
+  addBtnTextDisabled: {
+    color: '#B4B7BC',
+  },
 })
