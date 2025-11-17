@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Image,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -30,6 +31,10 @@ export default function Login() {
 
   const codeVerifier = 'buxcAKiNFcQ8Kslcm5NrKq6pm8JgFULeujc2usyw0g4'
   const codeChallenge = 'jrHilj7qFqhxKHKKM8AoQsqociZfnv-QJQjXrSyT0jU'
+
+  // 이용약관, 개인정보처리방침
+  const TERMS_URL = 'https://www.notion.so/29aaba73bec680159850c0297ddcd13f?source=copy_link'
+  const PRIVACY_URL = 'https://www.notion.so/29aaba73bec6807fbb64c4b38eae9f7a?source=copy_link'
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -146,8 +151,16 @@ export default function Login() {
       )}
 
       <Text style={styles.footerText}>
-        서비스 시작은 <Text style={styles.link}>서비스 이용약관{'\n'}</Text>
-        <Text style={styles.link}>개인정보 처리방침</Text> 동의를 의미합니다
+        서비스 시작은{' '}
+        <Pressable onPress={() => Linking.openURL(PRIVACY_URL)}>
+          {' '}
+          <Text style={styles.link}>서비스 이용약관</Text>
+        </Pressable>
+        {'\n'}
+        <Pressable onPress={() => Linking.openURL(PRIVACY_URL)}>
+          <Text style={styles.link}>개인정보 처리방침</Text>
+        </Pressable>{' '}
+        동의를 의미합니다
       </Text>
     </View>
   )
