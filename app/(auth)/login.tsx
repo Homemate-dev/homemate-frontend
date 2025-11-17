@@ -152,7 +152,7 @@ export default function Login() {
 
       <Text style={styles.footerText}>
         서비스 시작은{' '}
-        <Pressable onPress={() => Linking.openURL(PRIVACY_URL)}>
+        <Pressable onPress={() => Linking.openURL(TERMS_URL)}>
           {' '}
           <Text style={styles.link}>서비스 이용약관</Text>
         </Pressable>
