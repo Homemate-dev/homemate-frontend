@@ -23,7 +23,7 @@ import { useRegisterSpace } from '@/libs/hooks/recommend/useRegisterSpace'
 import useSpaceChoreList from '@/libs/hooks/recommend/useSpaceChoreList'
 import useSpaceList from '@/libs/hooks/recommend/useSpaceList'
 import { CategoryApi } from '@/libs/utils/category'
-import { styleFromRepeatColor, toRepeatFields } from '@/libs/utils/repeat'
+import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
 import { SpaceApi, SpaceUi, toSpaceUi } from '@/libs/utils/space'
 
 // 3개씩 묶어서 "한 행(row)" 만들기
@@ -215,7 +215,7 @@ export default function Recommend() {
               {choreRows.map((row, rIdx) => (
                 <View key={`row-${rIdx}`} style={styles.choreRow}>
                   {row.map((c, i) => {
-                    const { repeatType, repeatInterval } = toRepeatFields(c.frequency)
+                    const { repeatType, repeatInterval } = toRepeat(c.frequency)
                     const key = getRepeatKey(repeatType, repeatInterval)
                     const repeat = REPEAT_STYLE[key] ?? REPEAT_STYLE['NONE-0']
 
