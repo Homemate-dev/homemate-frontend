@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
@@ -27,13 +27,25 @@ export default function RecommendChoreModal({
   // 개별 체크박스 선택 상태
   const [selected, setSelected] = useState<Set<number>>(new Set())
 
+  const [sheetAnim] = useState(new Animated.Value(300))
+
+  const hasSelection = selected.size > 0
+
   // 모달 열렸을태 상태 및 전체 선택 기능
   useEffect(() => {
     if (!visible) return
 
-    // 초기 체크박스 false
-    setSelected(new Set())
-  }, [visible, chores])
+    // 초기 체크박스 전체 true
+    setSelected(new Set(chores.map((c) => c.choreId)))
+
+    // 바텀시트 애니메이션
+    sheetAnim.setValue(300)
+    Animated.timing(sheetAnim, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: true,
+    }).start()
+  }, [visible, chores, sheetAnim])
 
   // 전체 체크 여부 계산
   const allChecked = useMemo(
@@ -67,7 +79,7 @@ export default function RecommendChoreModal({
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="fade"
       statusBarTranslucent
       onRequestClose={onClose}
     >
@@ -76,12 +88,21 @@ export default function RecommendChoreModal({
         style={styles.backdrop}
       />
 
-      <View style={styles.sheet}>
+      <Animated.View
+        style={[
+          styles.sheet,
+          {
+            transform: [{ translateY: sheetAnim }],
+          },
+        ]}
+      >
         <Text style={styles.sheetHandle} />
 
         <View>
           <View style={styles.titleSection}>
-            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.title}>
+              {title === '미션 달성 집안일' ? '⭐ 미션 달성 집안일' : title}
+            </Text>
             <Checkbox
               checked={allChecked}
               onChange={(next) => toggleAllBtn(next)}
@@ -123,11 +144,20 @@ export default function RecommendChoreModal({
             )
           })}
 
-          <Pressable onPress={() => onSubmit(Array.from(selected))} style={styles.addBtn}>
-            <Text style={styles.addBtnText}>추가하기</Text>
+          <Pressable
+            onPress={() => {
+              if (!hasSelection) return
+              onSubmit(Array.from(selected))
+            }}
+            disabled={!hasSelection}
+            style={[styles.addBtn, !hasSelection && styles.addBtnDisabled]}
+          >
+            <Text style={[styles.addBtnText, !hasSelection && styles.addBtnTextDisabled]}>
+              등록하기
+            </Text>
           </Pressable>
         </View>
-      </View>
+      </Animated.View>
     </Modal>
   )
 }
@@ -201,5 +231,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
+  addBtnDisabled: {
+    backgroundColor: '#E6E7E9',
+  },
+
   addBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: 600 },
+
+  addBtnTextDisabled: {
+    color: '#B4B7BC',
+  },
 })
