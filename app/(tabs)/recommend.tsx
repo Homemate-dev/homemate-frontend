@@ -89,13 +89,13 @@ export default function Recommend() {
     if (!selectedIds.length || !selectedCategoryEnum) return
     setSubmitting(true)
 
+    setIsOpen(false)
     try {
       await Promise.all(
         selectedIds.map((categoryChoreId) =>
           cateRegister.mutateAsync({ categoryChoreId, category: selectedCategoryEnum })
         )
       )
-      setIsOpen(false)
 
       if (selectedCategoryName) {
         toast.show({

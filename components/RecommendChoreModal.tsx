@@ -152,12 +152,7 @@ export default function RecommendChoreModal({
             disabled={!hasSelection}
             style={[styles.addBtn, !hasSelection && styles.addBtnDisabled]}
           >
-            <Text
-              style={[
-                styles.addBtnText,
-                !hasSelection && styles.addBtnTextDisabled, // 선택 없을 땐 텍스트도 흐리게
-              ]}
-            >
+            <Text style={[styles.addBtnText, !hasSelection && styles.addBtnTextDisabled]}>
               등록하기
             </Text>
           </Pressable>
