@@ -5,7 +5,6 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "projectId": "abcd1234-5678-90ef-ghij-klmnopqrstuv",
     "scheme": "homematefrontend",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,9 +12,6 @@
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
-    },
-    "notification": {
-      "vapidPublicKey": "BLa4XgiuPsT4-9NPqs8xbdlYnUuRP_p2K9NqHTc0ofaxEBhfw5icOclS-vOso2v9aZR8RNkR9gs2GdUryxzx3eo"
     },
     "ios": {
       "supportsTablet": true
@@ -33,13 +29,11 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": ["expo-router", "expo-notifications"],
+    "plugins": [
+      "expo-router"
+    ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "KAKAO_REST_API_KEY": "767c656f116d3d699c2b979f9c77f0a6",
-      "KAKAO_REDIRECT_URI": "https://qa-homemate.vercel.app"
     }
   }
 }
