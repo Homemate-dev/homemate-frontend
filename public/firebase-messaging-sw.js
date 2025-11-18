@@ -1,4 +1,3 @@
-// web/firebase-messaging-sw.js
 /* eslint-disable */
 importScripts('https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js')
 importScripts('https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging-compat.js')
@@ -13,6 +12,7 @@ firebase.initializeApp({
   measurementId: 'G-VPLLHBT3LR',
 })
 
+// Firebase Cloud Messaging용 객체를 하나 생성
 const messaging = firebase.messaging()
 
 messaging.onBackgroundMessage((payload) => {
@@ -36,11 +36,9 @@ self.addEventListener('push', (event) => {
 
   let parsed = {}
   try {
-    // 대부분 이걸로 됨
     parsed = event.data?.json() || {}
   } catch (e) {
     try {
-      // 혹시 문자열로 한 번 더 감싸져 있으면
       parsed = event.data ? JSON.parse(event.data.text()) : {}
     } catch (e2) {
       console.error('[SW push parse error]', e, e2)
@@ -48,7 +46,7 @@ self.addEventListener('push', (event) => {
   }
 
   const n = parsed.notification || {}
-  const d = parsed.data || parsed // data-only인 경우도 커버
+  const d = parsed.data || parsed
 
   const title = n.title || d.title || 'Homemate'
   const body = n.body || d.body || d.message || '새 알림이 도착했어요.'
