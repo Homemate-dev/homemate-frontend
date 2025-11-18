@@ -31,6 +31,7 @@ import { useChoreDetail } from '@/libs/hooks/chore/useChoreDetail'
 import useCreateChore from '@/libs/hooks/chore/useCreateChore'
 import { useDeleteChore } from '@/libs/hooks/chore/useDeleteChore'
 import useUpdateChore from '@/libs/hooks/chore/useUpdateChore'
+import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import useRandomChoreInfo from '@/libs/hooks/recommend/useRandomChoreInfo'
 import useRandomChores from '@/libs/hooks/recommend/useRandomChores'
 import { isDateCompare, toYMD } from '@/libs/utils/date'
@@ -89,6 +90,19 @@ export default function AddChoreModal() {
   const safeYMD = (s: string | null | undefined, fallback: string): string =>
     isYMD(s) ? (s as string) : fallback
 
+  // ----- api 훅 -----
+  const { mutate: createChore, isPending: creating } = useCreateChore()
+  const { mutate: updateChore, isPending: updating } = useUpdateChore()
+  const { mutate: deleteChore, isPending: deleting } = useDeleteChore()
+  const { data: randomChores = [], isLoading, isRefetching, refetch } = useRandomChores()
+
+  const [spaceChoreId, setSpaceChoreId] = useState<number | null>(null)
+  const { data: randomChoreInfo } = useRandomChoreInfo(spaceChoreId as number)
+
+  const instanceKey = isEdit && instanceId ? instanceId : 0
+  const { data: detail, isLoading: loadingDetail } = useChoreDetail(instanceKey)
+  const { data: user } = useMyPage()
+
   // ----- 상태관리 -----
   const [inputValue, setInputValue] = useState('')
   const todayYMD = useMemo(() => toYMD(new Date()), [])
@@ -104,24 +118,12 @@ export default function AddChoreModal() {
 
   const [notifyOn, setNotifyOn] = useState(false)
   const [ampm, setAmpm] = useState<'오전' | '오후'>('오전')
-  const [hour12, setHour12] = useState<number>(9)
-  const [minute, setMinute] = useState<number>(0)
+  const [hour12, setHour12] = useState<number>(toHHmmParts(user?.notificationTime).hour12)
+  const [minute, setMinute] = useState<number>(toHHmmParts(user?.notificationTime).minute)
 
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [updateOpen, setUpdateOpen] = useState(false)
   const [applyToAfter, setApplyToAfter] = useState<boolean | null>(null)
-
-  // ----- api 훅 -----
-  const { mutate: createChore, isPending: creating } = useCreateChore()
-  const { mutate: updateChore, isPending: updating } = useUpdateChore()
-  const { mutate: deleteChore, isPending: deleting } = useDeleteChore()
-  const { data: randomChores = [], isLoading, isRefetching, refetch } = useRandomChores()
-
-  const [spaceChoreId, setSpaceChoreId] = useState<number | null>(null)
-  const { data: randomChoreInfo } = useRandomChoreInfo(spaceChoreId as number)
-
-  const instanceKey = isEdit && instanceId ? instanceId : 0
-  const { data: detail, isLoading: loadingDetail } = useChoreDetail(instanceKey)
 
   const isDateRangeValid = isDateCompare(startDate, endDate)
 
@@ -249,7 +251,7 @@ export default function AddChoreModal() {
 
   // ----- 오버레이: 공간/반복 전용 -----
   const overlayOpen = activeDropdown === 'space' || activeDropdown === 'repeat'
-  // 🔴 시간 드롭다운(ampm/hour/minute)은 제외해서, 안에서 터치/스크롤 가능하게 유지
+  // 시간 드롭다운(ampm/hour/minute)은 제외해서, 안에서 터치/스크롤 가능하게 유지
 
   // ----- 제출 -----
   const onSubmit = () => {
@@ -375,7 +377,16 @@ export default function AddChoreModal() {
   }
 
   const spaceOptions = SPACE_UI_OPTIONS
-  const repeatOptions = ['한번', '매일', '1주마다', '2주마다', '매달', '3개월마다', '6개월마다']
+  const repeatOptions = [
+    '한번',
+    '매일',
+    '1주마다',
+    '2주마다',
+    '매달',
+    '3개월마다',
+    '6개월마다',
+    '매년',
+  ]
 
   const headerTitle = isEdit ? '집안일 수정' : '집안일 추가'
   const btnLabel = isEdit ? '수정하기' : '등록하기'

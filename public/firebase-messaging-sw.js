@@ -1,4 +1,3 @@
-// web/firebase-messaging-sw.js
 /* eslint-disable */
 importScripts('https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js')
 importScripts('https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging-compat.js')
@@ -13,30 +12,48 @@ firebase.initializeApp({
   measurementId: 'G-VPLLHBT3LR',
 })
 
+// Firebase Cloud Messaging용 객체를 하나 생성
 const messaging = firebase.messaging()
 
 messaging.onBackgroundMessage((payload) => {
-  console.log('[SW onBackgroundMessage]', payload)
-  const { title, body, icon } = payload.notification ?? {}
-  self.registration.showNotification(title || 'Homemate', {
-    body: body || '새 알림이 도착했어요.',
-    icon: icon || '/icon-192.png',
-    data: payload.data || {},
+  console.log('[SW onBackgroundMessage]', JSON.stringify(payload, null, 2))
+
+  const n = payload.notification || {}
+  const d = payload.data || {}
+
+  const title = n.title || d.title || 'Homemate'
+  const body = n.body || d.body || d.message || '새 알림이 도착했어요.'
+
+  self.registration.showNotification(title, {
+    body,
+    icon: n.icon || '/icon-192.png',
+    data: d,
   })
 })
 
 self.addEventListener('push', (event) => {
-  let data = {}
-  try {
-    data = event.data?.json() || {}
-  } catch (_) {}
+  console.log('[SW push raw]', event.data && event.data.text())
 
-  const n = data.notification || {}
-  const d = data.data || {}
+  let parsed = {}
+  try {
+    parsed = event.data?.json() || {}
+  } catch (e) {
+    try {
+      parsed = event.data ? JSON.parse(event.data.text()) : {}
+    } catch (e2) {
+      console.error('[SW push parse error]', e, e2)
+    }
+  }
+
+  const n = parsed.notification || {}
+  const d = parsed.data || parsed
+
+  const title = n.title || d.title || 'Homemate'
+  const body = n.body || d.body || d.message || '새 알림이 도착했어요.'
 
   event.waitUntil(
-    self.registration.showNotification(n.title || 'Homemate', {
-      body: n.body || '새 알림이 도착했어요.',
+    self.registration.showNotification(title, {
+      body,
       icon: n.icon || '/icon-192.png',
       data: d,
     })

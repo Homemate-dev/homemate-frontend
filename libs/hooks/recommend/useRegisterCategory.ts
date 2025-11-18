@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { router } from 'expo-router'
 import { useDispatch } from 'react-redux'
 
-import { useToast } from '@/contexts/ToastContext'
 import { getAcquiredBadges } from '@/libs/api/badge/getAcquiredBadges'
 import { postResisterCategoryChore } from '@/libs/api/recommend/postResisterCategoryChore'
 import { getBadgeDesc } from '@/libs/utils/getBadgeDesc'
@@ -16,7 +14,6 @@ const missionIcon = require('../../../assets/images/icon/missionIcon.png')
 export function useRegisterCategory() {
   const qc = useQueryClient()
   const dispatch = useDispatch()
-  const toast = useToast()
 
   return useMutation<RegisterChoreResponse, unknown, { categoryChoreId: number; category: string }>(
     {
@@ -26,14 +23,6 @@ export function useRegisterCategory() {
         qc.invalidateQueries({ queryKey: ['chore', 'calendar'], type: 'active' })
         qc.invalidateQueries({ queryKey: ['chore', 'byDate', resp.data.startDate] })
         qc.invalidateQueries({ queryKey: ['mission', 'monthly'] })
-        const title = resp?.data?.title
-
-        toast.show({
-          message: title ?? '집안일이 추가됐어요',
-          onPress: () => {
-            router.push('/(tabs)/home')
-          },
-        })
 
         const completedMissions = resp.missionResults?.filter((m) => m.completed) ?? []
 

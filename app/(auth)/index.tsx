@@ -87,7 +87,7 @@ export default function OnboardingScreen() {
       images: [
         {
           source: require('../../assets/images/card/ironing3.png'),
-          style: { width: 270, height: 380, position: 'relative', alignSelf: 'center', top: -30 },
+          style: { width: 270, height: 380, position: 'relative', alignSelf: 'center', top: -35 },
         },
         {
           source: require('../../assets/images/card/ironing4.png'),

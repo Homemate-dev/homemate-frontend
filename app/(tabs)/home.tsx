@@ -86,7 +86,7 @@ export default function HomeScreen() {
 
       setShowSetupModal(false)
       alert('알림 설정이 완료되었습니다!')
-      router.replace('/')
+      router.replace('/(tabs)/home')
     } catch (err) {
       console.error('최초 알림 설정 실패:', err)
     }

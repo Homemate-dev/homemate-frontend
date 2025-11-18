@@ -7,6 +7,7 @@ export function toRepeatFields(label: string | null) {
   if (label === '매달') return { repeatType: 'MONTHLY' as const, repeatInterval: 1 }
   if (label === '3개월마다') return { repeatType: 'MONTHLY' as const, repeatInterval: 3 }
   if (label === '6개월마다') return { repeatType: 'MONTHLY' as const, repeatInterval: 6 }
+  if (label === '매년') return { repeatType: 'YEARLY' as const, repeatInterval: 1 }
   return { repeatType: 'NONE' as const, repeatInterval: 0 }
 }
 
@@ -18,7 +19,7 @@ export function toRepeat(label: string | null) {
   if (label === '매달') return { repeatType: 'MONTHLY' as const, repeatInterval: 1 }
   if (label === '3개월') return { repeatType: 'MONTHLY' as const, repeatInterval: 3 }
   if (label === '6개월') return { repeatType: 'MONTHLY' as const, repeatInterval: 6 }
-  if (label === '1년') return { repeatType: 'YEARLY' as const, repeatInterval: 1 }
+  if (label === '매년') return { repeatType: 'YEARLY' as const, repeatInterval: 1 }
   return { repeatType: 'NONE' as const, repeatInterval: 0 }
 }
 
@@ -31,6 +32,8 @@ export function toRepeatLabel(type: string, interval: number) {
   if (type === 'MONTHLY' && interval === 1) return '매달'
   if (type === 'MONTHLY' && interval === 3) return '3개월마다'
   if (type === 'MONTHLY' && interval === 6) return '6개월마다'
+  if (type === 'YEARLY' && interval === 1) return '매년'
+
   return '-'
 }
 
