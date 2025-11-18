@@ -10,6 +10,8 @@ export type MyPageResponse = {
   noticeEnabled: boolean
   notificationTime?: string // "18:00"
   updatedAt: string
+  totalBadgeCount: number
+  acquiredBadgeCount: number
 }
 
 // 최초 알림 설정 여부 조회 resp
