@@ -9,8 +9,8 @@ import { firebaseApp } from '@/libs/firebase/init'
 
 export const registerFCMToken = async (accessToken: string) => {
   console.log('[FCM] registerFCMToken 호출됨')
-  // 로그인(액세스 토큰) 안 되어 있으면 아예 호출 안 함 → 401 예방
 
+  // 로그인(액세스 토큰) 안 되어 있으면 아예 호출 안 함 → 401 예방
   console.log('[FCM] 현재 accessToken 존재?', !!accessToken)
 
   if (!accessToken) {
@@ -19,7 +19,9 @@ export const registerFCMToken = async (accessToken: string) => {
   }
 
   try {
-    // 💻 WEB: Firebase Messaging + VAPID
+    /** ─────────────────────────────────────────────
+     * 🌐 WEB: Firebase Messaging + VAPID (iOS Safari PWA 포함)
+     * ───────────────────────────────────────────── */
     if (Platform.OS === 'web') {
       const messaging = getMessaging(firebaseApp)
 
@@ -51,7 +53,9 @@ export const registerFCMToken = async (accessToken: string) => {
       return
     }
 
-    // 📱 APP: Expo Notifications (iOS / Android)
+    /** ─────────────────────────────────────────────
+     * 📱 APP (iOS / Android): Expo Notifications
+     * ───────────────────────────────────────────── */
     if (!Device.isDevice) {
       console.log('푸시 알림은 실제 기기에서만 지원됩니다.')
       return
