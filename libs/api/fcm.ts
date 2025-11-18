@@ -20,20 +20,56 @@ export const registerFCMToken = async (accessToken: string) => {
 
   try {
     /** ─────────────────────────────────────────────
-     * 🌐 WEB: Firebase Messaging + VAPID (iOS Safari PWA 포함)
+     * 🌐 WEB: Firebase Messaging + VAPID
+     *   - iOS Safari(웹)는 자동 권한 요청 x → 버튼에서만
+     *   - 그 외(크롬/안드/데스크탑)는 자동 권한 요청
      * ───────────────────────────────────────────── */
     if (Platform.OS === 'web') {
       const messaging = getMessaging(firebaseApp)
 
-      // 브라우저 알림 권한 요청 (안 했으면)
+      const ua = typeof navigator !== 'undefined' ? navigator.userAgent || '' : ''
+      const isIosWeb = /iPhone|iPad|iPod/i.test(ua)
+
+      console.log('[FCM][WEB] userAgent:', ua)
+      console.log('[FCM][WEB] isIosWeb?', isIosWeb)
+      console.log('[FCM][WEB] 현재 permission:', Notification.permission)
+
+      if (isIosWeb) {
+        // iOS Safari(PWA) → 자동으로 requestPermission() 호출 금지
+        if (Notification.permission !== 'granted') {
+          console.log(
+            '[FCM][WEB][iOS] permission이 granted가 아님 → 버튼에서 먼저 requestPermission() 호출 필요'
+          )
+          return
+        }
+
+        // 이미 granted인 경우에는 토큰만 갱신
+        const token = await getToken(messaging, {
+          vapidKey:
+            'BLa4XgiuPsT4-9NPqs8xbdlYnUuRP_p2K9NqHTc0ofaxEBhfw5icOclS-vOso2v9aZR8RNkR9gs2GdUryxzx3eo',
+        })
+
+        if (!token) {
+          console.log('[FCM][WEB][iOS] FCM 토큰 발급 실패 (빈 토큰)')
+          return
+        }
+
+        await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token })
+        console.log('✅ [FCM][WEB][iOS] 웹 푸시 토큰 등록 성공')
+        return
+      }
+
+      //  iOS 웹이 아닌 일반 웹(크롬/안드/데스크탑 등) → 자동 권한 요청 허용
       if (Notification.permission === 'default') {
         const permission = await Notification.requestPermission()
+        console.log('[FCM][WEB] requestPermission 결과:', permission)
+
         if (permission !== 'granted') {
-          console.log('웹 푸시 권한 거부됨')
+          console.log('[FCM][WEB] 웹 푸시 권한 거부됨')
           return
         }
       } else if (Notification.permission !== 'granted') {
-        console.log('웹 푸시 권한 거부됨')
+        console.log('[FCM][WEB] 웹 푸시 권한 상태가 granted 아님:', Notification.permission)
         return
       }
 
