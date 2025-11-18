@@ -70,7 +70,7 @@ export function usePatchChoreStatus(selectedDate: string) {
       newlyAcquired.forEach((badge) => {
         dispatch(
           openAchievementModal({
-            kind: 'mission',
+            kind: 'badge',
             title: `${badge.badgeTitle} 뱃지 획득`,
             desc: getBadgeDesc(badge, nextBadge),
             icon: badge.badgeImageUrl,
