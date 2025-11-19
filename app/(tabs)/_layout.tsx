@@ -52,7 +52,7 @@ export default function TabsLayout() {
               ? 72
               : Platform.OS === 'web'
                 ? 72 // 웹 전용
-                : 60, // iOS,
+                : 65, // iOS,
           paddingBottom: 6,
           paddingTop: 10,
           elevation: 0, // Android 기본 그림자 제거
