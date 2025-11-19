@@ -12,7 +12,7 @@
     "splash": {
       "image": "./assets/images/homemate.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F5F5F5"
     },
     "notification": {
       "vapidPublicKey": "BLa4XgiuPsT4-9NPqs8xbdlYnUuRP_p2K9NqHTc0ofaxEBhfw5icOclS-vOso2v9aZR8RNkR9gs2GdUryxzx3eo"
@@ -23,7 +23,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/homemate.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#F5F5F5"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -31,7 +31,11 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/homemate.png"
+      "favicon": "./assets/images/homemate.png",
+      "meta": {
+        "themeColor": "#F5F5F5",
+        "appleStatusBarStyle": "black-translucent"
+      }
     },
     "plugins": ["expo-router", "expo-notifications"],
     "experiments": {

@@ -64,6 +64,15 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
+        {/*  PWA manifest */}
+        <link rel="manifest" href="/manifest.json" />
+
+        {/*  Favicon */}
+        <link rel="icon" href="/icon-192.png" type="image/png" />
+
+        {/* iOS 홈 화면 아이콘 */}
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+
         {/* 기본 RN-Web 스타일 리셋 */}
         <ScrollViewStyleReset />
 
