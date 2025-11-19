@@ -31,6 +31,7 @@ messaging.onBackgroundMessage((payload) => {
   })
 })
 
+// 일반 Web Push 이벤트 (push 이벤트 수신)
 self.addEventListener('push', (event) => {
   console.log('[SW push raw]', event.data && event.data.text())
 
@@ -60,6 +61,7 @@ self.addEventListener('push', (event) => {
   )
 })
 
+// 알림 클릭 시 포커스/네비게이션 처리
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   const targetUrl = event.notification?.data?.url || '/'
