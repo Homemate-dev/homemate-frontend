@@ -1,7 +1,7 @@
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { registerFCMToken } from '@/libs/api/fcm'
+import { registerFCMToken } from '@/libs/firebase/fcm'
 
 export default function WebPushButton() {
   const { token } = useAuth()

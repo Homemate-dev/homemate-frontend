@@ -13,7 +13,7 @@ import { Provider } from 'react-redux'
 import AchievementModal from '@/components/AchievementModal'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/contexts/ToastContext'
-import { registerFCMToken } from '@/libs/api/fcm'
+import { registerFCMToken } from '@/libs/firebase/fcm'
 import { store } from '@/store'
 
 const queryClient = new QueryClient()
@@ -29,10 +29,10 @@ function RootNavigator() {
     PretendardSemiBold: require('../assets/fonts/prestandard/Pretendard-SemiBold.ttf'),
   })
 
-  // ✅ 웹에서 code 처리 완료 여부
+  // 웹에서 code 처리 완료 여부
   const [isCodeHandled, setIsCodeHandled] = useState(Platform.OS !== 'web')
 
-  /** ✅ 웹: /?code=... 로 들어오면 먼저 /login?code=... 로 리다이렉트
+  /** 웹: /?code=... 로 들어오면 먼저 /login?code=... 로 리다이렉트
    *  - 이 동안에는 스택 렌더 X (로딩만)
    *  - /login 으로 이미 온 상태면 여기서는 건드리지 않음 (Login.tsx가 처리)
    */
@@ -56,21 +56,21 @@ function RootNavigator() {
       return
     }
 
-    // ✅ /login 이 아니면 /login?code=... 로 한번에 이동
+    // /login 이 아니면 /login?code=... 로 한번에 이동
     currentUrl.pathname = '/login'
     currentUrl.searchParams.set('code', code)
     window.location.replace(currentUrl.toString())
     // 여기서는 setIsCodeHandled 안 해도 됨 (페이지 리로드 되니까)
   }, [])
 
-  /** ✅ 로그인 완료 + 토큰 준비된 뒤에만 푸시 토큰 등록 */
+  /** 로그인 완료 + 토큰 준비된 뒤에만 푸시 토큰 등록 */
   useEffect(() => {
     console.log('[FCM] useEffect user/token/verified:', !!user, !!token, verified)
     if (!verified || !user || !token) return
     registerFCMToken(token)
   }, [user, token, verified])
 
-  // 🔒 아직 준비 안됐으면(폰트 로딩, auth 로딩, code 처리 전) → 스택 렌더하지 말고 로딩만
+  // 아직 준비 안됐으면(폰트 로딩, auth 로딩, code 처리 전) → 스택 렌더하지 말고 로딩만
   if (!loaded || loading || !isCodeHandled) {
     return (
       <View style={styles.loadingContainer}>
