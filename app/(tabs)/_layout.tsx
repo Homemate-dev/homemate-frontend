@@ -1,7 +1,7 @@
 // app/(tabs)/_layout.tsx
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { router, Tabs } from 'expo-router'
-import { Image, Platform, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const ICONS = {
   home: [
@@ -47,12 +47,7 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontSize: 12, fontWeight: 700, marginTop: 3 },
         sceneContainerStyle: { backgroundColor: '#F8F8FA' },
         tabBarStyle: {
-          height:
-            Platform.OS === 'android'
-              ? 72
-              : Platform.OS === 'web'
-                ? 72 // 웹 전용
-                : 65, // iOS,
+          height: 72,
           paddingBottom: 6,
           paddingTop: 10,
           elevation: 0, // Android 기본 그림자 제거

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import * as Linking from 'expo-linking'
 import { Stack } from 'expo-router'
+import Head from 'expo-router/head'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
@@ -90,20 +91,29 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <Provider store={store}>
-      <SafeAreaProvider>
-        <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F8F8FA' }}>
-          <QueryClientProvider client={queryClient}>
-            <ToastProvider>
-              <AuthProvider>
-                <RootNavigator />
-                <AchievementModal />
-              </AuthProvider>
-            </ToastProvider>
-          </QueryClientProvider>
-        </SafeAreaView>
-      </SafeAreaProvider>
-    </Provider>
+    <>
+      {/* 웹에서 탭 타이틀 설정 */}
+      {Platform.OS === 'web' && (
+        <Head>
+          <title>Homemate</title>
+        </Head>
+      )}
+
+      <Provider store={store}>
+        <SafeAreaProvider>
+          <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F8F8FA' }}>
+            <QueryClientProvider client={queryClient}>
+              <ToastProvider>
+                <AuthProvider>
+                  <RootNavigator />
+                  <AchievementModal />
+                </AuthProvider>
+              </ToastProvider>
+            </QueryClientProvider>
+          </SafeAreaView>
+        </SafeAreaProvider>
+      </Provider>
+    </>
   )
 }
 
