@@ -175,7 +175,6 @@ export default function MyPage() {
           </View>
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
-            <Text style={styles.userid}>@{user.id}</Text>
           </View>
         </View>
 
