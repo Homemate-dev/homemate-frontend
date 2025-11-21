@@ -6,6 +6,7 @@ import {
   Image,
   ImageSourcePropType,
   ImageStyle,
+  Linking,
   NativeScrollEvent,
   NativeSyntheticEvent,
   StyleSheet,
@@ -101,7 +102,21 @@ export default function OnboardingScreen() {
         },
       ],
     },
+
+    {
+      id: 4,
+      title: '홈메이트를 홈화면에 추가해보세요',
+      subtitle: '홈화면에 추가하면 \n  생각 날때마다 찾기 쉬우실 거에요',
+      image: require('../../assets/images/card/ironing5.png'),
+      showQuote: false,
+      imageStyle: { width: 270, height: 380, position: 'absolute', right: -15, top: 0 },
+    },
   ]
+
+  const isLastSlide = activeIndex === slides.length - 1
+
+  const ADD_HOME_URL =
+    'https://classy-group-db3.notion.site/2b0aba73bec6800dba89f717e4b5b9d6?source=copy_link'
 
   /* ---------- 인덱스 동기화 (스와이프 시 실시간 반영) ---------- */
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -134,6 +149,16 @@ export default function OnboardingScreen() {
     } else {
       router.replace('/login')
     }
+  }
+
+  const handleSkip = () => {
+    // 온보딩 스킵 시 로그인 화면으로 이동
+    router.replace('/(auth)/login')
+  }
+
+  const handleAddToHome = () => {
+    // 홈화면에 추가 클릭 시 노션 페이지로 이동
+    Linking.openURL(ADD_HOME_URL)
   }
 
   const renderItem = ({ item }: { item: Slide }) => (
@@ -241,11 +266,20 @@ export default function OnboardingScreen() {
       </View>
 
       {/* 버튼 */}
-      <TouchableOpacity style={styles.button} onPress={handleNext}>
-        <Text style={styles.buttonText}>
-          {activeIndex === slides.length - 1 ? '시작하기' : '계속'}
-        </Text>
-      </TouchableOpacity>
+      {isLastSlide ? (
+        <View style={styles.btnArea}>
+          <TouchableOpacity onPress={handleSkip} style={styles.btnSkip}>
+            <Text style={styles.btnSkipText}>스킵</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleAddToHome} style={styles.btnAddHome}>
+            <Text style={styles.btnAddHomeText}>홈화면에 추가하기</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <TouchableOpacity style={styles.button} onPress={handleNext}>
+          <Text style={styles.buttonText}>계속</Text>
+        </TouchableOpacity>
+      )}
     </View>
   )
 }
@@ -325,8 +359,32 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#DADADA', marginHorizontal: 3 },
   dotActive: { backgroundColor: '#57C9D0' },
 
+  btnArea: {
+    flexDirection: 'row',
+    height: 52,
+    marginHorizontal: 20,
+  },
+
+  btnSkip: {
+    flex: 1,
+    backgroundColor: '#E6E7E9',
+    borderRadius: 12,
+    marginRight: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnSkipText: { fontSize: 16, fontWeight: 600, color: '#8E8E93' },
+  btnAddHome: {
+    flex: 2,
+    backgroundColor: '#57C9D0',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnAddHomeText: { fontSize: 16, fontWeight: 600, color: '#FFFFFF' },
+
   button: {
-    height: 48,
+    height: 52,
     backgroundColor: '#57C9D0',
     borderRadius: 12,
     justifyContent: 'center',
