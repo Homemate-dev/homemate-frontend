@@ -67,13 +67,7 @@ export default function HomeScreen() {
   useEffect(() => {
     if (!token || !firstNotiStatus) return
 
-    // ✅ debugNoti=1 쿼리 있으면 PWA에서 강제로 최초 알림 모달 띄우기
-    const isDebugNoti =
-      Platform.OS === 'web' &&
-      typeof window !== 'undefined' &&
-      new URL(window.location.href).searchParams.get('debugNoti') === '1'
-
-    if (isDebugNoti) {
+    if (isIosPwa()) {
       setShowSetupModal(true)
       return
     }
