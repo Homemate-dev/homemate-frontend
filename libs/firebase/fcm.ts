@@ -34,16 +34,21 @@ export const registerFCMToken = async (accessToken: string) => {
       console.log('[FCM][WEB] isIosWeb?', isIosWeb)
       console.log('[FCM][WEB] 현재 permission:', Notification.permission)
 
+      // 🔹 iOS Safari / iOS PWA 분기
       if (isIosWeb) {
+        // 1) 권한 상태 디버그
+        alert(`[iOS PWA] 현재 Permission: ${Notification.permission}`)
+
         // iOS Safari(PWA) → 자동으로 requestPermission() 호출 금지
         if (Notification.permission !== 'granted') {
           console.log(
             '[FCM][WEB][iOS] permission이 granted가 아님 → 버튼에서 먼저 requestPermission() 호출 필요'
           )
+          alert('[iOS PWA] 권한이 granted 상태가 아니라 토큰 발급을 스킵합니다.')
           return
         }
 
-        // 이미 granted인 경우에는 토큰만 갱신
+        // 2) 토큰 발급
         const token = await getToken(messaging, {
           vapidKey:
             'BLa4XgiuPsT4-9NPqs8xbdlYnUuRP_p2K9NqHTc0ofaxEBhfw5icOclS-vOso2v9aZR8RNkR9gs2GdUryxzx3eo',
@@ -51,15 +56,26 @@ export const registerFCMToken = async (accessToken: string) => {
 
         if (!token) {
           console.log('[FCM][WEB][iOS] FCM 토큰 발급 실패 (빈 토큰)')
+          alert('[iOS PWA] ❌ 토큰이 비어있어요 (발급 실패)')
           return
         }
 
-        await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token })
-        console.log('✅ [FCM][WEB][iOS] 웹 푸시 토큰 등록 성공')
+        alert('[iOS PWA] 🎉 토큰 발급 성공!\n' + token.slice(0, 20) + '...')
+
+        // 3) 서버 등록
+        try {
+          await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token })
+          console.log('✅ [FCM][WEB][iOS] 웹 푸시 토큰 등록 성공')
+          alert('[iOS PWA] ✅ 서버 등록 성공!')
+        } catch (err: any) {
+          console.error('❌ [FCM][WEB][iOS] 서버 등록 실패:', err)
+          alert('[iOS PWA] ❌ 서버 등록 실패:\n' + String(err?.message ?? err))
+        }
+
         return
       }
 
-      //  iOS 웹이 아닌 일반 웹(크롬/안드/데스크탑 등) → 자동 권한 요청 허용
+      // 🔹 iOS 웹이 아닌 일반 웹(크롬/안드/데스크탑 등) → 자동 권한 요청 허용
       if (Notification.permission === 'default') {
         const permission = await Notification.requestPermission()
         console.log('[FCM][WEB] requestPermission 결과:', permission)
