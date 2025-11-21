@@ -13,11 +13,14 @@ export type CreateChoreDTO = {
   repeatInterval: number
   startDate: string
   endDate: string
+  recommendYn: boolean
 }
 
 /**
  * 집안일 생성 응답
  */
+
+export type RegistrationType = 'MANUAL' | 'RECOMMEND' | 'SPACE' | 'CATEGORY'
 
 export interface MissionResult {
   id: number
@@ -33,12 +36,13 @@ export interface ResponseChore {
     title: string
     notificationYn: boolean
     notificationTime: string | null
+    space: string
     repeatType: RepeatType
     repeatInterval: number
     startDate: string
     endDate: string
     isDeleted: boolean
-    space: string
+    registrationType: RegistrationType
     createdAt: string
     updatedAt: string
     deletedAt: string | null
