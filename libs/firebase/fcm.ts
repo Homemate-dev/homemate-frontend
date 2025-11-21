@@ -20,8 +20,8 @@ export const registerFCMToken = async (accessToken: string) => {
 
   try {
     /** ─────────────────────────────────────────────
-     * 🌐 WEB: Firebase Messaging + VAPID
-     *   - iOS Safari(웹)는 자동 권한 요청 x → 버튼에서만
+     *  🌐 WEB: Firebase Messaging + VAPID
+     *   - iOS Safari(웹)는 자동 권한 요청 X → 버튼에서만
      *   - 그 외(크롬/안드/데스크탑)는 자동 권한 요청
      * ───────────────────────────────────────────── */
     if (Platform.OS === 'web') {
@@ -36,15 +36,11 @@ export const registerFCMToken = async (accessToken: string) => {
 
       // 🔹 iOS Safari / iOS PWA 분기
       if (isIosWeb) {
-        // 1) 권한 상태 디버그
-        alert(`[iOS PWA] 현재 Permission: ${Notification.permission}`)
-
-        // iOS Safari(PWA) → 자동으로 requestPermission() 호출 금지
+        // iOS Safari(PWA) → 자동 requestPermission() 호출 금지
         if (Notification.permission !== 'granted') {
           console.log(
-            '[FCM][WEB][iOS] permission이 granted가 아님 → 버튼에서 먼저 requestPermission() 호출 필요'
+            '[FCM][WEB][iOS] permission이 granted가 아님 → 버튼에서 requestPermission() 호출 필요'
           )
-          alert('[iOS PWA] 권한이 granted 상태가 아니라 토큰 발급을 스킵합니다.')
           return
         }
 
@@ -56,20 +52,15 @@ export const registerFCMToken = async (accessToken: string) => {
 
         if (!token) {
           console.log('[FCM][WEB][iOS] FCM 토큰 발급 실패 (빈 토큰)')
-          alert('[iOS PWA] ❌ 토큰이 비어있어요 (발급 실패)')
           return
         }
-
-        alert('[iOS PWA] 🎉 토큰 발급 성공!\n' + token.slice(0, 20) + '...')
 
         // 3) 서버 등록
         try {
           await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token })
           console.log('✅ [FCM][WEB][iOS] 웹 푸시 토큰 등록 성공')
-          alert('[iOS PWA] ✅ 서버 등록 성공!')
-        } catch (err: any) {
+        } catch (err) {
           console.error('❌ [FCM][WEB][iOS] 서버 등록 실패:', err)
-          alert('[iOS PWA] ❌ 서버 등록 실패:\n' + String(err?.message ?? err))
         }
 
         return
@@ -90,7 +81,7 @@ export const registerFCMToken = async (accessToken: string) => {
       }
 
       const token = await getToken(messaging, {
-        // FCM Web Push용 VAPID 키 (expo config에 넣은 거와 동일)
+        // FCM Web Push용 VAPID 키
         vapidKey:
           'BLa4XgiuPsT4-9NPqs8xbdlYnUuRP_p2K9NqHTc0ofaxEBhfw5icOclS-vOso2v9aZR8RNkR9gs2GdUryxzx3eo',
       })
