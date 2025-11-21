@@ -67,6 +67,17 @@ export default function HomeScreen() {
   useEffect(() => {
     if (!token || !firstNotiStatus) return
 
+    // ✅ debugNoti=1 쿼리 있으면 PWA에서 강제로 최초 알림 모달 띄우기
+    const isDebugNoti =
+      Platform.OS === 'web' &&
+      typeof window !== 'undefined' &&
+      new URL(window.location.href).searchParams.get('debugNoti') === '1'
+
+    if (isDebugNoti) {
+      setShowSetupModal(true)
+      return
+    }
+
     const { firstSetupCompleted, notificationTime } = firstNotiStatus
 
     if (!firstSetupCompleted) {
@@ -87,6 +98,7 @@ export default function HomeScreen() {
     const ua = window.navigator.userAgent || ''
     const isIos = /iPhone|iPad|iPod/i.test(ua)
 
+    // 홈 화면에 추가된 PWA인지 확인
     const isStandalone =
       (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
       // 구형 iOS PWA용 (Safari standalone)
