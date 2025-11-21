@@ -18,6 +18,7 @@ import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import { useAuth } from '@/contexts/AuthContext'
+import { registerFCMToken } from '@/libs/firebase/fcm'
 import { useChoreByDate } from '@/libs/hooks/chore/useChoreByDate'
 import { useChoreCalendar } from '@/libs/hooks/chore/useChoreCalendar'
 import { usePatchChoreStatus } from '@/libs/hooks/chore/usePatchChoreStatus'
@@ -78,8 +79,57 @@ export default function HomeScreen() {
     }
   }, [token, firstNotiStatus])
 
+  // iOS PWA 판별 함수
+  const isIosPwa = () => {
+    if (Platform.OS !== 'web') return
+    if (typeof window === 'undefined') return
+
+    const ua = window.navigator.userAgent || ''
+    const isIos = /iPhone|iPad|iPod/i.test(ua)
+
+    const isStandalone =
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+      // 구형 iOS PWA용 (Safari standalone)
+      (window.navigator as any).standalone === true
+
+    return isIos && isStandalone
+  }
+
+  // 최초 알림 설정 허용하기 버튼
   const handleAllowNotification = async () => {
     try {
+      // iOS PWA(홈 화면에 추가된 Safari)에서만 시스템 알림 팝업 띄우기
+
+      if (isIosPwa()) {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+          const current = Notification.permission as NotificationPermission
+
+          if (current === 'default') {
+            // 아직 선택 안 한 상태 → 여기서 처음으로 시스템 팝업 띄움
+            const result = await Notification.requestPermission()
+
+            if (result !== 'granted') {
+              alert(
+                '알림 권한이 허용되지 않아 알림을 받을 수 없어요.\n' +
+                  '언제든지 Safari 설정에서 다시 허용할 수 있어요.'
+              )
+            }
+          } else if (current === 'denied') {
+            // 이미 한 번 거절한 상태
+
+            alert(
+              '현재 브라우저에서 알림이 차단되어 있어요.\n' +
+                '설정 > Safari > 알림에서 권한을 허용해 주세요.'
+            )
+          }
+
+          // 권한이 허용된 상태에서만 FCM 토큰 등록 시도
+          if (Notification.permission === 'granted') {
+            await registerFCMToken(token ?? '')
+          }
+        }
+      }
+
       const notificationTime = toHHmm(ampm, hour, minute)
 
       await firstNotiTimeSetting({ notificationTime })
