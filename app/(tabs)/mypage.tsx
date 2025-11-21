@@ -327,8 +327,9 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   profileImage: {
-    width: 40,
-    height: 40,
+    width: 60,
+    height: 60,
+    borderRadius: 999,
   },
   userInfo: { alignItems: 'flex-start', justifyContent: 'center', gap: 4 },
   userName: { fontSize: 16, color: '#FFFFFF', fontWeight: '700' },
