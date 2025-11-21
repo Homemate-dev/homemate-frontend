@@ -276,6 +276,7 @@ export default function AddChoreModal() {
           repeatInterval,
           startDate: baseDate,
           endDate: endDate ?? baseDate,
+          recommendYn: false,
         },
         {
           onSuccess: async (resp) => {
@@ -338,6 +339,7 @@ export default function AddChoreModal() {
             space: spaceApi,
             repeatType,
             repeatInterval,
+            recommendYn: false,
             startDate: baseDate,
             endDate: endDate ?? baseDate,
             applyToAfter: Boolean(applyToAfter),
