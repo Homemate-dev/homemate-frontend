@@ -81,7 +81,7 @@ export default function Recommend() {
         }))
   }, [spaceList])
 
-  const categoryRows = useMemo(() => chunkBy(overview, 3), [overview]) // ← 한 줄에 3개
+  const categoryRows = useMemo(() => chunkBy(overview, 4), [overview]) // ← 한 줄에 3개
   const choreRows = useMemo(() => chunkBy(spaceChores, 5), [spaceChores])
 
   // 카테고리 집안일 등록 핸들러
