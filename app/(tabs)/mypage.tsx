@@ -54,10 +54,15 @@ export default function MyPage() {
   const [minute, setMinute] = useState(0)
   const [showConfirm, setShowConfirm] = useState(false)
 
+  //  기기 알림 권한 허용 여부 체크
+  const [isDeviceNotiDenied, setIsDeviceNotiDenied] = useState(false)
+
   // 뱃지 획득 개수
   const AcquireBadgeCount = badge.filter((b) => b.acquired).length ?? 0
   const totalBadge = badge?.length ?? 0
   const progress = totalBadge ? Math.round((AcquireBadgeCount / totalBadge) * 100) : 0
+
+  const FAQ_URL = 'https://www.notion.so/FAQ-29aaba73bec680a4b7f9f7431f1d103b?source=copy_link'
 
   const TERMS_URL =
     'https://classy-group-db3.notion.site/29aaba73bec680159850c0297ddcd13f?source=copy_link'
@@ -79,6 +84,15 @@ export default function MyPage() {
       setMinute(parsed.minute)
     }
   }, [user])
+
+  // 기기 알림 권한 허용 여부 체크
+  useEffect(() => {
+    if (Platform.OS !== 'web') return
+    if (typeof Notification === 'undefined') return
+
+    // denied이면 true 저장
+    setIsDeviceNotiDenied(Notification.permission === 'denied')
+  }, [])
 
   // 드롭다운 열고 닫힐 때 부드러운 애니메이션
   useEffect(() => {
@@ -161,7 +175,6 @@ export default function MyPage() {
           </View>
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user.nickname ?? '닉네임 없음'}</Text>
-            <Text style={styles.userid}>@{user.id}</Text>
           </View>
         </View>
 
@@ -227,16 +240,38 @@ export default function MyPage() {
           </View>
         </View>
 
+        {/* 알림 권한 여부 */}
+        {isDeviceNotiDenied && (
+          <View style={styles.sectionNoti}>
+            <TouchableOpacity onPress={() => {}} style={styles.touchNoti}>
+              <View style={styles.notiArea}>
+                <Image source={require('@/assets/images/bellOff.png')} style={styles.notiImage} />
+                <Text style={styles.notiText}>기기 알림이 꺼져 있어요</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* 약관 / 개인정보 처리방침 */}
         <View style={styles.sectionBelow}>
+          <TouchableOpacity style={styles.settingBelowTop} onPress={() => Linking.openURL(FAQ_URL)}>
+            <Text style={styles.settingText}>FAQ</Text>
+            <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
           <TouchableOpacity
-            style={styles.settingBelowTop}
+            style={styles.settingBelowMiddle}
             onPress={() => Linking.openURL(TERMS_URL)}
           >
             <Text style={styles.settingText}>이용 약관</Text>
             <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
           </TouchableOpacity>
+
           <View style={styles.divider} />
+
           <TouchableOpacity
             style={styles.settingBelowBottom}
             onPress={() => Linking.openURL(PRIVACY_URL)}
@@ -251,8 +286,6 @@ export default function MyPage() {
           <Text style={styles.logoutText}>로그아웃</Text>
         </TouchableOpacity>
       </TabSafeScroll>
-
-      {/* 🔥 오버레이 제거: TimeDropdown 클릭/스크롤 막지 않도록 */}
     </View>
   )
 }
@@ -293,8 +326,9 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   profileImage: {
-    width: 40,
-    height: 40,
+    width: 60,
+    height: 60,
+    borderRadius: 999,
   },
   userInfo: { alignItems: 'flex-start', justifyContent: 'center', gap: 4 },
   userName: { fontSize: 16, color: '#FFFFFF', fontWeight: '700' },
@@ -320,14 +354,28 @@ const styles = StyleSheet.create({
 
   sectionWithDropdown: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 20,
     marginTop: hp('2%'),
     elevation: 4,
   },
+
+  sectionNoti: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 20,
+    marginTop: hp('2%'),
+  },
+
+  notiImage: {
+    width: 16,
+    height: 16,
+    marginRight: 8,
+  },
+
   sectionBelow: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 20,
     marginTop: hp('2%'),
   },
@@ -355,17 +403,42 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
 
+  notiArea: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  notiText: {
+    fontSize: 14,
+    color: '#686F79',
+  },
+
+  touchNoti: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
   settingBelowTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: 16,
+    paddingBottom: 12,
   },
+
+  settingBelowMiddle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+
   settingBelowBottom: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 16,
+    paddingTop: 12,
   },
 
   settingText: { fontSize: 14, color: '#686F79' },
