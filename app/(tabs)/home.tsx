@@ -67,11 +67,6 @@ export default function HomeScreen() {
   useEffect(() => {
     if (!token || !firstNotiStatus) return
 
-    if (isIosPwa()) {
-      setShowSetupModal(true)
-      return
-    }
-
     const { firstSetupCompleted, notificationTime } = firstNotiStatus
 
     if (!firstSetupCompleted) {
