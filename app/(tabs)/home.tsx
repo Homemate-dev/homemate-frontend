@@ -64,21 +64,6 @@ export default function HomeScreen() {
   const { mutate: choreStatus } = usePatchChoreStatus(selectedDate)
   const { data: user } = useMyPage()
 
-  useEffect(() => {
-    if (!token || !firstNotiStatus) return
-
-    const { firstSetupCompleted, notificationTime } = firstNotiStatus
-
-    if (!firstSetupCompleted) {
-      const { ampm, hour12, minute } = toHHmmParts(notificationTime) // 알림 시간 기본값 셋팅
-
-      setAmpm(ampm)
-      setHour(hour12)
-      setMinute(minute)
-      setShowSetupModal(true)
-    }
-  }, [token, firstNotiStatus])
-
   // iOS PWA 판별 함수
   const isIosPwa = () => {
     if (Platform.OS !== 'web') return
@@ -96,11 +81,44 @@ export default function HomeScreen() {
     return isIos && isStandalone
   }
 
+  useEffect(() => {
+    if (!token || !firstNotiStatus) return
+
+    const { firstSetupCompleted, notificationTime } = firstNotiStatus
+
+    if (!firstSetupCompleted) {
+      const { ampm, hour12, minute } = toHHmmParts(notificationTime) // 알림 시간 기본값 셋팅
+
+      setAmpm(ampm)
+      setHour(hour12)
+      setMinute(minute)
+      setShowSetupModal(true)
+    }
+  }, [token, firstNotiStatus])
+
+  // iOS PWA 환경인 경우에만 토큰 등록
+  useEffect(() => {
+    if (!isIosPwa()) return
+
+    // 토큰 준비 안 됐을 경우 중단
+    if (!token) return
+
+    // 웹 알림 권한이 허용된 경우에만 토큰 등록
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      ;(async () => {
+        try {
+          await registerFCMToken(token)
+        } catch (e) {
+          console.error('iOS PWA 홈 진입 시 FCM 토큰 등록 실패: ', e)
+        }
+      })()
+    }
+  }, [token])
+
   // 최초 알림 설정 허용하기 버튼
   const handleAllowNotification = async () => {
     try {
-      // iOS PWA(홈 화면에 추가된 Safari)에서만 시스템 알림 팝업 띄우기
-
+      // 1. iOS PWA인 경우에만 웹 알림 권한 체크 + 요청
       if (isIosPwa()) {
         if (typeof window !== 'undefined' && 'Notification' in window) {
           const current = Notification.permission as NotificationPermission
@@ -114,6 +132,8 @@ export default function HomeScreen() {
                 '알림 권한이 허용되지 않아 알림을 받을 수 없어요.\n' +
                   '언제든지 Safari 설정에서 다시 허용할 수 있어요.'
               )
+
+              return
             }
           } else if (current === 'denied') {
             // 이미 한 번 거절한 상태
@@ -124,7 +144,7 @@ export default function HomeScreen() {
             )
           }
 
-          // 권한이 허용된 상태에서만 FCM 토큰 등록 시도
+          // 2. 권한이 허용된 상태에서만 FCM 토큰 등록 시도
           if (Notification.permission === 'granted') {
             await registerFCMToken(token ?? '')
           }
