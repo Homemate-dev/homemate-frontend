@@ -20,6 +20,8 @@ import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import Toggle from '@/components/Toggle'
+import { useAuth } from '@/contexts/AuthContext'
+import { registerFCMToken } from '@/libs/firebase/fcm'
 import { useAcquiredBadges } from '@/libs/hooks/badge/useAcquiredBadges'
 import { useLogout } from '@/libs/hooks/mypage/useLogout'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
@@ -34,6 +36,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 export default function MyPage() {
   const router = useRouter()
+  const { token } = useAuth()
 
   // React Query
   const { data: user, isLoading: isUserLoading, isError: isUserError } = useMyPage()
@@ -91,7 +94,16 @@ export default function MyPage() {
     if (typeof Notification === 'undefined') return
 
     // denied이면 true 저장
-    setIsDeviceNotiDenied(Notification.permission === 'denied')
+    const isDenied = Notification.permission === 'denied'
+
+    setIsDeviceNotiDenied(isDenied)
+
+    // 알림 권한 허용 denied일 경우, 토글 off
+    if (isDenied) {
+      setIsMasterAlarm(false)
+      setIsChoreAlarm(false)
+      setIsNoticeAlarm(false)
+    }
   }, [])
 
   // 드롭다운 열고 닫힐 때 부드러운 애니메이션
@@ -100,7 +112,55 @@ export default function MyPage() {
   }, [activeDropdown])
 
   // 토글 상태 핸들러
-  const handleToggle = (type: AlertType, next: boolean) => {
+  const handleToggle = async (type: AlertType, next: boolean) => {
+    // 웹에서 알림 권한이 denied 상태인데 ON을 시도하면 막기
+    if (Platform.OS === 'web' && next && isDeviceNotiDenied) {
+      alert('기기에서 알림이 차단되어 있어요.\n' + '설정 > 알림에서 홈메이트 알림을 허용해 주세요.')
+
+      // UI는 모두 OFF 상태 유지
+      setIsMasterAlarm(false)
+      setIsChoreAlarm(false)
+      setIsNoticeAlarm(false)
+      return
+    }
+
+    // 토글 ON 되는 순간 + 웹 환경일 경우 FCM 토큰 등록 시도
+    const nextMaster = type === 'master' ? next : isMasterAlarm
+    const nextChore = type === 'chore' ? next : isChoreAlarm
+    const nextNotice = type === 'notice' ? next : isNoticeAlarm
+
+    const wasAllOff = !isMasterAlarm && !isChoreAlarm && !isNoticeAlarm
+    const willAnyOn = nextMaster || nextChore || nextNotice
+
+    if (Platform.OS === 'web' && wasAllOff && willAnyOn) {
+      if (typeof Notification !== 'undefined') {
+        let permission = Notification.permission as NotificationPermission
+
+        // 아직 한 번도 선택 안했다면 시스템 팝업 요청
+        if (permission === 'default') {
+          permission = await Notification.requestPermission()
+        }
+
+        if (permission === 'granted') {
+          try {
+            await registerFCMToken(token ?? '')
+          } catch (e) {
+            console.error('FCM 토큰 등록 실패: ', e)
+          }
+        } else if (permission === 'denied') {
+          alert(
+            '기기에서 알림이 차단되었어요.\n' + '설정 > 알림에서 홈메이트 알림을 허용해 주세요.'
+          )
+
+          setIsDeviceNotiDenied(true)
+          setIsMasterAlarm(false)
+          setIsChoreAlarm(false)
+          setIsNoticeAlarm(false)
+          return
+        }
+      }
+    }
+
     if (type === 'master') {
       setIsMasterAlarm(next)
       setIsChoreAlarm(next)

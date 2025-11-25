@@ -18,6 +18,9 @@ export const registerFCMToken = async (accessToken: string) => {
     return
   }
 
+  const deviceType: 'WEB' | 'ANDROID' | 'IOS' =
+    Platform.OS === 'web' ? 'WEB' : Platform.OS === 'ios' ? 'IOS' : 'ANDROID'
+
   try {
     /** ─────────────────────────────────────────────
      *  🌐 WEB: Firebase Messaging + VAPID
@@ -57,7 +60,7 @@ export const registerFCMToken = async (accessToken: string) => {
 
         // 3) 서버 등록
         try {
-          await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token })
+          await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token, deviceType })
           console.log('✅ [FCM][WEB][iOS] 웹 푸시 토큰 등록 성공')
         } catch (err) {
           console.error('❌ [FCM][WEB][iOS] 서버 등록 실패:', err)
@@ -91,7 +94,7 @@ export const registerFCMToken = async (accessToken: string) => {
         return
       }
 
-      await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token })
+      await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token, deviceType })
       console.log('✅ 웹 푸시 토큰 등록 성공')
       return
     }
@@ -126,7 +129,7 @@ export const registerFCMToken = async (accessToken: string) => {
       return
     }
 
-    await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token: expoPushToken })
+    await api.post(NOTIFICATION_ENDPOINTS.ENABLE_PUSH, { token: expoPushToken, deviceType })
     console.log('✅ 앱 푸시 토큰 등록 성공:', expoPushToken)
   } catch (error) {
     console.error('❌ 푸시 토큰 등록 실패:', error)
