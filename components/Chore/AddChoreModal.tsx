@@ -35,6 +35,7 @@ import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import useRandomChoreInfo from '@/libs/hooks/recommend/useRandomChoreInfo'
 import useRandomChores from '@/libs/hooks/recommend/useRandomChores'
 import { isDateCompare, toYMD } from '@/libs/utils/date'
+import { trackEvent } from '@/libs/utils/ga4'
 import { getBadgeDesc } from '@/libs/utils/getBadgeDesc'
 import { getNewlyAcquiredBadge } from '@/libs/utils/getNewlyAcquiredBadges'
 import { toRepeatFields, toRepeatLabel } from '@/libs/utils/repeat'
@@ -125,6 +126,9 @@ export default function AddChoreModal() {
   const [updateOpen, setUpdateOpen] = useState(false)
   const [applyToAfter, setApplyToAfter] = useState<boolean | null>(null)
 
+  // 집안일 추천 chip을 선택했는지 여부
+  const [fromRecommendChip, setFromRecommendChip] = useState(false)
+
   const isDateRangeValid = isDateCompare(startDate, endDate)
 
   const dispatch = useDispatch()
@@ -132,6 +136,8 @@ export default function AddChoreModal() {
 
   // ----- 추천 집안일 자동 채우기 -----
   const applyRandomChore = (c: RandomChoreList) => {
+    setFromRecommendChip(true)
+
     setInputValue(c.titleKo)
     setSpace(toSpaceUi(c.space))
     setRepeat(toRepeatLabel(c.repeatType, c.repeatInterval))
@@ -253,7 +259,7 @@ export default function AddChoreModal() {
   const overlayOpen = activeDropdown === 'space' || activeDropdown === 'repeat'
   // 시간 드롭다운(ampm/hour/minute)은 제외해서, 안에서 터치/스크롤 가능하게 유지
 
-  // ----- 제출 -----
+  // ----- 제출(집안일 등록하기 버튼) -----
   const onSubmit = () => {
     if (!canSubmit) return
 
@@ -266,6 +272,18 @@ export default function AddChoreModal() {
     if (!spaceApi) return
 
     if (!isEdit) {
+      // 추천 chip으로 추가하는 경우 RECOMMEND, 아니면 MANUAL
+      const taskType = fromRecommendChip ? 'RECOMMEND' : 'MANUAL'
+
+      // GA4 태깅
+
+      trackEvent('task_created', {
+        user_id: user?.id,
+        task_type: taskType,
+        title: inputValue.trim(),
+        cycle: repeat,
+      })
+
       createChore(
         {
           title: inputValue.trim(),
