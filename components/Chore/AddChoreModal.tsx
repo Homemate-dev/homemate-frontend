@@ -276,7 +276,6 @@ export default function AddChoreModal() {
       const taskType = fromRecommendChip ? 'RECOMMEND' : 'MANUAL'
 
       // GA4 태깅
-
       trackEvent('task_created', {
         user_id: user?.id,
         task_type: taskType,
