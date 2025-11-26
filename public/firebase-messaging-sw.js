@@ -31,36 +31,6 @@ messaging.onBackgroundMessage((payload) => {
   })
 })
 
-// 일반 Web Push 이벤트 (push 이벤트 수신)
-self.addEventListener('push', (event) => {
-  console.log('[SW push raw]', event.data && event.data.text())
-
-  let parsed = {}
-  try {
-    parsed = event.data?.json() || {}
-  } catch (e) {
-    try {
-      parsed = event.data ? JSON.parse(event.data.text()) : {}
-    } catch (e2) {
-      console.error('[SW push parse error]', e, e2)
-    }
-  }
-
-  const n = parsed.notification || {}
-  const d = parsed.data || parsed
-
-  const title = n.title || d.title || 'Homemate'
-  const body = n.body || d.body || d.message || '새 알림이 도착했어요.'
-
-  event.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      icon: n.icon || '/icon-192.png',
-      data: d,
-    })
-  )
-})
-
 // 알림 클릭 시 포커스/네비게이션 처리
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
