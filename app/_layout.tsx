@@ -12,6 +12,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { Provider } from 'react-redux'
 
 import AchievementModal from '@/components/AchievementModal'
+import WebFCMListener from '@/components/notification/WebFCMListener'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { registerFCMToken } from '@/libs/firebase/fcm'
@@ -103,6 +104,7 @@ export default function RootLayout() {
         <SafeAreaProvider>
           <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F8F8FA' }}>
             <QueryClientProvider client={queryClient}>
+              <WebFCMListener />
               <ToastProvider>
                 <AuthProvider>
                   <RootNavigator />

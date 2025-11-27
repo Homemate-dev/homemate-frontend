@@ -18,6 +18,7 @@ import RecommendChoreModal from '@/components/RecommendChoreModal'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import { useToast } from '@/contexts/ToastContext'
+import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import useRecommend from '@/libs/hooks/recommend/useRecommend'
 import useRecommendChores from '@/libs/hooks/recommend/useRecommendChores'
 import { useRegisterCategory } from '@/libs/hooks/recommend/useRegisterCategory'
@@ -25,6 +26,7 @@ import { useRegisterSpace } from '@/libs/hooks/recommend/useRegisterSpace'
 import useSpaceChoreList from '@/libs/hooks/recommend/useSpaceChoreList'
 import useSpaceList from '@/libs/hooks/recommend/useSpaceList'
 import { CategoryApi } from '@/libs/utils/category'
+import { trackEvent } from '@/libs/utils/ga4'
 import { withSubjectJosa } from '@/libs/utils/getSubjectJosa'
 import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
 import { SpaceApi, SpaceUi, toSpaceUi } from '@/libs/utils/space'
@@ -51,6 +53,7 @@ export default function Recommend() {
   const toast = useToast()
 
   // ----- api 훅 -----
+  const { data: user } = useMyPage()
   const { data: overview = [], isLoading: overLoading, isError: overError } = useRecommend()
   // const { data: categories = [], isLoading: catLoading, isError: catError } = useChoreCategory()
   const { data: categoryChores = [], isLoading: choreLoading } = useRecommendChores(
@@ -81,7 +84,7 @@ export default function Recommend() {
         }))
   }, [spaceList])
 
-  const categoryRows = useMemo(() => chunkBy(overview, 4), [overview]) // ← 한 줄에 3개
+  const categoryRows = useMemo(() => chunkBy(overview, 4), [overview]) // ← 한 줄에 4개
   const choreRows = useMemo(() => chunkBy(spaceChores, 5), [spaceChores])
 
   // 카테고리 집안일 등록 핸들러
@@ -89,7 +92,23 @@ export default function Recommend() {
     if (!selectedIds.length || !selectedCategoryEnum) return
     setSubmitting(true)
 
+    // 선택한 집안일들 추려오기
+    const selectedChores = categoryChores.filter((chore: any) =>
+      selectedIds.includes(chore.choreId)
+    )
+
+    // GA4 태깅
+    selectedChores.forEach((chore: any) => {
+      trackEvent('task_created', {
+        user_id: user?.id,
+        task_type: 'CATEGORY',
+        title: chore.title,
+        cycle: chore.frequency,
+      })
+    })
+
     setIsOpen(false)
+
     try {
       await Promise.all(
         selectedIds.map((categoryChoreId) =>
@@ -101,7 +120,7 @@ export default function Recommend() {
         toast.show({
           message: `${withSubjectJosa(selectedCategoryName)} 추가되었어요`,
           onPress: () => {
-            router.push('/(tabs)/home')
+            router.replace('/(tabs)/home')
           },
         })
       }
@@ -250,9 +269,16 @@ export default function Recommend() {
                           </View>
 
                           <Pressable
-                            onPress={() =>
+                            onPress={() => {
+                              // GA4 태깅
+                              trackEvent('task_created', {
+                                user_id: user?.id,
+                                task_type: 'SPACE',
+                                title: c.title,
+                                cycle: repeat.label,
+                              })
                               spaRegister({ spaceChoreId: c.choreId, space: activeSpace })
-                            }
+                            }}
                             hitSlop={8}
                           >
                             <Image
