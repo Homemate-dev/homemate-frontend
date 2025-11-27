@@ -120,7 +120,7 @@ export default function Recommend() {
         toast.show({
           message: `${withSubjectJosa(selectedCategoryName)} 추가되었어요`,
           onPress: () => {
-            router.push('/(tabs)/home')
+            router.replace('/(tabs)/home')
           },
         })
       }
