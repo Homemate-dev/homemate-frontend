@@ -47,7 +47,7 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontSize: 12, fontWeight: 700, marginTop: 3 },
         sceneContainerStyle: { backgroundColor: '#F8F8FA' },
         tabBarStyle: {
-          height: 72,
+          height: 80,
           paddingBottom: 6,
           paddingTop: 10,
           elevation: 0, // Android 기본 그림자 제거
