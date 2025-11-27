@@ -259,6 +259,16 @@ export default function AddChoreModal() {
   const overlayOpen = activeDropdown === 'space' || activeDropdown === 'repeat'
   // 시간 드롭다운(ampm/hour/minute)은 제외해서, 안에서 터치/스크롤 가능하게 유지
 
+  const closeAddChore = () => {
+    if (Platform.OS === 'web') {
+      // 웹(iOS Safari, PWA 포함)에서는 add-chore 히스토리를 홈으로 교체
+      router.replace('/(tabs)/home')
+    } else {
+      // 앱(native)에서는 기존처럼 뒤로가기
+      router.back()
+    }
+  }
+
   // ----- 제출(집안일 등록하기 버튼) -----
   const onSubmit = () => {
     if (!canSubmit) return
@@ -297,8 +307,7 @@ export default function AddChoreModal() {
         },
         {
           onSuccess: async (resp) => {
-            router.back()
-
+            closeAddChore()
             const completedMissions = resp.missionResults?.filter((m) => m.completed) ?? []
             completedMissions.forEach((mission) => {
               dispatch(
@@ -364,7 +373,7 @@ export default function AddChoreModal() {
         },
         {
           onSuccess: () => {
-            router.back()
+            closeAddChore()
           },
           onError: (error) => {
             const { code, message, details } = toApiError(error)
@@ -385,7 +394,7 @@ export default function AddChoreModal() {
       {
         onSuccess: () => {
           setDeleteOpen(false)
-          router.back()
+          closeAddChore()
         },
         onError: (error) => {
           const { code, message, details } = toApiError(error)
@@ -446,7 +455,7 @@ export default function AddChoreModal() {
               >
                 {/* 헤더 */}
                 <View style={styles.headerRow}>
-                  <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
+                  <TouchableOpacity onPress={closeAddChore} style={styles.headerBack}>
                     <MaterialIcons name="chevron-left" size={28} color="#686F79" />
                   </TouchableOpacity>
                   <Text style={styles.headerTitle}>{headerTitle}</Text>
