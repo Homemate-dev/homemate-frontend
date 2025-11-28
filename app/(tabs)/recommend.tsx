@@ -27,7 +27,6 @@ import useSpaceChoreList from '@/libs/hooks/recommend/useSpaceChoreList'
 import useSpaceList from '@/libs/hooks/recommend/useSpaceList'
 import { CategoryApi } from '@/libs/utils/category'
 import { trackEvent } from '@/libs/utils/ga4'
-import { withSubjectJosa } from '@/libs/utils/getSubjectJosa'
 import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
 import { SpaceApi, SpaceUi, toSpaceUi } from '@/libs/utils/space'
 
@@ -118,7 +117,7 @@ export default function Recommend() {
 
       if (selectedCategoryName) {
         toast.show({
-          message: `${withSubjectJosa(selectedCategoryName)} 추가되었어요`,
+          message: selectedCategoryName,
           onPress: () => {
             router.replace('/(tabs)/home')
           },
