@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
   },
 
   josa: {
-    fontWeight: '700',
     fontSize: 14,
     color: '#7E7E7E', // 조사(이/가) 기본색
   },
