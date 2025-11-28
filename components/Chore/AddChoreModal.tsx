@@ -2,7 +2,7 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { useQueryClient } from '@tanstack/react-query'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ActivityIndicator,
   Image,
@@ -118,9 +118,14 @@ export default function AddChoreModal() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
   const [notifyOn, setNotifyOn] = useState(false)
-  const [ampm, setAmpm] = useState<'오전' | '오후'>('오전')
-  const [hour12, setHour12] = useState<number>(toHHmmParts(user?.notificationTime).hour12)
-  const [minute, setMinute] = useState<number>(toHHmmParts(user?.notificationTime).minute)
+
+  const userNoti = useMemo(
+    () => toHHmmParts(user?.notificationTime), // "18:00" 같은 문자열 → { ampm, hour12, minute }
+    [user?.notificationTime]
+  )
+  const [ampm, setAmpm] = useState<'오전' | '오후'>(userNoti.ampm)
+  const [hour12, setHour12] = useState<number>(userNoti.hour12)
+  const [minute, setMinute] = useState<number>(userNoti.minute)
 
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [updateOpen, setUpdateOpen] = useState(false)
@@ -135,27 +140,32 @@ export default function AddChoreModal() {
   const qc = useQueryClient()
 
   // ----- 추천 집안일 자동 채우기 -----
-  const applyRandomChore = (c: RandomChoreList) => {
-    setFromRecommendChip(true)
+  const applyRandomChore = useCallback(
+    (c: RandomChoreList) => {
+      setFromRecommendChip(true)
 
-    setInputValue(c.titleKo)
-    setSpace(toSpaceUi(c.space))
-    setRepeat(toRepeatLabel(c.repeatType, c.repeatInterval))
-    setStartDate(c.startDate)
-    setEndDate(c.endDate)
-    if (c.choreEnabled) {
-      setNotifyOn(true)
-      setAmpm('오전')
-      setHour12(9)
-      setMinute(0)
-    } else {
-      setNotifyOn(false)
-    }
-  }
+      setInputValue(c.titleKo)
+      setSpace(toSpaceUi(c.space))
+      setRepeat(toRepeatLabel(c.repeatType, c.repeatInterval))
+      setStartDate(c.startDate)
+      setEndDate(c.endDate)
+
+      if (c.choreEnabled) {
+        setNotifyOn(true)
+
+        setAmpm(userNoti.ampm)
+        setHour12(userNoti.hour12)
+        setMinute(userNoti.minute)
+      } else {
+        setNotifyOn(false)
+      }
+    },
+    [userNoti]
+  ) // userNoti가 바뀔 때만 새 함수로 교체
 
   useEffect(() => {
     if (randomChoreInfo) applyRandomChore(randomChoreInfo)
-  }, [randomChoreInfo])
+  }, [randomChoreInfo, applyRandomChore])
 
   // ADD 기본값
   useEffect(() => {
