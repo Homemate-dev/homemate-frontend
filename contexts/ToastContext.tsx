@@ -2,6 +2,8 @@ import { MaterialIcons } from '@expo/vector-icons'
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 
+import { withSubjectJosa } from '@/libs/utils/getSubjectJosa'
+
 type ToastOptions = {
   message: string
   duration?: number // ms (기본 2500ms)
@@ -100,7 +102,19 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 resizeMode="contain"
                 style={{ width: 18, height: 18, marginRight: 6 }}
               />
-              <Text style={styles.msgTitle}>{toast.message}</Text>가 추가되었어요
+              {(() => {
+                const full = withSubjectJosa(toast.message) // "욕실 청소가"
+                const text = full.slice(0, -1) // "욕실 청소"
+                const josa = full.slice(-1) // "가"
+
+                return (
+                  <Text style={styles.msgWrapper}>
+                    <Text style={styles.msgTitle}>{text}</Text>
+                    <Text style={styles.josa}>{josa}</Text>
+                    <Text style={styles.normalText}> 추가되었어요</Text>
+                  </Text>
+                )
+              })()}
             </View>
             <MaterialIcons name="chevron-right" size={18} color="#57C9D0" />
           </Pressable>
@@ -134,16 +148,29 @@ const styles = StyleSheet.create({
   },
   message: {
     flex: 1,
-
-    fontSize: 14,
-    color: '#7E7E7E',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  msgTitle: {
-    fontWeight: 700,
+
+  msgWrapper: {
+    flexDirection: 'row',
     fontSize: 14,
-    color: '#57C9D0',
+  },
+
+  msgTitle: {
+    fontWeight: '700',
+    fontSize: 14,
+    color: '#57C9D0', // 메시지 텍스트 강조 색
+  },
+
+  josa: {
+    fontWeight: '700',
+    fontSize: 14,
+    color: '#7E7E7E', // 조사(이/가) 기본색
+  },
+
+  normalText: {
+    fontSize: 14,
+    color: '#7E7E7E', // 고정 텍스트 기본색
   },
 })
