@@ -1,13 +1,40 @@
 import { router } from 'expo-router'
+import { useEffect } from 'react'
 import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
+import { trackEvent } from '@/libs/utils/ga4'
 import { RootState } from '@/store'
 import { closeAchievementModal } from '@/store/slices/achievementModalSlice'
 
 export default function AchievementModal() {
   const dispatch = useDispatch()
-  const { isVisible, kind, title, desc, icon } = useSelector((s: RootState) => s.achievementModal)
+  const { data: user } = useMyPage()
+
+  const { isVisible, kind, title, desc, icon, missionId, missionName, badgeId, badgeName } =
+    useSelector((s: RootState) => s.achievementModal)
+
+  // 미션 팝업이 실제 노출될 때 mission_completed 태깅
+  useEffect(() => {
+    if (isVisible && kind === 'mission' && missionId && missionName) {
+      trackEvent('mission_completed', {
+        user_id: user?.id,
+        mission_id: missionId,
+        mission_name: missionName,
+      })
+    }
+  }, [isVisible, kind, missionId, missionName, user?.id])
+
+  useEffect(() => {
+    if (isVisible && kind === 'badge' && badgeId) {
+      trackEvent('mission_completed', {
+        user_id: user?.id,
+        badge_id: badgeId,
+        badge_name: badgeName,
+      })
+    }
+  }, [isVisible, kind, badgeId, badgeName, user?.id])
 
   const onClose = () => dispatch(closeAchievementModal())
   const onPrimary = () => {

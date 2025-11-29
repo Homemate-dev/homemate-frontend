@@ -14,7 +14,9 @@ import {
 import BadgeCard from '@/components/Badge/BadgeCard'
 import BadgeDetail from '@/components/BadgeDetail'
 import { useAcquiredBadges } from '@/libs/hooks/badge/useAcquiredBadges'
+import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import { getBadgeSection, SECTION_ORDER } from '@/libs/utils/badgeSectionMap'
+import { trackEvent } from '@/libs/utils/ga4'
 import { ResponseBadge } from '@/types/badge'
 
 export type BadgeTier = { name: string; count: number }
@@ -26,6 +28,7 @@ export default function MyBadges() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const { data: badges = [], isLoading, isError } = useAcquiredBadges()
+  const { data: user } = useMyPage()
 
   const selected = badges.find((b) => b.badgeTitle === selectedId) ?? null
 
@@ -78,18 +81,26 @@ export default function MyBadges() {
             <Text style={styles.sectionTitle}>{section}</Text>
             <View style={styles.rowBetween}>
               {items.map((b) => {
-                const acquired = b.acquired ?? b.currentCount >= b.requiredCount
                 return (
                   <View key={b.badgeTitle} style={styles.badgeCol}>
                     <TouchableOpacity
                       activeOpacity={0.8}
-                      onPress={() => setSelectedId(b.badgeTitle)}
+                      onPress={() => {
+                        const gainType = b.acquired ? 'gained' : 'locked'
+                        trackEvent('badge_click', {
+                          user_id: user?.id,
+                          badge_id: b.badgeTitle,
+                          badge_name: b.badgeTitle,
+                          badge_gain_type: gainType,
+                        })
+                        setSelectedId(b.badgeTitle)
+                      }}
                     >
                       <BadgeCard
                         icon={b.badgeImageUrl}
                         size={100}
                         iconSize={80}
-                        acquired={acquired}
+                        acquired={b.acquired}
                       />
                     </TouchableOpacity>
                     <Text style={styles.badgeText}>

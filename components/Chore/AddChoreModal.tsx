@@ -293,14 +293,15 @@ export default function AddChoreModal() {
 
     if (!isEdit) {
       // 추천 chip으로 추가하는 경우 RECOMMEND, 아니면 MANUAL
-      const taskType = fromRecommendChip ? 'RECOMMEND' : 'MANUAL'
+      const taskSource = fromRecommendChip ? 'RECOMMEND' : 'MANUAL'
 
       // GA4 태깅
       trackEvent('task_created', {
         user_id: user?.id,
-        task_type: taskType,
+        task_type: taskSource,
         title: inputValue.trim(),
         cycle: repeat,
+        reco_btn_click: fromRecommendChip,
       })
 
       createChore(
@@ -326,6 +327,8 @@ export default function AddChoreModal() {
                   title: '미션 달성!',
                   desc: `이달의 미션 \n ${mission.title} 미션을 완료했어요!`,
                   icon: missionIcon,
+                  missionId: mission.id,
+                  missionName: mission.title,
                 })
               )
             })
@@ -344,6 +347,8 @@ export default function AddChoreModal() {
                   title: `${badge.badgeTitle} 뱃지 획득`,
                   desc: getBadgeDesc(badge, nextBadge),
                   icon: badge.badgeImageUrl,
+                  badgeId: badge.badgeTitle,
+                  badgeName: badge.badgeTitle,
                 })
               )
             })
@@ -383,6 +388,25 @@ export default function AddChoreModal() {
         },
         {
           onSuccess: () => {
+            // GA4 태깅
+            if (initialValue) {
+              const beforeCycle = initialValue.repeat ?? ''
+              const afterCycle = currentValue.repeat ?? ''
+              const cycleChanged = beforeCycle !== afterCycle
+
+              const taskSource = fromRecommendChip ? 'RECOMMEND' : 'MANUAL'
+
+              trackEvent('task_update', {
+                user_id: user?.id,
+                title: inputValue.trim(),
+                task_type: taskSource,
+                before_cycle: beforeCycle,
+                after_cycle: afterCycle,
+                reco_btn_click: fromRecommendChip,
+                cycle_changed: cycleChanged,
+              })
+            }
+
             closeAddChore()
           },
           onError: (error) => {
