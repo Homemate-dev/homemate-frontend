@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Image,
   Modal,
@@ -26,7 +26,8 @@ import { useFirstNotiStatus } from '@/libs/hooks/mypage/useFirstNotiStatus'
 import { useFirstNotiTimeSetting } from '@/libs/hooks/mypage/useFirstNotiTimeSetting'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import { formatKoreanDate, getMonthRange, toYMD } from '@/libs/utils/date'
-import { styleFromRepeatColor } from '@/libs/utils/repeat'
+import { trackEvent } from '@/libs/utils/ga4'
+import { styleFromRepeatColor, toRepeatLabel2 } from '@/libs/utils/repeat'
 import { toHHmm, toHHmmParts } from '@/libs/utils/time'
 
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
@@ -63,6 +64,46 @@ export default function HomeScreen() {
   const { data: todayChores = [] } = useChoreByDate(todayStr)
   const { mutate: choreStatus } = usePatchChoreStatus(selectedDate)
   const { data: user } = useMyPage()
+
+  // 이미 태깅한 상태임을 표시하기 위함
+  const notiTrackedRef = useRef(false)
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') return
+    if (!user?.id) return
+    if (notiTrackedRef.current) return // 중복 방지
+
+    // 현재 URL의 query string 읽기 -> ?from_push=1&task_type=category 만 읽어옴
+    const search = window.location.search
+
+    if (!search) return
+
+    //URLSearchParams 로 파싱
+    const params = new URLSearchParams(search)
+    const fromPush = params.get('from_push')
+    const taskType = params.get('task_type')
+
+    if (fromPush === '1') {
+      //ga4 태깅
+      trackEvent('noti_open', {
+        user_id: user.id,
+        task_type: taskType ?? 'unknown',
+        from_push: true,
+      })
+
+      notiTrackedRef.current = true
+
+      //  URL 정리 (쿼리 제거)
+      params.delete('from_push')
+      params.delete('task_type')
+
+      const newSearch = params.toString()
+      const newUrl =
+        window.location.pathname + (newSearch ? `?${newSearch}` : '') + window.location.hash
+
+      window.history.replaceState(null, '', newUrl)
+    }
+  }, [user?.id])
 
   // iOS PWA 판별 함수
   const isIosPwa = () => {
@@ -160,6 +201,26 @@ export default function HomeScreen() {
       router.replace('/(tabs)/home')
     } catch (err) {
       console.error('최초 알림 설정 실패:', err)
+    }
+  }
+
+  // 체크했을 때 GA4 이벤트 보내는 핸들러
+  const handleToggleChore = (item: any) => {
+    // 현재 상태 기준으로 완료 여부 체크
+    const wasCompleted = item.status === 'COMPLETED'
+    const nextCompleted = !wasCompleted
+
+    // 먼저 서버에 상태 변경 호출
+    choreStatus(item.id)
+
+    // 완료로 바꿔는 순간에만 GA4 태깅
+    if (nextCompleted) {
+      trackEvent('task_completed', {
+        user_id: user?.id,
+        task_type: item.registrationType,
+        title: item.titleSnapshot,
+        cycle: toRepeatLabel2(item.repeatType, item.repeatInterval),
+      })
     }
   }
 
@@ -281,7 +342,7 @@ export default function HomeScreen() {
                       </View>
                       <Checkbox
                         checked={item.status === 'COMPLETED'}
-                        onChange={() => choreStatus(item.id)}
+                        onChange={() => handleToggleChore(item)}
                         size={20}
                       />
                     </View>

@@ -18,6 +18,8 @@ import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { useTopBadges } from '@/libs/hooks/badge/useTopBadges'
 import { useMonthlyMissions } from '@/libs/hooks/mission/useMonthlyMissions'
+import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
+import { trackEvent } from '@/libs/utils/ga4'
 import { ResponseBadge } from '@/types/badge'
 
 export default function Mission() {
@@ -25,6 +27,7 @@ export default function Mission() {
 
   const { data: missions, isLoading, isError } = useMonthlyMissions()
   const { data: TopBadges, isLoading: badgeLoading, isError: badgeError } = useTopBadges()
+  const { data: user } = useMyPage()
 
   const [selected, setSelected] = useState<ResponseBadge | null>(null)
 
@@ -93,7 +96,15 @@ export default function Mission() {
                 ))}
             </View>
 
-            <Pressable style={styles.tipRow} onPress={() => router.push('/recommend')}>
+            <Pressable
+              style={styles.tipRow}
+              onPress={() => {
+                trackEvent('reco_redirect', {
+                  user_id: user?.id,
+                })
+                router.push('/recommend')
+              }}
+            >
               <Text style={styles.star}>⭐</Text>
               <View style={styles.tipInner}>
                 <Text style={styles.tipText}>추천 카테고리에서 추가해보세요!</Text>
@@ -122,7 +133,19 @@ export default function Mission() {
 
                 {TopBadges?.map((b) => (
                   <View key={b.badgeTitle} style={styles.badgeItem}>
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => setSelected(b)}>
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={() => {
+                        const gainType = b.acquired ? 'gained' : 'locked'
+                        trackEvent('badge_click', {
+                          user_id: user?.id,
+                          badge_id: b.badgeTitle,
+                          badge_name: b.badgeTitle,
+                          badge_gain_type: gainType,
+                        })
+                        setSelected(b)
+                      }}
+                    >
                       <BadgeCard
                         icon={b.badgeImageUrl}
                         size={84}

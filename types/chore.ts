@@ -115,6 +115,7 @@ export type ResponseChoreInstance = {
   dueDate: string
   notificationTime: string
   choreStatus: statusType
+  registrationType: RegistrationType
   completedAt: string | null
   createdAt: string
   updatedAt: string | null
