@@ -91,19 +91,10 @@ export default function Recommend() {
     if (!selectedIds.length || !selectedCategoryEnum) return
     setSubmitting(true)
 
-    // 선택한 집안일들 추려오기
-    const selectedChores = categoryChores.filter((chore: any) =>
-      selectedIds.includes(chore.choreId)
-    )
-
     // GA4 태깅
-    selectedChores.forEach((chore: any) => {
-      trackEvent('task_created', {
-        user_id: user?.id,
-        task_type: 'CATEGORY',
-        title: chore.title,
-        cycle: chore.frequency,
-      })
+    trackEvent('task_update', {
+      user_id: user?.id,
+      category_id: selectedCategoryEnum,
     })
 
     setIsOpen(false)
@@ -163,6 +154,12 @@ export default function Recommend() {
                           key={c.category}
                           style={styles.card}
                           onPress={() => {
+                            trackEvent('reco_category_click', {
+                              user_id: user?.id,
+                              category_id: c.category,
+                              category_name: c.name,
+                            })
+
                             setSelectedCategoryEnum(c.category)
                             setSelectedCategoryName(c.name)
                             setIsOpen(true)

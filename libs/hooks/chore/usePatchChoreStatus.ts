@@ -53,6 +53,8 @@ export function usePatchChoreStatus(selectedDate: string) {
             title: '미션 달성!',
             desc: `이달의 미션 \n ${mission.title} 미션을 완료했어요!`,
             icon: missionIcon,
+            missionId: mission.id,
+            missionName: mission.title,
           })
         )
       })
@@ -74,6 +76,8 @@ export function usePatchChoreStatus(selectedDate: string) {
             title: `${badge.badgeTitle} 뱃지 획득`,
             desc: getBadgeDesc(badge, nextBadge),
             icon: badge.badgeImageUrl,
+            badgeId: badge.badgeTitle,
+            badgeName: badge.badgeTitle,
           })
         )
       })

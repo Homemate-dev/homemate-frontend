@@ -11,6 +11,12 @@ type AchievementPayload = {
   title: string
   desc?: string
   icon?: ImageSourcePropType
+
+  missionId?: number | null
+  missionName?: string | null
+
+  badgeId?: string | null
+  badgeName?: string | null
 }
 
 // 리덕스에 들고 있을 전체 모달 상태
@@ -20,7 +26,14 @@ type AchievementModalState = {
   title: string
   desc?: string
   icon?: ImageSourcePropType
+
   queue: AchievementPayload[] // 다음에 보여줄 모달들
+
+  missionId?: number | null
+  missionName?: string | null
+
+  badgeId?: string | null
+  badgeName?: string | null
 }
 
 // 초기 상태
@@ -31,6 +44,12 @@ const initialState: AchievementModalState = {
   desc: undefined,
   icon: undefined,
   queue: [],
+
+  missionId: null,
+  missionName: null,
+
+  badgeId: null,
+  badgeName: null,
 }
 
 const achievementModalSlice = createSlice({
@@ -48,6 +67,12 @@ const achievementModalSlice = createSlice({
         state.title = action.payload.title
         state.desc = action.payload.desc
         state.icon = action.payload.icon
+
+        state.missionId = action.payload.missionId ?? null
+        state.missionName = action.payload.missionName ?? null
+
+        state.badgeId = action.payload.badgeId ?? null
+        state.badgeName = action.payload.badgeName ?? null
       } else {
         state.queue.push(payload)
       }
@@ -63,12 +88,23 @@ const achievementModalSlice = createSlice({
         state.title = next.title
         state.desc = next.desc
         state.icon = next.icon
+
+        state.missionId = next.missionId ?? null
+        state.missionName = next.missionName ?? null
+
+        state.badgeId = next.badgeId ?? null
+        state.badgeName = next.badgeName ?? null
       } else {
         state.isVisible = false
         state.kind = null
         state.title = ''
         state.desc = undefined
         state.icon = undefined
+
+        state.missionId = null
+        state.missionName = null
+        state.badgeId = null
+        state.badgeName = null
       }
     },
   },
