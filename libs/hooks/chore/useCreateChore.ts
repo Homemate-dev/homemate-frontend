@@ -43,6 +43,8 @@ export default function useCreateChore() {
             title: `${badge.badgeTitle} 뱃지 획득`,
             desc: getBadgeDesc(badge, nextBadge),
             icon: badge.badgeImageUrl,
+            badgeId: badge.badgeTitle,
+            badgeName: badge.badgeTitle,
           })
         )
       })

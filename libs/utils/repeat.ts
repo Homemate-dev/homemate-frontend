@@ -37,6 +37,19 @@ export function toRepeatLabel(type: string, interval: number) {
   return '-'
 }
 
+export function toRepeatLabel2(type: string, interval: number) {
+  if (type === 'NONE') return '한번'
+  if (type === 'DAILY' && interval === 1) return '매일'
+  if (type === 'WEEKLY' && interval === 1) return '1주'
+  if (type === 'WEEKLY' && interval === 2) return '2주'
+  if (type === 'MONTHLY' && interval === 1) return '매달'
+  if (type === 'MONTHLY' && interval === 3) return '3개월'
+  if (type === 'MONTHLY' && interval === 6) return '6개월'
+  if (type === 'YEARLY' && interval === 1) return '매년'
+
+  return '-'
+}
+
 export function styleFromRepeatColor(cls: string | undefined) {
   if (!cls) return {}
   const bgMatch = cls.match(/bg-\[#([0-9A-Fa-f]{6})\]/)
