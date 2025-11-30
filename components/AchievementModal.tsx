@@ -28,7 +28,7 @@ export default function AchievementModal() {
 
   useEffect(() => {
     if (isVisible && kind === 'badge' && badgeId) {
-      trackEvent('mission_completed', {
+      trackEvent('badge_earned', {
         user_id: user?.id,
         badge_id: badgeId,
         badge_name: badgeName,
