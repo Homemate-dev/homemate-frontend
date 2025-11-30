@@ -92,9 +92,10 @@ export default function Recommend() {
     setSubmitting(true)
 
     // GA4 태깅
-    trackEvent('task_update', {
+    trackEvent('task_created', {
       user_id: user?.id,
       category_id: selectedCategoryEnum,
+      reco_category_cta_click: selectedCategoryName,
     })
 
     setIsOpen(false)
