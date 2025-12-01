@@ -91,20 +91,26 @@ export default function Recommend() {
     if (!selectedIds.length || !selectedCategoryEnum) return
     setSubmitting(true)
 
-    // GA4 태깅
-    trackEvent('task_created', {
-      user_id: user?.id,
-      category_id: selectedCategoryEnum,
-      reco_category_cta_click: selectedCategoryName,
-    })
-
     setIsOpen(false)
 
     try {
       await Promise.all(
-        selectedIds.map((categoryChoreId) =>
-          cateRegister.mutateAsync({ categoryChoreId, category: selectedCategoryEnum })
-        )
+        selectedIds.map((categoryChoreId) => {
+          // 선택한 집안일 찾기
+          const chore = categoryChores.find((item) => item.choreId === categoryChoreId)
+
+          // GA4 태깅
+          trackEvent('task_created', {
+            user_id: user?.id,
+            task_type: 'CATEGORY',
+            title: chore?.title,
+            cycle: chore?.frequency,
+            category_id: selectedCategoryEnum,
+            category_name: selectedCategoryName,
+          })
+
+          return cateRegister.mutateAsync({ categoryChoreId, category: selectedCategoryEnum })
+        })
       )
 
       if (selectedCategoryName) {
