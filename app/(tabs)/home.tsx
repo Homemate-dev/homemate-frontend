@@ -88,7 +88,6 @@ export default function HomeScreen() {
       trackEvent('noti_open', {
         user_id: user.id,
         task_type: taskType ?? 'unknown',
-        from_push: true,
       })
 
       notiTrackedRef.current = true
