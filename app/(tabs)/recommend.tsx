@@ -91,6 +91,13 @@ export default function Recommend() {
     if (!selectedIds.length || !selectedCategoryEnum) return
     setSubmitting(true)
 
+    // GA4 태깅
+    trackEvent('reco_category_cta_click', {
+      user_id: user?.id,
+      category_id: selectedCategoryEnum,
+      category_name: selectedCategoryName,
+    })
+
     setIsOpen(false)
 
     try {
