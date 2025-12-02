@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux'
 import { getAcquiredBadges } from '@/libs/api/badge/getAcquiredBadges'
 import { postCreateChore } from '@/libs/api/chore/postCreateChore'
 import { getBadgeDesc } from '@/libs/utils/getBadgeDesc'
-import { getNewlyAcquiredBadge } from '@/libs/utils/getNewlyAcquiredBadges'
+import { getNewlyAcquiredBadgeByTime } from '@/libs/utils/getNewlyAcquiredBadgeByTime'
 import { openAchievementModal } from '@/store/slices/achievementModalSlice'
 import { ResponseBadge } from '@/types/badge'
 import { CreateChoreDTO, ResponseChore } from '@/types/chore'
@@ -33,10 +33,10 @@ export default function useCreateChore() {
       })
 
       // 이전에는 없었는데 이번에 새로 획득한 뱃지 가져오기
-      const newlyAcquired = getNewlyAcquiredBadge(prevBadge, nextBadge)
+      const newlyAcquired = getNewlyAcquiredBadgeByTime(prevBadge, nextBadge)
 
       // 새로 획득한 뱃지마다 모달 큐에 쌓기
-      newlyAcquired.forEach((badge) => {
+      newlyAcquired?.forEach((badge) => {
         dispatch(
           openAchievementModal({
             kind: 'badge',

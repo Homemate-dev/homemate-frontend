@@ -1,7 +1,7 @@
 // app/_layout.tsx
 
 import '@/libs/firebase/init'
-import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import * as Linking from 'expo-linking'
 import { Stack } from 'expo-router'
@@ -15,7 +15,6 @@ import AchievementModal from '@/components/AchievementModal'
 import WebFCMListener from '@/components/notification/WebFCMListener'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/contexts/ToastContext'
-import { getAcquiredBadges } from '@/libs/api/badge/getAcquiredBadges'
 import { registerFCMToken } from '@/libs/firebase/fcm'
 import { store } from '@/store'
 
@@ -23,7 +22,6 @@ const queryClient = new QueryClient()
 
 function RootNavigator() {
   const { token, user, loading, verified } = useAuth()
-  const qc = useQueryClient()
 
   const [loaded] = useFonts({
     SeoulNamsanEB: require('../assets/fonts/SeoulNamsanEB.ttf'),
@@ -73,16 +71,6 @@ function RootNavigator() {
     if (!verified || !user || !token) return
     registerFCMToken(token)
   }, [user, token, verified])
-
-  /** 로그인 직후 뱃지 목록 조회 및 세팅 */
-  useEffect(() => {
-    if (!verified || !!user?.id) return
-
-    qc.fetchQuery({
-      queryKey: ['badge', 'acquired'],
-      queryFn: getAcquiredBadges,
-    })
-  }, [verified, user?.id, qc])
 
   // 아직 준비 안됐으면(폰트 로딩, auth 로딩, code 처리 전) → 스택 렌더하지 말고 로딩만
   if (!loaded || loading || !isCodeHandled) {
