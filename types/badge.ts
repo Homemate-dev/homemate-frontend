@@ -5,6 +5,7 @@ export type ResponseBadge = {
   badgeTitle: string
   description: string
   acquired: boolean
+  acquiredAt: string
   currentCount: number
   requiredCount: number
   remainingCount: number

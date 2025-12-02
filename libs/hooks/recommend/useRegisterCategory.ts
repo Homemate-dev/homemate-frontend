@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux'
 import { getAcquiredBadges } from '@/libs/api/badge/getAcquiredBadges'
 import { postResisterCategoryChore } from '@/libs/api/recommend/postResisterCategoryChore'
 import { getBadgeDesc } from '@/libs/utils/getBadgeDesc'
-import { getNewlyAcquiredBadge } from '@/libs/utils/getNewlyAcquiredBadges'
+import { getNewlyAcquiredBadgeByTime } from '@/libs/utils/getNewlyAcquiredBadgeByTime'
 import { openAchievementModal } from '@/store/slices/achievementModalSlice'
 import { ResponseBadge } from '@/types/badge'
 import { RegisterChoreResponse } from '@/types/recommend'
@@ -48,9 +48,11 @@ export function useRegisterCategory() {
           queryFn: getAcquiredBadges,
         })
 
-        const newlyAcquired = getNewlyAcquiredBadge(prevBadge, nextBadge)
+        // 이전에는 없었는데 이번에 새로 획득한 뱃지 가져오기
+        const newlyAcquired = getNewlyAcquiredBadgeByTime(prevBadge, nextBadge)
 
-        newlyAcquired.forEach((badge) => {
+        // 새로 획득한 뱃지마다 모달 큐에 쌓기
+        newlyAcquired?.forEach((badge) => {
           dispatch(
             openAchievementModal({
               kind: 'badge',
