@@ -37,7 +37,7 @@ import useRandomChores from '@/libs/hooks/recommend/useRandomChores'
 import { isDateCompare, toYMD } from '@/libs/utils/date'
 import { trackEvent } from '@/libs/utils/ga4'
 import { getBadgeDesc } from '@/libs/utils/getBadgeDesc'
-import { getNewlyAcquiredBadge } from '@/libs/utils/getNewlyAcquiredBadges'
+import { getNewlyAcquiredBadgeByTime } from '@/libs/utils/getNewlyAcquiredBadgeByTime'
 import { toRepeatFields, toRepeatLabel } from '@/libs/utils/repeat'
 import { SPACE_UI_OPTIONS, toSpaceApi, toSpaceUi } from '@/libs/utils/space'
 import { toHHmm, toHHmmParts } from '@/libs/utils/time'
@@ -338,12 +338,12 @@ export default function AddChoreModal() {
               queryKey: ['badge', 'acquired'],
               queryFn: getAcquiredBadges,
             })
-            const newlyAcquired = getNewlyAcquiredBadge(prevBadge, nextBadge)
+            const newlyAcquired = getNewlyAcquiredBadgeByTime(prevBadge, nextBadge)
 
-            newlyAcquired.forEach((badge) => {
+            newlyAcquired?.forEach((badge) => {
               dispatch(
                 openAchievementModal({
-                  kind: 'mission', // 필요시 'badge'로 변경
+                  kind: 'badge',
                   title: `${badge.badgeTitle} 뱃지 획득`,
                   desc: getBadgeDesc(badge, nextBadge),
                   icon: badge.badgeImageUrl,
