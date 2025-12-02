@@ -6,6 +6,7 @@ import type { ImageSourcePropType } from 'react-native'
 type AchievementKind = 'mission' | 'badge'
 
 // 큐에 쌓일 "모달 1개 분량"의 데이터
+// 화면에 표시할 데이터 정보들
 type AchievementPayload = {
   kind: AchievementKind
   title: string
@@ -20,6 +21,7 @@ type AchievementPayload = {
 }
 
 // 리덕스에 들고 있을 전체 모달 상태
+// 모달 상태 + 팝업 히스토리
 type AchievementModalState = {
   isVisible: boolean
   kind: AchievementKind | null
