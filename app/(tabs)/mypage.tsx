@@ -65,6 +65,8 @@ export default function MyPage() {
   const totalBadge = badge?.length ?? 0
   const progress = totalBadge ? Math.round((AcquireBadgeCount / totalBadge) * 100) : 0
 
+  const NOTIFICATION_URL =
+    'https://www.notion.so/Safari-29aaba73bec681948470fed9040bf094?source=copy_link'
   const FAQ_URL = 'https://www.notion.so/FAQ-29aaba73bec680a4b7f9f7431f1d103b?source=copy_link'
 
   const TERMS_URL =
@@ -303,7 +305,10 @@ export default function MyPage() {
         {/* 알림 권한 여부 */}
         {isDeviceNotiDenied && (
           <View style={styles.sectionNoti}>
-            <TouchableOpacity onPress={() => {}} style={styles.touchNoti}>
+            <TouchableOpacity
+              onPress={() => Linking.openURL(NOTIFICATION_URL)}
+              style={styles.touchNoti}
+            >
               <View style={styles.notiArea}>
                 <Image source={require('@/assets/images/bellOff.png')} style={styles.notiImage} />
                 <Text style={styles.notiText}>기기 알림이 꺼져 있어요</Text>
