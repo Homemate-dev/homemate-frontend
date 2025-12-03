@@ -91,21 +91,31 @@ export default function MyPage() {
   }, [user])
 
   // 기기 알림 권한 허용 여부 체크
+  // 기기 알림 권한 재확인
   useEffect(() => {
     if (Platform.OS !== 'web') return
     if (typeof Notification === 'undefined') return
 
-    // denied이면 true 저장
-    const isDenied = Notification.permission === 'denied'
+    const checkPermission = () => {
+      const permission = Notification.permission
+      const isDenied = permission === 'denied'
 
-    setIsDeviceNotiDenied(isDenied)
+      setIsDeviceNotiDenied(isDenied)
 
-    // 알림 권한 허용 denied일 경우, 토글 off
-    if (isDenied) {
-      setIsMasterAlarm(false)
-      setIsChoreAlarm(false)
-      setIsNoticeAlarm(false)
+      if (isDenied) {
+        setIsMasterAlarm(false)
+        setIsChoreAlarm(false)
+        setIsNoticeAlarm(false)
+      }
     }
+
+    // 최초 1회
+    checkPermission()
+
+    // 서비스 복귀 시마다 재확인
+    window.addEventListener('focus', checkPermission)
+
+    return () => window.removeEventListener('focus', checkPermission)
   }, [])
 
   // 드롭다운 열고 닫힐 때 부드러운 애니메이션
