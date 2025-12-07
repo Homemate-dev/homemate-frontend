@@ -6,45 +6,45 @@ export function getNewlyAcquiredBadgeByTime(
 ) {
   if (!nextBadge) return
 
-  // 1. 이전에 이미 획득한 뱃지들 중, acquiredAt 있는 것만 추리기
-  const prevAcquiredWithTime = (prevBadge ?? []).filter((b) => b.acquired && b.acquiredAt)
+  // 이전/현재 목록에서 "획득 완료(acquired) + 획득 시간(acquiredAt) 존재"하는 뱃지만 추림
+  const prevAcquired = (prevBadge ?? []).filter((b) => b.acquired && b.acquiredAt)
+  const nextAcquired = nextBadge.filter((b) => b.acquired && b.acquiredAt)
 
-  // 2. 이전 배지가 하나도 없거나, acquiredAt 있는 애가 없으면
-  //    → "기존 배지들을 한 번에 다 새로 얻은 것"처럼 보이기 때문에
-  //       여기서는 "새로 획득한 배지 없음"으로 처리 (최초 1회 보호용)
-  if (prevAcquiredWithTime.length === 0) {
-    return []
+  // 이전에 획득한 뱃지가 없던 상태라면 → 이번에 획득한 애들 전부 새로 획득한 걸로 처리
+  if (prevAcquired.length === 0) {
+    return [...nextAcquired].sort(
+      (a, b) => new Date(a.acquiredAt!).getTime() - new Date(b.acquiredAt!).getTime()
+    )
   }
 
-  // 3. 이전까지 획득한 배지들 중, 가장 최신 acquiredAt 찾기
-  const baselineDate = prevAcquiredWithTime.reduce<Date | null>((latest, cur) => {
-    const curTime = new Date(cur.acquiredAt!)
+  // 이전까지 획득한 뱃지들 중 "가장 최근 획득 시간"을 baseline으로 사용
+  const baselineMs = prevAcquired.reduce(
+    (latestMs, cur) => {
+      const curMs = new Date(cur.acquiredAt!).getTime()
 
-    if (!latest) return curTime
-    return curTime > latest ? curTime : latest
-  }, null)
+      if (Number.isNaN(curMs)) return latestMs
+      if (latestMs === null) return curMs
 
-  if (!baselineDate) {
-    return []
-  }
+      return curMs > latestMs ? curMs : latestMs
+    },
+    null as number | null
+  )
 
-  const baselineMs = baselineDate.getTime()
+  if (baselineMs === null) return []
 
-  // 4. 새 목록(nextBadge) 중, baseline 이후에 획득된 배지들만 필터링
-  const newlyAcquired = nextBadge.filter((b) => {
-    if (!b.acquired || !b.acquiredAt) return false
-
-    const acquiredMs = new Date(b.acquiredAt).getTime()
+  // baseline 이후에 새로 획득한 뱃지만 필더링
+  const newlyAcquired = nextAcquired.filter((b) => {
+    const acquiredMs = new Date(b.acquiredAt!).getTime()
 
     if (Number.isNaN(acquiredMs)) return false
 
     return acquiredMs > baselineMs
   })
 
-  // 5. 오래된 순으로 정렬해서 모달 뜨게 하고 싶으면 정렬
-  newlyAcquired.sort((a, b) => {
-    return new Date(a.acquiredAt!).getTime() - new Date(b.acquiredAt!).getTime()
-  })
+  // 오래된 순으로 보여주기
+  newlyAcquired.sort(
+    (a, b) => new Date(a.acquiredAt!).getTime() - new Date(b.acquiredAt!).getTime()
+  )
 
   return newlyAcquired
 }
