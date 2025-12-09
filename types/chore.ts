@@ -127,7 +127,7 @@ export type ResponseChoreInstance = {
  */
 export type ToggleResp = {
   data: ResponseChoreInstance
-  missionResult?: {
+  missionResults?: {
     id: number
     title: string
     targetCount: number
