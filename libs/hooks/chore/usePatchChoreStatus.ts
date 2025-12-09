@@ -44,7 +44,7 @@ export function usePatchChoreStatus(selectedDate: string) {
       )
 
       // 미션 완료 시 모달
-      const completedMissions = resp.missionResult?.filter((m) => m.completed) ?? []
+      const completedMissions = resp.missionResults?.filter((m) => m.completed) ?? []
 
       completedMissions.forEach((mission) => {
         dispatch(
