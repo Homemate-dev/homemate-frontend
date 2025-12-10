@@ -41,7 +41,7 @@ export function useRegisterCategory() {
 
         // 뱃지 획득 시 모달
         // 뱃지 데이터 최신화
-        const prevBadge = qc.getQueryData<ResponseBadge[]>(['badge', 'acquired']) ?? []
+        const prevBadge = qc.getQueryData<ResponseBadge[]>(['badge', 'acquired'])
 
         const nextBadge = await qc.fetchQuery<ResponseBadge[]>({
           queryKey: ['badge', 'acquired'],
