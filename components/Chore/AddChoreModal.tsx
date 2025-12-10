@@ -333,7 +333,7 @@ export default function AddChoreModal() {
               )
             })
 
-            const prevBadge = qc.getQueryData<ResponseBadge[]>(['badge', 'acquired']) ?? []
+            const prevBadge = qc.getQueryData<ResponseBadge[]>(['badge', 'acquired'])
             const nextBadge = await qc.fetchQuery<ResponseBadge[]>({
               queryKey: ['badge', 'acquired'],
               queryFn: getAcquiredBadges,

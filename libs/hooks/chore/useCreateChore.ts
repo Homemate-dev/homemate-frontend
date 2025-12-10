@@ -24,7 +24,7 @@ export default function useCreateChore() {
 
       // 뱃지 획득 로직
       // - 이전에 가지고 있던 뱃지들
-      const prevBadge = qc.getQueryData<ResponseBadge[]>(['badge', 'acquired']) ?? []
+      const prevBadge = qc.getQueryData<ResponseBadge[]>(['badge', 'acquired'])
 
       // - 최신 뱃지 목록 서버에서 가져오기
       const nextBadge = await qc.fetchQuery<ResponseBadge[]>({

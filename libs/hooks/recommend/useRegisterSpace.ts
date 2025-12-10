@@ -51,7 +51,7 @@ export function useRegisterSpace() {
       })
 
       // 뱃지 획득 시 모달
-      const prevBadge = qc.getQueryData<ResponseBadge[]>(['badge', 'acquired']) ?? []
+      const prevBadge = qc.getQueryData<ResponseBadge[]>(['badge', 'acquired'])
 
       const nextBadge = await qc.fetchQuery<ResponseBadge[]>({
         queryKey: ['badge', 'acquired'],
