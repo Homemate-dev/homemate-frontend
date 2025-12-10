@@ -1,7 +1,12 @@
 // app/(tabs)/_layout.tsx
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useQueryClient } from '@tanstack/react-query'
 import { router, Tabs } from 'expo-router'
+import { useEffect } from 'react'
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+
+import { useAuth } from '@/contexts/AuthContext'
+import { getAcquiredBadges } from '@/libs/api/badge/getAcquiredBadges'
 
 const ICONS = {
   home: [
@@ -37,6 +42,19 @@ function CenterAddButton() {
 }
 
 export default function TabsLayout() {
+  const { user, verified } = useAuth()
+  const qc = useQueryClient()
+
+  /** 로그인 직후 뱃지 목록 조회(기준 baseline 생성) */
+  useEffect(() => {
+    if (!verified || !user?.id) return
+
+    qc.fetchQuery({
+      queryKey: ['badge', 'acquired'],
+      queryFn: getAcquiredBadges,
+    })
+  }, [verified, user?.id, qc])
+
   return (
     <Tabs
       initialRouteName="home" // 첫 화면: 홈

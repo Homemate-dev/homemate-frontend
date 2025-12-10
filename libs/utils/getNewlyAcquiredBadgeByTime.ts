@@ -7,9 +7,13 @@ export function getNewlyAcquiredBadgeByTime(
   if (!nextBadge) return
 
   // 이전/현재 목록에서 "획득 완료(acquired) + 획득 시간(acquiredAt) 존재"하는 뱃지만 추림
-  const prevAcquired = (prevBadge ?? []).filter((b) => b.acquired && b.acquiredAt)
   const nextAcquired = nextBadge.filter((b) => b.acquired && b.acquiredAt)
 
+  if (!prevBadge) {
+    return []
+  }
+
+  const prevAcquired = (prevBadge ?? []).filter((b) => b.acquired && b.acquiredAt)
   // 이전에 획득한 뱃지가 없던 상태라면 → 이번에 획득한 애들 전부 새로 획득한 걸로 처리
   if (prevAcquired.length === 0) {
     return [...nextAcquired].sort(
