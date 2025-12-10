@@ -14,9 +14,10 @@ export function useDeleteChore() {
   return useMutation<void, unknown, deleteType>({
     mutationFn: ({ choreInstanceId, applyToAfter = false }) =>
       deleteChore(choreInstanceId, applyToAfter),
-    onSuccess: (_data, { selectedDate, choreInstanceId }) => {
+
+    onSuccess: (_data, { choreInstanceId }) => {
       // 해당 날짜 리스트 새로고침
-      qc.invalidateQueries({ queryKey: ['chore', 'byDate', selectedDate] })
+      qc.invalidateQueries({ queryKey: ['chore', 'byDate'], exact: false })
 
       // 캘린더 새로고침
       qc.invalidateQueries({ queryKey: ['chore', 'calendar'] })

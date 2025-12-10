@@ -15,9 +15,9 @@ export default function useCreateChore() {
 
   return useMutation<ResponseChore, unknown, CreateChoreDTO>({
     mutationFn: (dto) => postCreateChore(dto),
-    onSuccess: async (resp, dto) => {
+    onSuccess: async () => {
       // 해당 날짜의 집안일 리스트 갱신
-      qc.invalidateQueries({ queryKey: ['chore', 'byDate', dto.startDate] })
+      qc.invalidateQueries({ queryKey: ['chore', 'byDate'], exact: false })
 
       // 캘린더 갱신(화면에 보이는 달만)
       qc.invalidateQueries({ queryKey: ['chore', 'calendar'], type: 'active' })
