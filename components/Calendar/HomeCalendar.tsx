@@ -96,7 +96,21 @@ export default function HomeCalendar({ onSelect, dotDates = [], onMonthChangeRan
   const goToday = () => {
     setSelectedDate(todayStr)
     onSelect?.(todayStr)
-    setCurrentMonthStr(toFirstDayOfMonth(todayStr))
+
+    const first = toFirstDayOfMonth(todayStr)
+    setCurrentMonthStr(first)
+
+    // 오늘이 속한 달 범위를 부모(HomeScreen)에 알려주기
+    if (onMonthChangeRange) {
+      const base = new Date(todayStr)
+      const pad = (n: number) => String(n).padStart(2, '0')
+
+      const start = first
+      const last = new Date(base.getFullYear(), base.getMonth() + 1, 0)
+      const end = `${last.getFullYear()}-${pad(last.getMonth() + 1)}-${pad(last.getDate())}`
+
+      onMonthChangeRange(start, end)
+    }
   }
 
   const showTodayBtn = selectedDate !== '' && selectedDate !== todayStr
