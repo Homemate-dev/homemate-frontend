@@ -23,6 +23,8 @@ export function useRegisterCategory() {
         qc.invalidateQueries({ queryKey: ['chore', 'calendar'], type: 'active' })
         qc.invalidateQueries({ queryKey: ['chore', 'byDate', resp.data.startDate] })
         qc.invalidateQueries({ queryKey: ['mission', 'monthly'] })
+        qc.invalidateQueries({ queryKey: ['badge', 'acquired'] })
+        qc.invalidateQueries({ queryKey: ['badge', 'top', 'three'] })
 
         const completedMissions = resp.missionResults?.filter((m) => m.completed) ?? []
 

@@ -51,6 +51,7 @@ export default function useCreateChore() {
 
       qc.invalidateQueries({ queryKey: ['mission', 'monthly'] })
       qc.invalidateQueries({ queryKey: ['badge', 'acquired'] })
+      qc.invalidateQueries({ queryKey: ['badge', 'top', 'three'] })
     },
   })
 }
