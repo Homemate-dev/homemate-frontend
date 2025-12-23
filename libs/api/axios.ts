@@ -20,6 +20,14 @@ let accessToken: string | null = null
 let refreshToken: string | null = null
 let onUnauthorized: (() => void) | null = null
 
+let onTokenRefreshed:
+  | ((tokens: { accessToken: string; refreshToken?: string | null }) => Promise<void> | void)
+  | null = null
+
+export const setOnTokenRefreshed = (fn: typeof onTokenRefreshed) => {
+  onTokenRefreshed = fn
+}
+
 // refresh 동시요청 방지(single-flight)
 let refreshingPromise: Promise<string | null> | null = null
 
@@ -89,7 +97,7 @@ api.interceptors.request.use((config) => {
 })
 
 /** ─────────────────────────────────────────────────────────────
- *  refresh 로직 (단일 비행)
+ *  refresh 로직
  *  ────────────────────────────────────────────────────────────*/
 
 async function refreshIfNeeded(): Promise<string | null> {
@@ -104,7 +112,7 @@ async function refreshIfNeeded(): Promise<string | null> {
         USE_AUTH_HEADER ? {} : { refreshToken }, // 바디 방식이면 여기
         USE_AUTH_HEADER ? { headers: { Authorization: `Bearer ${refreshToken}` } } : undefined
       )
-      .then((res) => {
+      .then(async (res) => {
         // 스펙에 맞춰 파싱
         const data = res.data as {
           tokenType?: string
@@ -119,6 +127,11 @@ async function refreshIfNeeded(): Promise<string | null> {
 
         if (newAccess) setAccessToken(newAccess)
         if (newRefresh) setRefreshToken(newRefresh)
+
+        // storage 동기화 콜백 호출
+        if (newAccess) {
+          await onTokenRefreshed?.({ accessToken: newAccess, refreshToken: newRefresh })
+        }
 
         return newAccess
       })
