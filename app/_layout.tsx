@@ -4,7 +4,7 @@ import '@/libs/firebase/init'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import * as Linking from 'expo-linking'
-import { Stack } from 'expo-router'
+import { Stack, useRouter, useSegments } from 'expo-router'
 import Head from 'expo-router/head'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native'
@@ -22,6 +22,9 @@ const queryClient = new QueryClient()
 
 function RootNavigator() {
   const { token, user, loading, verified } = useAuth()
+
+  const router = useRouter()
+  const segments = useSegments()
 
   const [loaded] = useFonts({
     SeoulNamsanEB: require('../assets/fonts/SeoulNamsanEB.ttf'),
@@ -72,6 +75,21 @@ function RootNavigator() {
     registerFCMToken(token)
   }, [user, token, verified])
 
+  /** 라우트 가드: 준비 끝나면 auth/tabs 강제 이동 */
+  useEffect(() => {
+    if (loading || !loaded || !isCodeHandled) return
+
+    const seg0 = segments[0] // "(auth)" | "(tabs)" | undefined
+    const isAuthed = verified && !!token
+
+    if (isAuthed) {
+      if (seg0 !== '(tabs)') router.replace('/(tabs)/home')
+      return
+    }
+
+    if (seg0 !== '(auth)') router.replace('/(auth)')
+  }, [loading, loaded, isCodeHandled, verified, token, segments, router])
+
   // 아직 준비 안됐으면(폰트 로딩, auth 로딩, code 처리 전) → 스택 렌더하지 말고 로딩만
   if (!loaded || loading || !isCodeHandled) {
     return (
@@ -81,10 +99,10 @@ function RootNavigator() {
     )
   }
 
-  const isLoggedIn = !!token && !!user
+  const isLoggedIn = verified && !!user
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack key={isLoggedIn ? 'app' : 'auth'} screenOptions={{ headerShown: false }}>
       {isLoggedIn ? <Stack.Screen name="(tabs)" /> : <Stack.Screen name="(auth)" />}
     </Stack>
   )
