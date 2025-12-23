@@ -3,10 +3,11 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useQueryClient } from '@tanstack/react-query'
 import { router, Tabs } from 'expo-router'
 import { useEffect } from 'react'
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Image, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 import { useAuth } from '@/contexts/AuthContext'
 import { getAcquiredBadges } from '@/libs/api/badge/getAcquiredBadges'
+import { useReplaceTab } from '@/libs/hooks/tabs/useReplaceTab'
 
 const ICONS = {
   home: [
@@ -32,7 +33,7 @@ function CenterAddButton() {
     <View style={styles.centerBtnWrap}>
       <TouchableOpacity
         activeOpacity={0.8}
-        onPress={() => router.push('/add-chore')}
+        onPress={() => router.push('/(modals)/add-chore')}
         style={styles.centerBtn}
       >
         <Ionicons name="add" size={40} color={'#fff'} />
@@ -42,6 +43,7 @@ function CenterAddButton() {
 }
 
 export default function TabsLayout() {
+  const replaceTab = useReplaceTab()
   const { user, verified } = useAuth()
   const qc = useQueryClient()
 
@@ -89,8 +91,26 @@ export default function TabsLayout() {
         },
       })}
     >
-      <Tabs.Screen name="home" options={{ title: '홈' }} />
-      <Tabs.Screen name="recommend" options={{ title: '추천' }} />
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: '홈',
+          tabBarButton: (props) => {
+            const { href: _href, onPress: _onPress, ...rest } = props as any
+            return <Pressable {...rest} onPress={() => replaceTab('/(tabs)/home')} />
+          },
+        }}
+      />
+      <Tabs.Screen
+        name="recommend"
+        options={{
+          title: '추천',
+          tabBarButton: (props) => {
+            const { href: _href, onPress: _onPress, ...rest } = props as any
+            return <Pressable {...rest} onPress={() => replaceTab('/(tabs)/recommend')} />
+          },
+        }}
+      />
       <Tabs.Screen
         name="addChore"
         options={{
@@ -99,8 +119,43 @@ export default function TabsLayout() {
           tabBarButton: () => <CenterAddButton />,
         }}
       />
-      <Tabs.Screen name="mission" options={{ title: '미션' }} />
-      <Tabs.Screen name="mypage" options={{ title: '마이페이지' }} />
+      <Tabs.Screen
+        name="mission"
+        options={{
+          title: '미션',
+          tabBarButton: (props) => {
+            const { href: _href, onPress: _onPress, ...rest } = props as any
+            return <Pressable {...rest} onPress={() => replaceTab('/(tabs)/mission')} />
+          },
+        }}
+      />
+      <Tabs.Screen
+        name="mypage"
+        options={{
+          title: '마이페이지',
+          tabBarButton: (props) => {
+            const { href: _href, onPress: _onPress, ...rest } = props as any
+            return <Pressable {...rest} onPress={() => replaceTab('/(tabs)/mypage')} />
+          },
+        }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          href: null, // 탭 버튼 숨김
+          tabBarStyle: { display: 'none' },
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="mybadges"
+        options={{
+          href: null, // 탭 버튼 숨김
+          tabBarStyle: { display: 'none' },
+          headerShown: false,
+        }}
+      />
     </Tabs>
   )
 }

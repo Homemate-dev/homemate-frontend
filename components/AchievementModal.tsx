@@ -39,8 +39,8 @@ export default function AchievementModal() {
   const onClose = () => dispatch(closeAchievementModal())
   const onPrimary = () => {
     onClose()
-    if (kind === 'badge') router.push('/mybadges')
-    else router.push('/(tabs)/mission')
+    if (kind === 'badge') router.replace('/mybadges')
+    else router.replace('/(tabs)/mission')
   }
 
   const primaryLabel = kind === 'badge' ? '뱃지 더보기' : '미션 더보기'
