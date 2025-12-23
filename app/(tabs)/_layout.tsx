@@ -32,7 +32,7 @@ function CenterAddButton() {
     <View style={styles.centerBtnWrap}>
       <TouchableOpacity
         activeOpacity={0.8}
-        onPress={() => router.push('/add-chore')}
+        onPress={() => router.push('/(modals)/add-chore')}
         style={styles.centerBtn}
       >
         <Ionicons name="add" size={40} color={'#fff'} />
@@ -101,6 +101,23 @@ export default function TabsLayout() {
       />
       <Tabs.Screen name="mission" options={{ title: '미션' }} />
       <Tabs.Screen name="mypage" options={{ title: '마이페이지' }} />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          href: null, // 탭 버튼 숨김
+          tabBarStyle: { display: 'none' },
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="mybadges"
+        options={{
+          href: null, // 탭 버튼 숨김
+          tabBarStyle: { display: 'none' },
+          headerShown: false,
+        }}
+      />
     </Tabs>
   )
 }

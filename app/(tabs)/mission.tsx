@@ -102,7 +102,7 @@ export default function Mission() {
                 trackEvent('reco_redirect', {
                   user_id: user?.id,
                 })
-                router.push('/recommend')
+                router.replace('/recommend')
               }}
             >
               <Text style={styles.star}>⭐</Text>
@@ -165,7 +165,7 @@ export default function Mission() {
               </View>
             </View>
 
-            <TouchableOpacity onPress={() => router.push('/mybadges')} style={styles.moreBtn}>
+            <TouchableOpacity onPress={() => router.replace('/mybadges')} style={styles.moreBtn}>
               <Text style={styles.moreText}>뱃지 더보기</Text>
             </TouchableOpacity>
           </View>

@@ -18,7 +18,11 @@ export default function NotificationBell() {
   }, [choreData, noticeData])
 
   return (
-    <Pressable onPress={() => router.push('/notifications')} style={styles.wrap} hitSlop={8}>
+    <Pressable
+      onPress={() => router.push('/(modals)/notifications')}
+      style={styles.wrap}
+      hitSlop={8}
+    >
       <Image
         source={require('@/assets/images/notification.png')}
         style={{ width: 24, height: 24 }}

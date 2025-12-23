@@ -82,8 +82,11 @@ function RootNavigator() {
     const seg0 = segments[0] // "(auth)" | "(tabs)" | undefined
     const isAuthed = verified && !!token
 
+    const protectedGroups = ['(tabs)', '(modals)'] as const
+    const isInProtected = protectedGroups.includes(seg0 as any)
+
     if (isAuthed) {
-      if (seg0 !== '(tabs)') router.replace('/(tabs)/home')
+      if (seg0 === '(auth)' || !seg0) router.replace('/(tabs)/home')
       return
     }
 
@@ -103,7 +106,14 @@ function RootNavigator() {
 
   return (
     <Stack key={isLoggedIn ? 'app' : 'auth'} screenOptions={{ headerShown: false }}>
-      {isLoggedIn ? <Stack.Screen name="(tabs)" /> : <Stack.Screen name="(auth)" />}
+      {isLoggedIn ? (
+        <>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(modals)" options={{ presentation: 'modal' }} />
+        </>
+      ) : (
+        <Stack.Screen name="(auth)" />
+      )}
     </Stack>
   )
 }
