@@ -33,7 +33,7 @@ export function useRegisterSpace() {
       toast.show({
         message: title ?? '집안일이 추가됐어요',
         onPress: () => {
-          router.push('/(tabs)/home')
+          router.replace('/(tabs)/home')
         },
       })
 
