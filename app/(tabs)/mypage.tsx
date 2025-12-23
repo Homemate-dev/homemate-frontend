@@ -255,7 +255,7 @@ export default function MyPage() {
           <View style={styles.badgeHeader}>
             <Text style={styles.sectionTitle}>나의 뱃지</Text>
 
-            <Pressable onPress={() => router.push('/mybadges')} style={styles.badgeCountWrapper}>
+            <Pressable onPress={() => router.replace('/mybadges')} style={styles.badgeCountWrapper}>
               <Text style={styles.badgeCount}>
                 {AcquireBadgeCount}개 <Text style={styles.badgeTotal}>/ {totalBadge}개</Text>
               </Text>
