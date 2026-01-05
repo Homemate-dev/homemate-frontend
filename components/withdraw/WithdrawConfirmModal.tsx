@@ -12,7 +12,7 @@ export default function WithdrawConfirmModal({ visible, userName, onClose, onCon
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose}>
         <Pressable style={styles.card} onPress={() => {}}>
-          <Image source={require('../../assets//images/withdrawImg.svg')} style={styles.cardImg} />
+          <Image source={require('../../assets//images/withdrawImg.png')} style={styles.cardImg} />
 
           <View style={styles.textArea}>
             <Text style={styles.title}>회원 탈퇴를 진행하시겠어요?</Text>

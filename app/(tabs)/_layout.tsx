@@ -141,6 +141,15 @@ export default function TabsLayout() {
           },
         }}
       />
+
+      <Tabs.Screen
+        name="mypage/withdraw"
+        options={{
+          href: null, // 탭 버튼 숨김
+          tabBarStyle: { display: 'none' },
+          headerShown: false,
+        }}
+      />
       <Tabs.Screen
         name="notifications"
         options={{
