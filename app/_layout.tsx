@@ -14,6 +14,7 @@ import { Provider } from 'react-redux'
 import AchievementModal from '@/components/AchievementModal'
 import WebFCMListener from '@/components/notification/WebFCMListener'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { SimpleToastProvider } from '@/contexts/SimpleToastContext'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { registerFCMToken } from '@/libs/firebase/fcm'
 import { store } from '@/store'
@@ -134,10 +135,12 @@ export default function RootLayout() {
             <QueryClientProvider client={queryClient}>
               <WebFCMListener />
               <ToastProvider>
-                <AuthProvider>
-                  <RootNavigator />
-                  <AchievementModal />
-                </AuthProvider>
+                <SimpleToastProvider>
+                  <AuthProvider>
+                    <RootNavigator />
+                    <AchievementModal />
+                  </AuthProvider>
+                </SimpleToastProvider>
               </ToastProvider>
             </QueryClientProvider>
           </SafeAreaView>

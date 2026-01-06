@@ -79,8 +79,10 @@ export default function TabsLayout() {
         },
         tabBarBackground: () => <View style={styles.tabBarBg} />,
         tabBarIcon: ({ focused }) => {
-          const [inactive, active] = ICONS[route.name as keyof typeof ICONS] ?? []
+          const tabKey = route.name.split('/')[0] as keyof typeof ICONS
+          const [inactive, active] = ICONS[tabKey] ?? []
           if (!inactive || !active) return null
+
           return (
             <Image
               source={focused ? active : inactive}
@@ -130,13 +132,22 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="mypage"
+        name="mypage/index"
         options={{
           title: '마이페이지',
           tabBarButton: (props) => {
             const { href: _href, onPress: _onPress, ...rest } = props as any
             return <Pressable {...rest} onPress={() => replaceTab('/(tabs)/mypage')} />
           },
+        }}
+      />
+
+      <Tabs.Screen
+        name="mypage/withdraw"
+        options={{
+          href: null, // 탭 버튼 숨김
+          tabBarStyle: { display: 'none' },
+          headerShown: false,
         }}
       />
       <Tabs.Screen
