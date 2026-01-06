@@ -16,10 +16,12 @@ import {
 
 import WithdrawReasonDropdown from '@/components/withdraw/WithdrawReasonDropdown'
 import { WITHDRAW_REASONS, WithdrawReasonConfig } from '@/constants/withdrawReasons'
+import { useSimpleToast } from '@/contexts/SimpleToastContext'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 
 export default function WithdrawScreen() {
   const { data: user } = useMyPage()
+  const { show } = useSimpleToast()
 
   // 상태
   const [selected, setSelected] = useState<WithdrawReasonConfig | null>(null)
@@ -33,6 +35,7 @@ export default function WithdrawScreen() {
   const isRequiredInput = Boolean(inputConfig?.enabled && inputConfig?.required)
   const hasRequiredText = reasonText.trim().length > 0
 
+  // useMemo
   const isIosSafariPwa = useMemo(() => {
     if (Platform.OS !== 'web') return false
     if (typeof navigator === 'undefined' || typeof window === 'undefined') return false
@@ -64,6 +67,23 @@ export default function WithdrawScreen() {
 
     return hasRequiredText
   }, [selected, isRequiredInput, hasRequiredText])
+
+  const handleSubmitBtn = () => {
+    // 1) 탙퇴 사유 선택 안함
+    if (!selected) {
+      show({ message: '탈퇴 전, 사유를 한 가지 선택해주세요.' })
+      return
+    }
+
+    // 2) 필수 입력인데 입력 안 함
+    if (isRequiredInput && !hasRequiredText) {
+      show({ message: '탈퇴 사유를 입력해주세요' })
+      return
+    }
+
+    // 3) 통과 → 여기서 실제 탈퇴 로직 호출(나중에)
+    // handleSubmit()
+  }
 
   return (
     <>
@@ -179,6 +199,7 @@ export default function WithdrawScreen() {
             <TouchableOpacity
               activeOpacity={0.9}
               style={[styles.withdrawBtn, canSubmit && styles.withdrawBtnActive]}
+              onPress={handleSubmitBtn}
             >
               <Text style={[styles.withdrawText, canSubmit && styles.withdrawTextActive]}>
                 회원 탈퇴
