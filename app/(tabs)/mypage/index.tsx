@@ -20,6 +20,7 @@ import TimeDropdown from '@/components/Dropdown/TimeDropdown'
 import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import Toggle from '@/components/Toggle'
+import WithdrawConfirmModal from '@/components/withdraw/WithdrawConfirmModal'
 import { useAuth } from '@/contexts/AuthContext'
 import { registerFCMToken } from '@/libs/firebase/fcm'
 import { useAcquiredBadges } from '@/libs/hooks/badge/useAcquiredBadges'
@@ -50,6 +51,10 @@ export default function MyPage() {
   const [isChoreAlarm, setIsChoreAlarm] = useState(false)
   const [isNoticeAlarm, setIsNoticeAlarm] = useState(false)
 
+  const [WithdrawOpen, setWithdrawOpen] = useState(false)
+  const openWithdraw = () => setWithdrawOpen(true)
+  const closeWithdraw = () => setWithdrawOpen(false)
+
   // 타임 드롭다운 상태
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [ampm, setAmpm] = useState<'오전' | '오후'>('오전')
@@ -59,6 +64,12 @@ export default function MyPage() {
 
   //  기기 알림 권한 허용 여부 체크
   const [isDeviceNotiDenied, setIsDeviceNotiDenied] = useState(false)
+
+  //회원탈퇴 화면 가기
+  const goWithdrawScreen = () => {
+    closeWithdraw()
+    router.push('/(tabs)/mypage/withdraw')
+  }
 
   // 뱃지 획득 개수
   const AcquireBadgeCount = badge.filter((b) => b.acquired).length ?? 0
@@ -240,7 +251,7 @@ export default function MyPage() {
               source={
                 user.profileImageUrl
                   ? { uri: user.profileImageUrl }
-                  : require('../../assets/images/icon/default_profile.png')
+                  : require('../../../assets/images/icon/default_profile.png')
               }
               style={styles.profileImage}
             />
@@ -356,10 +367,33 @@ export default function MyPage() {
           </TouchableOpacity>
         </View>
 
-        {/* 로그아웃 */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={() => logout()}>
-          <Text style={styles.logoutText}>로그아웃</Text>
-        </TouchableOpacity>
+        {/* 로그아웃 & 회원탈퇴 */}
+        <View style={styles.logoutArea}>
+          <TouchableOpacity
+            style={styles.logoutBtn}
+            onPress={() => logout()}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.logoutText}>로그아웃</Text>
+          </TouchableOpacity>
+
+          <View style={styles.logoutDivider} />
+
+          <TouchableOpacity
+            style={styles.logoutBtn}
+            onPress={openWithdraw}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.logoutText}>회원탈퇴</Text>
+          </TouchableOpacity>
+        </View>
+
+        <WithdrawConfirmModal
+          visible={WithdrawOpen}
+          userName={user?.nickname}
+          onClose={closeWithdraw}
+          onConfirm={goWithdrawScreen}
+        />
       </TabSafeScroll>
     </View>
   )
@@ -531,8 +565,19 @@ const styles = StyleSheet.create({
   },
   confirmText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
 
-  logoutBtn: { alignItems: 'center', marginTop: hp('3%') },
+  logoutArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+
+    marginTop: 60,
+  },
+
+  logoutBtn: { alignItems: 'center' },
   logoutText: { color: '#9B9FA6', fontSize: 12 },
+
+  logoutDivider: { backgroundColor: '#9B9FA6', width: 1, height: 9 },
 
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 })
