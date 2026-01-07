@@ -1,8 +1,9 @@
-// libs/hooks/auth/useLogout.ts
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
+import { Platform } from 'react-native'
 
+import { setAccessToken } from '@/libs/api/axios'
 import { postLogout } from '@/libs/api/mypage/postLogout'
 
 export function useLogout() {
@@ -11,16 +12,30 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: postLogout,
-    onSuccess: async () => {
-      // 캐시/토큰 정리
-      await AsyncStorage.multiRemove(['accessToken', 'refreshToken'])
-      qc.clear() // 모든 React Query 캐시 삭제
 
-      // 로그인 화면으로 이동
-      router.replace('/(auth)')
+    onMutate: async () => {
+      // 로그아웃 누르는 순간부터 네트워크/쿼리 멈추기
+      await qc.cancelQueries()
     },
-    onError: () => {
-      alert('로그아웃 중 오류가 발생했습니다.')
+
+    onSettled: async () => {
+      // 1) 토큰 먼저 끊기
+      setAccessToken(null)
+
+      // 2) 저장소 정리
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        window.localStorage.removeItem('accessToken')
+        window.localStorage.removeItem('refreshToken')
+        window.localStorage.removeItem('user')
+      } else {
+        await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user'])
+      }
+
+      // 3) 캐시 정리
+      qc.clear()
+
+      // 4) 이동
+      router.replace('/(auth)')
     },
   })
 }

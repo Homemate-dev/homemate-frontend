@@ -51,9 +51,9 @@ export default function Login() {
     try {
       setLoading(true)
       const response = await fetch(`${API_BASE_URL}/auth/login/kakao`, {
-        // CHANGED
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           authorizationCode: codeString,
           redirectUri: KAKAO_REDIRECT_URI,
@@ -68,13 +68,11 @@ export default function Login() {
 
       const data = await response.json()
 
-      if (data.accessToken && data.refreshToken) {
+      if (data.accessToken && data.user) {
         await login(
           {
             accessToken: data.accessToken,
-            refreshToken: data.refreshToken,
             accessTokenExpiresIn: data.accessTokenExpiresIn, // 있으면 전달
-            refreshTokenExpiresIn: data.refreshTokenExpiresIn, // 있으면 전달
           },
           data.user
         )

@@ -13,9 +13,7 @@ import { api, setAccessToken, setOnTokenRefreshed, setOnUnauthorized } from '@/l
  */
 type LoginTokens = {
   accessToken: string
-  refreshToken: string
   accessTokenExpiresIn?: number
-  refreshTokenExpiresIn?: number
 }
 
 /**
@@ -233,13 +231,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
    * - storage 토큰 제거
    */
   const logout = async () => {
-    setToken(null)
-    setUser(null)
-    setVerified(false)
+    try {
+      // 서버에서 refresh_token 쿠키 만료 처리
+      await api.post('/auth/logout', undefined, { withCredentials: true })
+    } catch {
+      // 실패해도 일단 로컬 상태는 정리
+    } finally {
+      setToken(null)
+      setUser(null)
+      setVerified(false)
 
-    setAccessToken(null)
-
-    await storage.multiRemove(['accessToken', 'user'])
+      setAccessToken(null)
+      await storage.multiRemove(['accessToken', 'user'])
+    }
   }
 
   return (
