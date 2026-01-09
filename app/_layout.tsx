@@ -82,16 +82,14 @@ function RootNavigator() {
 
     const seg0 = segments[0] // "(auth)" | "(tabs)" | undefined
     const isAuthed = verified && !!token
-
-    const protectedGroups = ['(tabs)', '(modals)'] as const
-    const isInProtected = protectedGroups.includes(seg0 as any)
+    const isWithdrawComplete = segments.join('/').includes('withdraw-complete')
 
     if (isAuthed) {
       if (seg0 === '(auth)' || !seg0) router.replace('/(tabs)/home')
       return
     }
 
-    if (seg0 !== '(auth)') router.replace('/(auth)')
+    if (!isWithdrawComplete && seg0 !== '(auth)') router.replace('/(auth)')
   }, [loading, loaded, isCodeHandled, verified, token, segments, router])
 
   // 아직 준비 안됐으면(폰트 로딩, auth 로딩, code 처리 전) → 스택 렌더하지 말고 로딩만
@@ -106,7 +104,8 @@ function RootNavigator() {
   const isLoggedIn = verified && !!user
 
   return (
-    <Stack key={isLoggedIn ? 'app' : 'auth'} screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="withdraw-complete" />
       {isLoggedIn ? (
         <>
           <Stack.Screen name="(tabs)" />

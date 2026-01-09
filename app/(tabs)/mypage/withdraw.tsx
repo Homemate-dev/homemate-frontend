@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons'
+import { useQueryClient } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import { useMemo, useState } from 'react'
 import {
@@ -18,9 +19,12 @@ import WithdrawReasonDropdown from '@/components/withdraw/WithdrawReasonDropdown
 import { WITHDRAW_REASONS, WithdrawReasonConfig } from '@/constants/withdrawReasons'
 import { useSimpleToast } from '@/contexts/SimpleToastContext'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
+import { useWithdraw } from '@/libs/hooks/mypage/useWithdraw'
+import { cleanupSession } from '@/libs/utils/cleanupSession'
 
 export default function WithdrawScreen() {
   const { data: user } = useMyPage()
+  const { mutate: withdraw, isPending } = useWithdraw()
   const { show } = useSimpleToast()
 
   // 상태
@@ -68,6 +72,8 @@ export default function WithdrawScreen() {
     return hasRequiredText
   }, [selected, isRequiredInput, hasRequiredText])
 
+  const qc = useQueryClient()
+
   const handleSubmitBtn = () => {
     // 1) 탙퇴 사유 선택 안함
     if (!selected) {
@@ -81,8 +87,28 @@ export default function WithdrawScreen() {
       return
     }
 
-    // 3) 통과 → 여기서 실제 탈퇴 로직 호출(나중에)
-    // handleSubmit()
+    // 3) 탈퇴 사유 보내기
+    const body = {
+      reason: selected.title,
+      detail: reasonText.trim().length ? reasonText.trim() : null,
+    }
+
+    // 탈퇴 api
+    withdraw(body, {
+      onSuccess: async () => {
+        // 1) 먼저 완료 화면으로 이동
+        router.replace('/withdraw-complete')
+
+        // 2) 세션 정리
+        requestAnimationFrame(() => {
+          cleanupSession(qc)
+        })
+      },
+
+      onError: () => {
+        show({ message: '회원 탈퇴에 실패했어요. 잠시 후 다시 시도해주세요.' })
+      },
+    })
   }
 
   return (
@@ -200,6 +226,7 @@ export default function WithdrawScreen() {
               activeOpacity={0.9}
               style={[styles.withdrawBtn, canSubmit && styles.withdrawBtnActive]}
               onPress={handleSubmitBtn}
+              disabled={isPending}
             >
               <Text style={[styles.withdrawText, canSubmit && styles.withdrawTextActive]}>
                 회원 탈퇴
