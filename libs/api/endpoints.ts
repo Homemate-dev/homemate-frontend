@@ -4,6 +4,7 @@ export const AUTH_ENDPOINTS = {
   KAKAO_LOGIN: '/auth/login/kakao',
   REFRESH: '/auth/refresh',
   LOGOUT: '/auth/logout',
+  WITHDRAW: '/auth/withdraw',
 } as const
 
 export const MYPAGE_ENDPOINTS = {
