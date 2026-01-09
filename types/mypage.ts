@@ -45,3 +45,9 @@ export type ResponseNotificationTime = {
   notificationTime: string
   updatedAt: string
 }
+
+// 회원 탈퇴
+export type WithdrawBody = {
+  reason: string
+  detail: string | null
+}

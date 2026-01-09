@@ -5,6 +5,7 @@ import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 
 export default function WithdrawCompleteScreen() {
   const { data: user } = useMyPage()
+
   const userName = user?.nickname ?? '사용자'
 
   return (
@@ -12,7 +13,7 @@ export default function WithdrawCompleteScreen() {
       {/* 가운데 영역 */}
       <View style={styles.center}>
         <Image
-          source={require('../../assets/images/withdraw/withdrawComplete.png')}
+          source={require('../assets/images/withdraw/withdrawComplete.png')}
           style={styles.image}
         />
 
@@ -28,7 +29,7 @@ export default function WithdrawCompleteScreen() {
 
       {/* 하단 버튼 */}
       <View style={styles.bottom}>
-        <Pressable style={styles.btn} onPress={() => router.replace('/(auth)/login')}>
+        <Pressable style={styles.btn} onPress={() => router.replace('/(auth)')}>
           <Text style={styles.btnText}>나중에 다시 만나요!</Text>
         </Pressable>
       </View>
