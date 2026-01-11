@@ -18,6 +18,7 @@ const ICONS = {
     require('../../assets/images/tabs/recommend.png'),
     require('../../assets/images/tabs/recommend-active.png'),
   ],
+
   mission: [
     require('../../assets/images/tabs/mission.png'),
     require('../../assets/images/tabs/mission-active.png'),
@@ -104,7 +105,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="recommend"
+        name="recommend/index"
         options={{
           title: '추천',
           tabBarButton: (props) => {
