@@ -114,6 +114,16 @@ export default function TabsLayout() {
           },
         }}
       />
+
+      <Tabs.Screen
+        name="recommend/space-chores"
+        options={{
+          href: null, // 탭 버튼 숨김
+          tabBarStyle: { display: 'none' },
+          headerShown: false,
+        }}
+      />
+
       <Tabs.Screen
         name="addChore"
         options={{

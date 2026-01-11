@@ -2,7 +2,6 @@ import { SpaceApi } from '@/libs/utils/space'
 
 import { RepeatType } from './chore'
 
-export type Space = 'KITCHEN' | 'BATHROOM' | 'BEDROOM' | 'PORCH' | 'ETC'
 // 추천 화면 개요
 export type Recommend = {
   name: string
@@ -54,7 +53,7 @@ export type SpaceChoreList = {
   choreId: number
   title: string
   frequency: string
-  categoryName: string
+  spaceName: SpaceApi
 }
 
 export interface MissionResult {
@@ -76,7 +75,7 @@ export interface RegisterChoreResponse {
     startDate: string
     endDate: string
     isDeleted: boolean
-    space: 'KITCHEN' | 'BATHROOM' | 'BEDROOM' | 'PORCH' | 'ETC'
+    space: SpaceApi
     createdAt: string
     updatedAt: string
     deletedAt: string | null

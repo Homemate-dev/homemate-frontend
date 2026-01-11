@@ -1,14 +1,15 @@
+import { router } from 'expo-router'
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
 
-import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import { useRegisterSpace } from '@/libs/hooks/recommend/useRegisterSpace'
 import useSpaceChoreList from '@/libs/hooks/recommend/useSpaceChoreList'
 import useSpaceList from '@/libs/hooks/recommend/useSpaceList'
 import { trackEvent } from '@/libs/utils/ga4'
-import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
 import { SpaceApi, SpaceUi, toSpaceUi } from '@/libs/utils/space'
+
+import SpaceChoreListCard from './SpaceChoreListCard'
 
 function chunkBy<T>(arr: T[], size: number): T[][] {
   const out: T[][] = []
@@ -21,7 +22,6 @@ function chunkBy<T>(arr: T[], size: number): T[][] {
 export default function SpaceChoreSection() {
   // ----- 상태관리 -----
   const { data: user } = useMyPage()
-  const [activeSpace, setActiveSpace] = useState<SpaceApi>('KITCHEN')
   const [selectedSpace, setSelectedSpace] = useState<SpaceApi | undefined>('KITCHEN')
 
   // ----- api 훅 -----
@@ -49,8 +49,6 @@ export default function SpaceChoreSection() {
         }))
   }, [spaceList])
 
-  const choresList = useMemo(() => spaceChores.slice(0, 5), [spaceChores])
-
   return (
     <View style={styles.section}>
       {/* 헤더 */}
@@ -67,13 +65,12 @@ export default function SpaceChoreSection() {
         )}
 
         {uiSpaces.map(({ code, label }) => {
-          const isActive = activeSpace === code
+          const isActive = selectedSpace === code
           return (
             <Pressable
               key={code}
               style={[styles.space, isActive && styles.spaceActive]}
               onPress={() => {
-                setActiveSpace(code)
                 setSelectedSpace(code)
               }}
               hitSlop={6}
@@ -85,65 +82,35 @@ export default function SpaceChoreSection() {
       </View>
 
       {/* 공간에 해당하는 집안일 카드 */}
-      <View style={styles.choreCard}>
-        {spaChoreLoading && (
-          <View style={styles.loadingRow}>
-            <ActivityIndicator />
-          </View>
-        )}
+      <SpaceChoreListCard
+        choresList={spaceChores}
+        limit={5}
+        isLoading={spaChoreLoading}
+        isError={spaChoreError}
+        onAdd={(c, cycleLabel) => {
+          trackEvent('task_created', {
+            user_id: user?.id,
+            task_type: 'SPACE',
+            title: c.title,
+            cycle: cycleLabel,
+          })
 
-        {spaChoreError && (
-          <Text style={{ color: '#FF4838' }}>공간별 집안일 불러오기에 실패했습니다.</Text>
-        )}
-
-        <View style={styles.choreRow}>
-          {choresList.map((c, i) => {
-            const { repeatType, repeatInterval } = toRepeat(c.frequency)
-            const key = getRepeatKey(repeatType, repeatInterval)
-            const repeat = REPEAT_STYLE[key] ?? REPEAT_STYLE['NONE-0']
-
-            return (
-              <View key={c.choreId}>
-                <View style={[styles.choreList, i === choresList.length - 1 && styles.mb0]}>
-                  <View style={styles.chore}>
-                    <View style={[styles.badge, styleFromRepeatColor(repeat.color)]}>
-                      <Text style={[styles.badgeText, styleFromRepeatColor(repeat.color)]}>
-                        {repeat.label}
-                      </Text>
-                    </View>
-                    <Text style={styles.choreTitle}>{c.title}</Text>
-                  </View>
-
-                  <Pressable
-                    onPress={() => {
-                      // GA4 태깅
-                      trackEvent('task_created', {
-                        user_id: user?.id,
-                        task_type: 'SPACE',
-                        title: c.title,
-                        cycle: repeat.label,
-                      })
-                      spaRegister({ spaceChoreId: c.choreId, space: activeSpace })
-                    }}
-                    hitSlop={8}
-                  >
-                    <Image
-                      source={require('../../assets/images/plus-square.png')}
-                      resizeMode="contain"
-                      style={{ width: 20, height: 20 }}
-                    />
-                  </Pressable>
-                </View>
-
-                {i !== choresList.length - 1 && <View style={styles.divider} />}
-              </View>
-            )
-          })}
-        </View>
-      </View>
+          spaRegister({ spaceChoreId: c.choreId, space: c.spaceName })
+        }}
+      />
 
       {/* 더보기 버튼 */}
-      <Pressable style={styles.btnArea}>
+      <Pressable
+        style={styles.btnArea}
+        onPress={() =>
+          router.push({
+            pathname: '/(tabs)/recommend/space-chores',
+            params: {
+              space: selectedSpace, // ✅ 현재 선택된 공간 전달
+            },
+          })
+        }
+      >
         <Text style={styles.btnText}>더보기</Text>
       </Pressable>
     </View>
