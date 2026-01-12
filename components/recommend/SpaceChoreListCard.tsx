@@ -1,15 +1,24 @@
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import {
+  ActivityIndicator,
+  DimensionValue,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native'
 
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
-import { SpaceChoreList } from '@/types/recommend'
+import { ChoreItem } from '@/types/recommend'
 
 type Props = {
-  choresList: SpaceChoreList[]
+  choresList: ChoreItem[]
   isLoading?: boolean
   isError?: boolean
   limit?: number
-  onAdd: (item: SpaceChoreList, cycleLabel: string) => void
+  width?: DimensionValue
+  onAdd: (item: ChoreItem, cycleLabel: string) => void
 }
 
 export default function SpaceChoreListCard({
@@ -17,6 +26,7 @@ export default function SpaceChoreListCard({
   isLoading,
   isError,
   limit,
+  width = '100%',
   onAdd,
 }: Props) {
   const list = limit ? choresList.slice(0, limit) : choresList
@@ -31,7 +41,7 @@ export default function SpaceChoreListCard({
 
       {isError && <Text style={{ color: '#FF4838' }}>공간별 집안일 불러오기에 실패했습니다.</Text>}
 
-      <View style={styles.choreRow}>
+      <View style={[styles.choreRow, width ? { width } : null]}>
         {list.map((c, i) => {
           const { repeatType, repeatInterval } = toRepeat(c.frequency)
           const key = getRepeatKey(repeatType, repeatInterval)

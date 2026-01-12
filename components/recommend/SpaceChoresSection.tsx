@@ -11,14 +11,6 @@ import { SpaceApi, SpaceUi, toSpaceUi } from '@/libs/utils/space'
 
 import SpaceChoreListCard from './SpaceChoreListCard'
 
-function chunkBy<T>(arr: T[], size: number): T[][] {
-  const out: T[][] = []
-  for (let i = 0; i < arr.length; i += size) {
-    out.push(arr.slice(i, i + size))
-  }
-  return out
-}
-
 export default function SpaceChoreSection() {
   // ----- 상태관리 -----
   const { data: user } = useMyPage()
@@ -52,9 +44,8 @@ export default function SpaceChoreSection() {
   return (
     <View style={styles.section}>
       {/* 헤더 */}
-      <View style={styles.sectionSpace}>
-        <Text style={styles.sectionTitle}>공간별 집안일</Text>
-      </View>
+
+      <Text style={styles.sectionTitle}>공간별 집안일</Text>
 
       {/* 공간 리스트 */}
       <View style={styles.spaceList}>
@@ -106,7 +97,7 @@ export default function SpaceChoreSection() {
           router.push({
             pathname: '/(tabs)/recommend/space-chores',
             params: {
-              space: selectedSpace, // ✅ 현재 선택된 공간 전달
+              space: selectedSpace,
             },
           })
         }
@@ -121,11 +112,7 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 24,
   },
-  sectionSpace: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+
   sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
 
   spaceList: {

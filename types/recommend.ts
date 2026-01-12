@@ -35,25 +35,18 @@ export type ChoreCategory = {
 }
 
 // 집안일 리스트 조회
-export type RecommendChores = {
+export type ChoreItem = {
   choreId: number
   title: string
   frequency: string
-  categoryName: string
+  spaceName?: string
+  categoryName?: string
 }
 
 // 공간 리스트 조회
 export type SpaceList = {
   spaceName: string
   space: SpaceApi
-}
-
-// 공간 집안일 정보
-export type SpaceChoreList = {
-  choreId: number
-  title: string
-  frequency: string
-  spaceName: SpaceApi
 }
 
 export interface MissionResult {

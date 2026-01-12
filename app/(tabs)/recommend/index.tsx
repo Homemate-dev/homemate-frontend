@@ -1,6 +1,7 @@
 import { Platform, StatusBar, StyleSheet, Text, View } from 'react-native'
 
 import NotificationBell from '@/components/notification/NotificationBell'
+import CategoryOverviewSection from '@/components/recommend/CategoryOverviewSection'
 import MonthlyCategorySection from '@/components/recommend/MonthlyCategorySection'
 import SpaceChoreSection from '@/components/recommend/SpaceChoresSection'
 import TabSafeScroll from '@/components/TabSafeScroll'
@@ -22,13 +23,16 @@ export default function Recommend() {
           </View>
 
           {/* 이번달 집안일 카테고리 */}
-          <MonthlyCategorySection />
+          <CategoryOverviewSection />
 
           {/* 공간별 집안일 */}
-
           <SpaceChoreSection />
+
+          {/* 계절 */}
+          <MonthlyCategorySection />
         </View>
       </TabSafeScroll>
+      ......
     </>
   )
 }

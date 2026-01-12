@@ -78,6 +78,10 @@ export const RECOMMEND_ENDPOINTS = {
   /** 카테고리 리스트 조회 */
   CATEGORIES: '/recommend/categories', // GET
 
+  /** 월간 카테고리 조회기능 설명 */
+  MONTHLY_CATEGORY_CHORES: (categoryId: number) =>
+    `/recommend/categories/monthly/${categoryId}/chores`,
+
   /** 랜덤 집안일 추천 조회 */
   RANDOM: '/recommend/random', // GET
 
