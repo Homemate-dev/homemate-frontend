@@ -1,12 +1,15 @@
+import { router } from 'expo-router'
 import { useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { MONTHLY_CATEGORIES } from '@/constants/recommendCategory'
+import { useToast } from '@/contexts/ToastContext'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import useMonthlyCategoryChores from '@/libs/hooks/recommend/useMonthlyCategoryChores'
-import { useRegisterSpace } from '@/libs/hooks/recommend/useRegisterSpace'
+import { useRegisterCategory } from '@/libs/hooks/recommend/useRegisterCategory'
 import { trackEvent } from '@/libs/utils/ga4'
 import { groupMonthlyChoresByCategoryName } from '@/libs/utils/groupByCategoryName'
+import { ChoreItem } from '@/types/recommend'
 
 import SpaceChoreListCard from './SpaceChoreListCard'
 
@@ -19,6 +22,8 @@ function chunkBy<T>(arr: T[], size: number): T[][] {
 }
 
 function MonthlyBlock({ categoryId }: { categoryId: number }) {
+  const toast = useToast()
+
   const { data: user } = useMyPage()
 
   const {
@@ -27,7 +32,7 @@ function MonthlyBlock({ categoryId }: { categoryId: number }) {
     isError: choreError,
   } = useMonthlyCategoryChores(categoryId)
 
-  const { mutate: spaRegister } = useRegisterSpace()
+  const cateRegister = useRegisterCategory()
 
   const grouped = useMemo(() => groupMonthlyChoresByCategoryName(monthlyChores), [monthlyChores])
 
@@ -35,6 +40,39 @@ function MonthlyBlock({ categoryId }: { categoryId: number }) {
     <>
       {grouped.map((chore) => {
         const pages = chunkBy(chore.choresList.slice(0, 6), 3)
+
+        const selectedCategoryEnum = chore.categoryName
+        const selectedCategoryName = chore.categoryName
+
+        const handleAdd = async (item: ChoreItem) => {
+          if (!item?.choreId) return
+          if (!selectedCategoryEnum || !selectedCategoryName) return
+
+          // GA4
+          trackEvent('task_created', {
+            user_id: user?.id,
+            task_type: 'CATEGORY',
+            title: item.title,
+            category_id: selectedCategoryEnum,
+            category_name: selectedCategoryName,
+          })
+
+          try {
+            await cateRegister.mutateAsync({
+              categoryChoreId: item.choreId,
+              category: selectedCategoryEnum,
+            })
+
+            toast.show({
+              message: item.title,
+              onPress: () => {
+                router.replace('/(tabs)/home')
+              },
+            })
+          } catch (e) {
+            console.error(e)
+          }
+        }
         return (
           <View style={styles.section} key={`${categoryId}-${chore.categoryName}`}>
             {/* 헤더 */}
@@ -53,16 +91,7 @@ function MonthlyBlock({ categoryId }: { categoryId: number }) {
                   isLoading={choreLoading}
                   isError={choreError}
                   width={300}
-                  onAdd={(c, cycleLabel) => {
-                    trackEvent('task_created', {
-                      user_id: user?.id,
-                      task_type: 'SPACE',
-                      title: c.title,
-                      cycle: cycleLabel,
-                    })
-
-                    spaRegister({ spaceChoreId: c.choreId, space: c.spaceName })
-                  }}
+                  onAdd={handleAdd}
                 />
               ))}
             </ScrollView>

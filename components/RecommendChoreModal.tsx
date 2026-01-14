@@ -3,7 +3,7 @@ import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native
 
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
-import { RecommendChores } from '@/types/recommend'
+import { ChoreItem } from '@/types/recommend'
 
 import Checkbox from './Checkbox'
 
@@ -12,7 +12,7 @@ type Props = {
   onClose: () => void
   title: string
   loading?: boolean
-  chores: RecommendChores[]
+  chores: ChoreItem[]
   onSubmit: (selectedIds: number[]) => void
 }
 
