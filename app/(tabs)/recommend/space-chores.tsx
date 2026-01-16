@@ -106,7 +106,11 @@ export default function SpaceChoresScreen() {
         </View>
 
         {/* 공간 리스트 */}
-        <ScrollView style={styles.listScroll} contentContainerStyle={styles.listContent}>
+        <ScrollView
+          style={styles.listScroll}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+        >
           <SpaceChoreListCard
             choresList={spaceChores}
             isLoading={choreLoading}
