@@ -58,7 +58,12 @@ export default function SpaceChoresScreen() {
         {/* 헤더 */}
         <View style={styles.header}>
           <TouchableOpacity
-            onPress={() => router.replace('/(tabs)/recommend')}
+            onPress={() =>
+              router.replace({
+                pathname: '/(tabs)/recommend',
+                params: { space: params.space },
+              })
+            }
             style={styles.backBtn}
           >
             <MaterialIcons name="chevron-left" size={24} color="#686F79" />
@@ -85,7 +90,10 @@ export default function SpaceChoresScreen() {
                 <TouchableOpacity
                   key={String(label)}
                   style={[styles.space, isActive && styles.spaceActive]}
-                  onPress={() => setSelectedSpace(code)}
+                  onPress={() => {
+                    setSelectedSpace(code)
+                    router.setParams({ space: code })
+                  }}
                   activeOpacity={0.8}
                 >
                   <Text style={[styles.spaceText, isActive && styles.spaceTextActive]}>
