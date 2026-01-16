@@ -12,7 +12,7 @@ import {
 } from 'react-native'
 
 import BadgeCard from '@/components/Badge/BadgeCard'
-import BadgeDetail from '@/components/BadgeDetail'
+import BadgeDetail from '@/components/Badge/BadgeDetail'
 import { useAcquiredBadges } from '@/libs/hooks/badge/useAcquiredBadges'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import { getBadgeSection, SECTION_ORDER } from '@/libs/utils/badgeSectionMap'

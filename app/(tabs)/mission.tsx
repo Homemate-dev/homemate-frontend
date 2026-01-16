@@ -13,7 +13,7 @@ import {
 } from 'react-native'
 
 import BadgeCard from '@/components/Badge/BadgeCard'
-import BadgeDetail from '@/components/BadgeDetail'
+import BadgeDetail from '@/components/Badge/BadgeDetail'
 import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { useTopBadges } from '@/libs/hooks/badge/useTopBadges'
