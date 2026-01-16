@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Animated, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
 import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
 import { ChoreItem } from '@/types/recommend'
 
-import Checkbox from './Checkbox'
+import Checkbox from '../Checkbox'
 
 type Props = {
   visible: boolean
@@ -100,9 +100,15 @@ export default function RecommendChoreModal({
 
         <View>
           <View style={styles.titleSection}>
-            <Text style={styles.title}>
-              {title === '미션 달성 집안일' ? '⭐ 미션 달성 집안일' : title}
-            </Text>
+            {title === '미션 달성 집안일' ? (
+              <View style={styles.missionTitle}>
+                <Image source={require('../../assets/images/star.svg')} />
+                <Text style={styles.title}>{title}</Text>
+              </View>
+            ) : (
+              <Text style={styles.title}>{title}</Text>
+            )}
+
             <Checkbox
               checked={allChecked}
               onChange={(next) => toggleAllBtn(next)}
@@ -208,7 +214,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
   },
-  title: { fontSize: 18, fontWeight: 700, color: '#57C9D0' },
+  missionTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: 4,
+  },
+  title: { fontSize: 18, fontWeight: 700, color: '#46A1A6' },
   divider: { borderBottomWidth: 0.5, borderBottomColor: '#DDF4F6', marginBottom: 16 },
 
   badge: {

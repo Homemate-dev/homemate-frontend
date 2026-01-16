@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native'
 
-import RecommendChoreModal from '@/components/RecommendChoreModal'
+import RecommendChoreModal from '@/components/recommend/RecommendChoreModal'
 import { FIXED_NAME_TO_ENUM, isSeasonCategory } from '@/constants/recommendCategory'
 import { useToast } from '@/contexts/ToastContext'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
@@ -147,12 +147,18 @@ export default function CategoryOverviewSection() {
                   }}
                 >
                   <View style={styles.cardHeader}>
-                    {row.category === 'MISSIONS' && (
-                      <Image source={require('../../assets/images/star.svg')} />
+                    {row.category === 'MISSIONS' ? (
+                      <View style={styles.missionTitle}>
+                        <Image source={require('../../assets/images/star.svg')} />
+                        <Text style={styles.cardTitle} numberOfLines={2}>
+                          {row.name}
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text style={styles.cardTitle} numberOfLines={2}>
+                        {row.name}
+                      </Text>
                     )}
-                    <Text style={styles.cardTitle} numberOfLines={2}>
-                      {row.name}
-                    </Text>
                     <MaterialIcons
                       name="chevron-right"
                       size={18}
@@ -219,6 +225,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 4,
     gap: 8,
+  },
+  missionTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: 4,
   },
   cardTitle: {
     fontSize: 16,
