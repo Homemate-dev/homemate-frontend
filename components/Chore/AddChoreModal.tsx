@@ -45,8 +45,8 @@ import { openAchievementModal } from '@/store/slices/achievementModalSlice'
 import { ResponseBadge } from '@/types/badge'
 import { RandomChoreList } from '@/types/recommend'
 
-import DeleteModal from '../DeleteModal'
-import UpdateModal from '../UpdateModal'
+import DeleteModal from './DeleteModal'
+import UpdateModal from './UpdateModal'
 
 // 이모지(특수문자) 불가
 const EMOJI_RE = /[\p{Extended_Pictographic}]/u
