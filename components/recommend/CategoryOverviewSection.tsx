@@ -1,7 +1,15 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import { useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native'
 
 import RecommendChoreModal from '@/components/RecommendChoreModal'
 import { FIXED_NAME_TO_ENUM, isSeasonCategory } from '@/constants/recommendCategory'
@@ -110,7 +118,7 @@ export default function CategoryOverviewSection() {
             return (
               <View key={`${row.name}-${idx}`}>
                 <Pressable
-                  style={styles.card}
+                  style={[styles.card, row.category === 'MISSIONS' ? styles.bg : '']}
                   onPress={() => {
                     const name = row.name ?? ''
                     const isSeason = isSeasonCategory(name)
@@ -139,8 +147,10 @@ export default function CategoryOverviewSection() {
                   }}
                 >
                   <View style={styles.cardHeader}>
+                    {row.category === 'MISSIONS' && (
+                      <Image source={require('../../assets/images/star.svg')} />
+                    )}
                     <Text style={styles.cardTitle} numberOfLines={2}>
-                      {row.category === 'MISSIONS' ? '⭐ ' : ''}
                       {row.name}
                     </Text>
                     <MaterialIcons
@@ -197,6 +207,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 14,
+  },
+
+  bg: {
+    backgroundColor: '#DDF4F6',
   },
 
   cardHeader: {

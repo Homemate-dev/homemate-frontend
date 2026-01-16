@@ -39,7 +39,7 @@ function MonthlyBlock({ categoryId }: { categoryId: number }) {
   return (
     <>
       {grouped.map((chore) => {
-        const pages = chunkBy(chore.choresList.slice(0, 6), 3)
+        const pages = chunkBy(chore.choresList, 3)
 
         const selectedCategoryEnum = chore.categoryName
         const selectedCategoryName = chore.categoryName

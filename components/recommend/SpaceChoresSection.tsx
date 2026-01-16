@@ -1,5 +1,5 @@
-import { router } from 'expo-router'
-import { useMemo, useState } from 'react'
+import { router, useLocalSearchParams } from 'expo-router'
+import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
@@ -12,9 +12,13 @@ import { SpaceApi, SpaceUi, toSpaceUi } from '@/libs/utils/space'
 import SpaceChoreListCard from './SpaceChoreListCard'
 
 export default function SpaceChoreSection() {
+  const { space } = useLocalSearchParams<{ space?: SpaceApi }>()
+
   // ----- 상태관리 -----
   const { data: user } = useMyPage()
-  const [selectedSpace, setSelectedSpace] = useState<SpaceApi | undefined>('KITCHEN')
+  const [selectedSpace, setSelectedSpace] = useState<SpaceApi | undefined>(
+    (space as SpaceApi) ?? 'KITCHEN'
+  )
 
   // ----- api 훅 -----
   const { data: spaceList = [], isLoading: spaLoading } = useSpaceList()
@@ -26,6 +30,11 @@ export default function SpaceChoreSection() {
   } = useSpaceChoreList(selectedSpace)
 
   const { mutate: spaRegister } = useRegisterSpace()
+
+  useEffect(() => {
+    if (!space) return
+    setSelectedSpace(space as SpaceApi)
+  }, [space])
 
   const uiSpaces = useMemo((): { code: SpaceApi; label: SpaceUi }[] => {
     const list = (spaceList ?? []).map(({ space }) => ({
@@ -63,6 +72,7 @@ export default function SpaceChoreSection() {
               style={[styles.space, isActive && styles.spaceActive]}
               onPress={() => {
                 setSelectedSpace(code)
+                router.setParams({ space: code })
               }}
               hitSlop={6}
             >
