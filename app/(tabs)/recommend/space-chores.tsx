@@ -54,7 +54,7 @@ export default function SpaceChoresScreen() {
   return (
     <>
       <StatusBar backgroundColor="#F8F8FA" />
-      <ScrollView contentContainerStyle={styles.scrollContent} style={styles.scroll}>
+      <View style={styles.container}>
         {/* 헤더 */}
         <View style={styles.header}>
           <TouchableOpacity
@@ -67,52 +67,63 @@ export default function SpaceChoresScreen() {
         </View>
 
         {/* 공간 리스트 */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.spaceList}>
-          {spaceLoading && (
-            <View style={styles.loadingRow}>
-              <ActivityIndicator />
-            </View>
-          )}
+        <View style={styles.tabBar}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.spaceList}
+          >
+            {spaceLoading && (
+              <View style={styles.loadingRow}>
+                <ActivityIndicator />
+              </View>
+            )}
 
-          {uiSpaces.map(({ code, label }) => {
-            const isActive = selectedSpace === code
-            return (
-              <TouchableOpacity
-                key={String(label)}
-                style={[styles.space, isActive && styles.spaceActive]}
-                onPress={() => setSelectedSpace(code)}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.spaceText, isActive && styles.spaceTextActive]}>{label}</Text>
-              </TouchableOpacity>
-            )
-          })}
-        </ScrollView>
+            {uiSpaces.map(({ code, label }) => {
+              const isActive = selectedSpace === code
+              return (
+                <TouchableOpacity
+                  key={String(label)}
+                  style={[styles.space, isActive && styles.spaceActive]}
+                  onPress={() => setSelectedSpace(code)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.spaceText, isActive && styles.spaceTextActive]}>
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              )
+            })}
+          </ScrollView>
+        </View>
 
         {/* 공간 리스트 */}
-        <SpaceChoreListCard
-          choresList={spaceChores}
-          isLoading={choreLoading}
-          isError={choreError}
-          onAdd={(c, cycleLabel) => {
-            trackEvent('task_created', {
-              user_id: user?.id,
-              task_type: 'SPACE',
-              title: c.title,
-              cycle: cycleLabel,
-            })
+        <ScrollView style={styles.listScroll} contentContainerStyle={styles.listContent}>
+          <SpaceChoreListCard
+            choresList={spaceChores}
+            isLoading={choreLoading}
+            isError={choreError}
+            expandedGap
+            onAdd={(c, cycleLabel) => {
+              trackEvent('task_created', {
+                user_id: user?.id,
+                task_type: 'SPACE',
+                title: c.title,
+                cycle: cycleLabel,
+              })
 
-            spaRegister({ spaceChoreId: c.choreId, space: c.spaceName })
-          }}
-        />
-      </ScrollView>
+              spaRegister({ spaceChoreId: c.choreId, space: c.spaceName })
+            }}
+          />
+        </ScrollView>
+      </View>
     </>
   )
 }
 
 const styles = StyleSheet.create({
-  scroll: { backgroundColor: '#F8F8FA' },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 24 },
+  container: { flex: 1, backgroundColor: '#F8F8FA', paddingHorizontal: 20, paddingTop: 24 },
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -120,14 +131,19 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
+  tabBar: {
+    height: 50,
+  },
+
   spaceList: {
-    flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    paddingRight: 8,
     marginBottom: 16,
   },
 
   loadingRow: { paddingVertical: 12 },
   space: {
+    height: 32,
     backgroundColor: '#FFFFFF',
     borderColor: '#E6E7E9',
     borderWidth: 0.5,
@@ -151,4 +167,12 @@ const styles = StyleSheet.create({
 
   backBtn: { position: 'absolute', left: 0 },
   headerTitle: { fontSize: 20, fontWeight: '600' },
+
+  listScroll: {
+    flex: 1,
+  },
+
+  listContent: {
+    paddingBottom: 24,
+  },
 })

@@ -18,6 +18,7 @@ type Props = {
   isError?: boolean
   limit?: number
   width?: DimensionValue
+  expandedGap?: boolean
   onAdd: (item: ChoreItem, cycleLabel: string) => void
 }
 
@@ -27,6 +28,7 @@ export default function SpaceChoreListCard({
   isError,
   limit,
   width = '100%',
+  expandedGap,
   onAdd,
 }: Props) {
   const list = limit ? choresList.slice(0, limit) : choresList
@@ -50,7 +52,13 @@ export default function SpaceChoreListCard({
 
           return (
             <View key={c.choreId}>
-              <View style={[styles.choreList, isLast && styles.mb0]}>
+              <View
+                style={[
+                  styles.choreList,
+                  expandedGap ? styles.mb12 : styles.mb8,
+                  isLast && styles.mb0,
+                ]}
+              >
                 <View style={styles.chore}>
                   <View style={[styles.badge, styleFromRepeatColor(repeat.color)]}>
                     <Text style={[styles.badgeText, styleFromRepeatColor(repeat.color)]}>
@@ -88,8 +96,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8.5,
   },
+
+  mb8: { marginBottom: 8 },
+  mb12: { marginBottom: 12 },
+  mb0: { marginBottom: 0 },
   choreRow: {
     backgroundColor: '#FFFFFF',
     paddingVertical: 16,
@@ -113,10 +124,6 @@ const styles = StyleSheet.create({
 
   choreTitle: {
     fontSize: 14,
-  },
-
-  mb0: {
-    marginBottom: 0,
   },
 
   divider: { borderBottomWidth: 0.5, borderBottomColor: '#E6E7E9', marginBottom: 8.5 },
