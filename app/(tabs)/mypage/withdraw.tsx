@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { useQueryClient } from '@tanstack/react-query'
-import { router } from 'expo-router'
-import { useMemo, useState } from 'react'
+import { router, useFocusEffect } from 'expo-router'
+import { useCallback, useMemo, useState } from 'react'
 import {
   KeyboardAvoidingView,
   Linking,
@@ -73,6 +73,14 @@ export default function WithdrawScreen() {
 
     return hasRequiredText
   }, [selected, isRequiredInput, hasRequiredText])
+
+  useFocusEffect(
+    useCallback(() => {
+      // 화면 진입(포커스)마다 초기화
+      setSelected(null)
+      setReasonText('')
+    }, [])
+  )
 
   const qc = useQueryClient()
 
