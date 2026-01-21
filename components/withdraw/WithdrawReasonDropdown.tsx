@@ -9,6 +9,7 @@ type Props = {
   selected: WithdrawReasonConfig | null
   onSelect: (reason: WithdrawReasonConfig) => void
   placeholder?: string
+  onOpenChange?: (open: boolean) => void
 }
 
 export default function WithdrawReasonDropdown({
@@ -16,6 +17,7 @@ export default function WithdrawReasonDropdown({
   selected,
   onSelect,
   placeholder = '탈퇴 사유를 선택해주세요',
+  onOpenChange,
 }: Props) {
   const [open, setOpen] = useState(false)
 
@@ -24,7 +26,13 @@ export default function WithdrawReasonDropdown({
       <TouchableOpacity
         style={styles.dropdownArea}
         activeOpacity={0.9}
-        onPress={() => setOpen((prev) => !prev)}
+        onPress={() =>
+          setOpen((prev) => {
+            const next = !prev
+            onOpenChange?.(next)
+            return next
+          })
+        }
       >
         <Text style={styles.dropdownText}>{selected ? selected.title : placeholder}</Text>
         <MaterialIcons
@@ -49,6 +57,7 @@ export default function WithdrawReasonDropdown({
                   onPress={() => {
                     onSelect(r)
                     setOpen(false)
+                    onOpenChange?.(false)
                   }}
                 >
                   <Text style={styles.dropdownItemText}>{r.title}</Text>
