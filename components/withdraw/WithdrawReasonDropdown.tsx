@@ -110,41 +110,6 @@ const styles = StyleSheet.create({
     gap: 9,
   },
 
-  cancelBtn: {
-    flex: 1,
-    backgroundColor: '#E6E7E9',
-
-    paddingVertical: 14,
-
-    height: 52,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  cancelText: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: 600,
-    color: '#686F79',
-  },
-
-  withdrawBtn: {
-    flex: 1,
-    backgroundColor: '#CDCFD2',
-
-    height: 52,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  withdrawText: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: 600,
-    color: '#9B9FA6',
-  },
-
   dropdownOverlay: {
     paddingHorizontal: 5,
     paddingVertical: 5,

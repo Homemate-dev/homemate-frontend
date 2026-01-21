@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   desc: {
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 21,
     color: '#686F79',
     marginBottom: 34,
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   guideText: {
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 21,
     color: '#000000',
     marginHorizontal: 4,
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
   },
 
   chipText: {
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 21,
     color: '#000000',
   },
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     minHeight: 120,
 
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 21,
     textAlignVertical: 'top',
   },
