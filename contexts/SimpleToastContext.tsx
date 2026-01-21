@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
-import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+
+import { useToastAnimation } from '@/libs/hooks/useToastAnimation'
 
 type SimpleToastOptions = {
   message: string
@@ -22,7 +24,11 @@ export function useSimpleToast() {
 
 export function SimpleToastProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<SimpleToastOptions | null>(null)
-  const translateY = useRef(new Animated.Value(80)).current
+  const { opacity, translateY, animateIn, animateOut } = useToastAnimation({
+    inTranslateFrom: 80,
+    inDuration: 220,
+    outDuration: 180,
+  })
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clearTimer = () => {
@@ -30,18 +36,6 @@ export function SimpleToastProvider({ children }: { children: React.ReactNode })
       clearTimeout(timer.current)
       timer.current = null
     }
-  }
-
-  const animateOut = (cb?: () => void) => {
-    Animated.timing(translateY, {
-      toValue: 80,
-      duration: 200,
-      easing: Easing.out(Easing.quad),
-      useNativeDriver: true,
-    }).start(() => {
-      setToast(null)
-      cb?.()
-    })
   }
 
   const hide = () => {
@@ -53,12 +47,10 @@ export function SimpleToastProvider({ children }: { children: React.ReactNode })
     clearTimer()
     setToast(options)
 
-    Animated.timing(translateY, {
-      toValue: 0,
-      duration: 200,
-      easing: Easing.out(Easing.quad),
-      useNativeDriver: true,
-    }).start()
+    // state set 이후 프레임에서 실행되도록 보장(렌더 타이밍 안정화)
+    requestAnimationFrame(() => {
+      animateIn()
+    })
 
     const duration = typeof options.duration === 'number' ? options.duration : DEFAULT_DURATION
     timer.current = setTimeout(() => {
@@ -77,7 +69,7 @@ export function SimpleToastProvider({ children }: { children: React.ReactNode })
       {children}
 
       {toast && (
-        <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
+        <Animated.View style={[styles.container, { opacity, transform: [{ translateY }] }]}>
           <Pressable style={styles.toast} onPress={hide}>
             <View style={styles.message}>
               <Image

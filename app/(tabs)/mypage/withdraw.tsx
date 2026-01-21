@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { useQueryClient } from '@tanstack/react-query'
-import { router } from 'expo-router'
-import { useMemo, useState } from 'react'
+import { router, useFocusEffect } from 'expo-router'
+import { useCallback, useMemo, useState } from 'react'
 import {
   KeyboardAvoidingView,
   Linking,
@@ -23,6 +23,7 @@ import { useWithdraw } from '@/libs/hooks/mypage/useWithdraw'
 import { cleanupSession } from '@/libs/utils/cleanupSession'
 
 export default function WithdrawScreen() {
+  // API 훅
   const { data: user } = useMyPage()
   const { mutate: withdraw, isPending } = useWithdraw()
   const { show } = useSimpleToast()
@@ -30,6 +31,7 @@ export default function WithdrawScreen() {
   // 상태
   const [selected, setSelected] = useState<WithdrawReasonConfig | null>(null)
   const [reasonText, setReasonText] = useState('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   // 변수
   const userName = user?.nickname ?? '사용자'
@@ -71,6 +73,14 @@ export default function WithdrawScreen() {
 
     return hasRequiredText
   }, [selected, isRequiredInput, hasRequiredText])
+
+  useFocusEffect(
+    useCallback(() => {
+      // 화면 진입(포커스)마다 초기화
+      setSelected(null)
+      setReasonText('')
+    }, [])
+  )
 
   const qc = useQueryClient()
 
@@ -146,7 +156,6 @@ export default function WithdrawScreen() {
             </Text>
 
             {/* 드롭다운 */}
-
             <WithdrawReasonDropdown
               reasons={WITHDRAW_REASONS}
               selected={selected}
@@ -154,6 +163,7 @@ export default function WithdrawScreen() {
                 setSelected(next)
                 setReasonText('')
               }}
+              onOpenChange={setIsDropdownOpen}
             />
 
             {/* 선택 후 안내 문구 */}
@@ -212,7 +222,10 @@ export default function WithdrawScreen() {
           </ScrollView>
 
           {/* 하단 버튼 */}
-          <View style={styles.btnArea}>
+          <View
+            style={[styles.btnArea, isDropdownOpen && styles.btnAreaBehind]}
+            pointerEvents={isDropdownOpen ? 'none' : 'auto'}
+          >
             <TouchableOpacity
               activeOpacity={0.9}
               style={styles.cancelBtn}
@@ -253,7 +266,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8FA',
   },
   scrollContent: {
-    paddingBottom: 120, // 하단 버튼 영역 만큼 확보
+    paddingBottom: 120,
   },
 
   headerRow: {
@@ -360,6 +373,14 @@ const styles = StyleSheet.create({
     bottom: 16,
 
     gap: 9,
+
+    zIndex: 1,
+    elevation: 1,
+  },
+
+  btnAreaBehind: {
+    zIndex: -1,
+    elevation: 0,
   },
 
   cancelBtn: {
