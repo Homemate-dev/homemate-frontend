@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: '600' },
   sectionWrap: { marginBottom: 24 },
   sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 18 },
-  rowBetween: { flexDirection: 'row', justifyContent: 'space-between' },
+  rowBetween: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', gap: 16 },
   badgeCol: { alignItems: 'center' },
   badgeText: { fontSize: 14, marginTop: 8, color: '#4F5763' },
 })
