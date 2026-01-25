@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
+import { useSimpleToast } from '@/contexts/SimpleToastContext'
 import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
 import { ChoreItem } from '@/types/recommend'
 
@@ -31,6 +32,8 @@ export default function SpaceChoreListCard({
   expandedGap,
   onAdd,
 }: Props) {
+  const simpleToast = useSimpleToast()
+
   const list = limit ? choresList.slice(0, limit) : choresList
 
   return (
@@ -68,7 +71,23 @@ export default function SpaceChoreListCard({
                   <Text style={styles.choreTitle}>{c.title}</Text>
                 </View>
 
-                <Pressable onPress={() => onAdd(c, repeat.label)} hitSlop={8}>
+                <Pressable
+                  hitSlop={8}
+                  onPress={() => {
+                    if (!c.isDuplicate) {
+                      onAdd(c, repeat.label)
+                      return
+                    }
+
+                    simpleToast.show({
+                      message: '이미 등록된 집안일이에요',
+                      actionText: '무시하고 등록',
+                      onActionPress: () => {
+                        onAdd(c, repeat.label)
+                      },
+                    })
+                  }}
+                >
                   <Image
                     source={require('../../assets/images/plus-square.png')}
                     resizeMode="contain"
