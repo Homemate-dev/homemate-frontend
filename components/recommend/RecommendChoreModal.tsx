@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Animated, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { getRepeatKey, REPEAT_STYLE } from '@/constants/choreRepeatStyles'
+import { useSimpleToast } from '@/contexts/SimpleToastContext'
 import { styleFromRepeatColor, toRepeat } from '@/libs/utils/repeat'
 import { ChoreItem } from '@/types/recommend'
 
@@ -30,6 +31,8 @@ export default function RecommendChoreModal({
   const [sheetAnim] = useState(new Animated.Value(300))
 
   const hasSelection = selected.size > 0
+
+  const simpleToast = useSimpleToast()
 
   // 모달 열렸을태 상태 및 전체 선택 기능
   useEffect(() => {
@@ -74,6 +77,14 @@ export default function RecommendChoreModal({
     if (loading) return
     setSelected(next ? new Set(chores.map((c) => c.choreId)) : new Set())
   }
+
+  // 중복 집안일 개수 계산
+  const duplicateCount = useMemo(() => chores.filter((c) => c.isDuplicate).length, [chores])
+
+  // 선택한 중복 집안일 계산
+  const duplicateSelectedIds = useMemo(() => {
+    return chores.filter((c) => c.isDuplicate && selected.has(c.choreId)).map((c) => c.choreId)
+  }, [chores, selected])
 
   return (
     <Modal
@@ -140,7 +151,9 @@ export default function RecommendChoreModal({
                         {repeat.label}
                       </Text>
                     </View>
-                    <Text>{c.title}</Text>
+                    <Text>
+                      {c.title} {c.isDuplicate && <Text style={styles.duplicateHint}>*</Text>}
+                    </Text>
                   </View>
 
                   {/* 우측 액션 자리 */}
@@ -150,16 +163,43 @@ export default function RecommendChoreModal({
             )
           })}
 
+          {duplicateCount > 0 && (
+            <View style={styles.duplicateArea}>
+              <Text style={styles.duplicateHint}>* 중복된 집안일이 {duplicateCount}개 있어요</Text>
+            </View>
+          )}
+
           <Pressable
             onPress={() => {
               if (!hasSelection) return
+
+              // 중복 포함되면 확인 토스트 먼저 보여준 후 등록
+              if (duplicateSelectedIds.length > 0) {
+                onClose()
+                simpleToast.show({
+                  messageNode: (
+                    <>
+                      이미 등록된 집안일이{' '}
+                      <Text style={styles.highlight}>{duplicateSelectedIds.length}개</Text>에요
+                    </>
+                  ),
+                  actionText: '무시하고 등록',
+                  onActionPress: () => {
+                    onSubmit(Array.from(selected))
+                  },
+                })
+
+                return
+              }
+
+              // 중복 없으면 바로 등록
               onSubmit(Array.from(selected))
             }}
             disabled={!hasSelection}
             style={[styles.addBtn, !hasSelection && styles.addBtnDisabled]}
           >
             <Text style={[styles.addBtnText, !hasSelection && styles.addBtnTextDisabled]}>
-              등록하기
+              추가하기
             </Text>
           </Pressable>
         </View>
@@ -235,6 +275,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 
+  duplicateArea: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+
+  duplicateHint: {
+    fontSize: 14,
+    color: '#46A1A6',
+    top: 0,
+  },
+
   addBtn: {
     width: '100%',
     height: 52,
@@ -252,5 +303,9 @@ const styles = StyleSheet.create({
 
   addBtnTextDisabled: {
     color: '#B4B7BC',
+  },
+
+  highlight: {
+    color: '#57C9D0',
   },
 })

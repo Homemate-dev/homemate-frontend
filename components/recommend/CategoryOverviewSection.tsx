@@ -12,7 +12,11 @@ import {
 } from 'react-native'
 
 import RecommendChoreModal from '@/components/recommend/RecommendChoreModal'
-import { FIXED_NAME_TO_ENUM, isSeasonCategory } from '@/constants/recommendCategory'
+import {
+  FIXED_NAME_TO_ENUM,
+  isSeasonCategory,
+  SEASON_LABEL_MAP,
+} from '@/constants/recommendCategory'
 import { useToast } from '@/contexts/ToastContext'
 import { useMyPage } from '@/libs/hooks/mypage/useMyPage'
 import useRecommend from '@/libs/hooks/recommend/useRecommend'
@@ -27,6 +31,7 @@ type SelectedTarget =
 
 export default function CategoryOverviewSection() {
   const toast = useToast()
+  const currentMonth = new Date().getMonth() + 1
 
   // ----- 상태관리 -----
   const [isOpen, setIsOpen] = useState(false)
@@ -35,7 +40,6 @@ export default function CategoryOverviewSection() {
   const [_submitting, setSubmitting] = useState(false)
 
   // ----- api 훅 -----
-
   const { data: user } = useMyPage()
   const { data: overview = [], isLoading: overLoading, isError: overError } = useRecommend()
 
@@ -102,7 +106,7 @@ export default function CategoryOverviewSection() {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>이번달 집안일 카테고리</Text>
+      <Text style={styles.sectionTitle}>{currentMonth}월 집안일 큐레이션</Text>
 
       <ScrollView
         horizontal
@@ -115,6 +119,10 @@ export default function CategoryOverviewSection() {
           </View>
         ) : (
           overview.map((row, idx) => {
+            const rawName = row.name ?? ''
+            const seasonKey = rawName.trim().toUpperCase()
+            const displayName = SEASON_LABEL_MAP[seasonKey] ?? rawName
+
             return (
               <View key={`${row.name}-${idx}`}>
                 <Pressable
@@ -122,7 +130,6 @@ export default function CategoryOverviewSection() {
                   onPress={() => {
                     const name = row.name ?? ''
                     const isSeason = isSeasonCategory(name)
-
                     const fixedEnum = row.category ?? FIXED_NAME_TO_ENUM[name]
 
                     trackEvent('reco_category_click', {
@@ -132,7 +139,7 @@ export default function CategoryOverviewSection() {
                     })
 
                     if (isSeason) {
-                      setSelectedTarget({ type: 'SEASON', category: name, name })
+                      setSelectedTarget({ type: 'SEASON', category: name, name: displayName })
                       setIsOpen(true)
                       return
                     }
@@ -142,7 +149,7 @@ export default function CategoryOverviewSection() {
                       return
                     }
 
-                    setSelectedTarget({ type: 'FIXED', category: fixedEnum, name })
+                    setSelectedTarget({ type: 'FIXED', category: fixedEnum, name: displayName })
                     setIsOpen(true)
                   }}
                 >
@@ -151,12 +158,12 @@ export default function CategoryOverviewSection() {
                       <View style={styles.missionTitle}>
                         <Image source={require('../../assets/images/star.svg')} />
                         <Text style={styles.cardTitle} numberOfLines={2}>
-                          {row.name}
+                          {displayName}
                         </Text>
                       </View>
                     ) : (
                       <Text style={styles.cardTitle} numberOfLines={2}>
-                        {row.name}
+                        {displayName}
                       </Text>
                     )}
                     <MaterialIcons
