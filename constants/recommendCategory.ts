@@ -1,6 +1,14 @@
 // 계절 카테고리 enum
 export const SEASON_CATEGORIES = ['WINTER', 'SPRING', 'SUMMER', 'FALL'] as const
 
+export const SEASON_LABEL_MAP: Record<string, string> = {
+  WINTER: '겨울철 집안일',
+  SPRING: '봄철 집안일',
+  SUMMER: '여름철 집안일',
+  FALL: '가을철 집안일',
+  AUTUMN: '가을철 집안일',
+}
+
 // 고정 카테고리로 취급할 enum
 export const FIXED_CATEGORIES = [
   'MISSIONS',
