@@ -41,6 +41,7 @@ export type ChoreItem = {
   frequency: string
   spaceName?: string
   categoryName?: string
+  isDuplicate: boolean
 }
 
 // 공간 리스트 조회
@@ -60,18 +61,17 @@ export interface MissionResult {
 export interface RegisterChoreResponse {
   data: {
     id: number
-    title: string
-    notificationYn: boolean
+    choreId: number
+    titleSnapshot: string
+    dueDate: string
     notificationTime: string | null
+    notificationYn?: boolean
+    choreStatus: string
     repeatType: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE' | 'YEARLY'
     repeatInterval: number
-    startDate: string
-    endDate: string
-    isDeleted: boolean
-    space: SpaceApi
+    completedAt: string | null
     createdAt: string
     updatedAt: string
-    deletedAt: string | null
   }
   missionResults: MissionResult[]
 }

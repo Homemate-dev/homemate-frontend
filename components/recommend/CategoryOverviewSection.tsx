@@ -35,7 +35,6 @@ export default function CategoryOverviewSection() {
   const [_submitting, setSubmitting] = useState(false)
 
   // ----- api 훅 -----
-
   const { data: user } = useMyPage()
   const { data: overview = [], isLoading: overLoading, isError: overError } = useRecommend()
 

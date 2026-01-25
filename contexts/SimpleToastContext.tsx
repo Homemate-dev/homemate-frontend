@@ -4,8 +4,11 @@ import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native
 import { useToastAnimation } from '@/libs/hooks/useToastAnimation'
 
 type SimpleToastOptions = {
-  message: string
+  message?: string
+  messageNode?: React.ReactNode
   duration?: number // ms (default 1800)
+  actionText?: string
+  onActionPress?: () => void
 }
 
 type SimpleToastContextType = {
@@ -14,6 +17,7 @@ type SimpleToastContextType = {
 }
 
 const DEFAULT_DURATION = 2500
+const ACTION_TOAST_DURATION = 4500
 const SimpleToastContext = createContext<SimpleToastContextType | null>(null)
 
 export function useSimpleToast() {
@@ -24,6 +28,9 @@ export function useSimpleToast() {
 
 export function SimpleToastProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<SimpleToastOptions | null>(null)
+
+  const hasAction = !!toast?.actionText
+
   const { opacity, translateY, animateIn, animateOut } = useToastAnimation({
     inTranslateFrom: 80,
     inDuration: 220,
@@ -52,7 +59,13 @@ export function SimpleToastProvider({ children }: { children: React.ReactNode })
       animateIn()
     })
 
-    const duration = typeof options.duration === 'number' ? options.duration : DEFAULT_DURATION
+    const duration =
+      typeof options.duration === 'number'
+        ? options.duration
+        : options.actionText
+          ? ACTION_TOAST_DURATION
+          : DEFAULT_DURATION
+
     timer.current = setTimeout(() => {
       animateOut(() => (timer.current = null))
     }, duration)
@@ -77,8 +90,22 @@ export function SimpleToastProvider({ children }: { children: React.ReactNode })
                 resizeMode="contain"
                 style={{ width: 18, height: 18, marginRight: 6 }}
               />
-              <Text style={styles.text}>{toast.message}</Text>
+              <Text style={[styles.text, hasAction ? styles.textWithAction : styles.textDefault]}>
+                {toast.messageNode ?? toast.message}
+              </Text>
             </View>
+
+            {!!toast.actionText && (
+              <Pressable
+                hitSlop={8}
+                onPress={() => {
+                  toast.onActionPress?.()
+                  hide()
+                }}
+              >
+                <Text style={styles.actionText}>{toast.actionText}</Text>
+              </Pressable>
+            )}
           </Pressable>
         </Animated.View>
       )}
@@ -96,6 +123,7 @@ const styles = StyleSheet.create({
   toast: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#FFFFFF',
     borderRadius: 6,
     paddingVertical: 10,
@@ -106,7 +134,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.09,
     shadowRadius: 8.3,
     elevation: 2,
-    margin: 'auto' as any, // RN에는 'auto' 미지원이라 필요 없으면 제거 가능
   },
   message: {
     flex: 1,
@@ -114,9 +141,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   text: {
-    color: '#57C9D0',
     fontSize: 14,
     lineHeight: 21,
+    fontWeight: 400,
+  },
+
+  textDefault: {
+    color: '#57C9D0',
+  },
+
+  textWithAction: {
+    color: '#81878F',
+  },
+
+  actionText: {
+    color: '#57C9D0',
+    fontSize: 12,
     fontWeight: 400,
   },
 })
