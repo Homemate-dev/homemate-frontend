@@ -42,30 +42,33 @@ export default function WithdrawScreen() {
   const hasRequiredText = reasonText.trim().length > 0
 
   // useMemo
-  const isIosSafariPwa = useMemo(() => {
+  const isIosSafari = useMemo(() => {
     if (Platform.OS !== 'web') return false
-    if (typeof navigator === 'undefined' || typeof window === 'undefined') return false
+    if (typeof navigator === 'undefined') return false
 
     const ua = navigator.userAgent
     const isIOS = /iPhone|iPad|iPod/i.test(ua)
 
-    // iOS Safari만 더 타이트하게
     const isSafari =
       /Safari/i.test(ua) &&
       /Version\//i.test(ua) &&
       !/CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo/i.test(ua)
 
-    // 홈 화면(PWA)로 실행 중인지
-    const isStandalone =
-      // iOS Safari 홈화면 실행 감지
-      (navigator as any).standalone === true ||
-      // 표준 display-mode
-      window.matchMedia?.('(display-mode: standalone)')?.matches === true
-
-    return isIOS && isSafari && isStandalone
+    return isIOS && isSafari
   }, [])
 
-  const ctx = useMemo(() => ({ isIosSafari: isIosSafariPwa }), [isIosSafariPwa])
+  const isIosSafariPwa = useMemo(() => {
+    if (!isIosSafari) return false
+    if (typeof window === 'undefined') return false
+
+    const isStandalone =
+      (navigator as any).standalone === true ||
+      window.matchMedia?.('(display-mode: standalone)')?.matches === true
+
+    return isStandalone
+  }, [isIosSafari])
+
+  const ctx = useMemo(() => ({ isIosSafari, isIosSafariPwa }), [isIosSafari, isIosSafariPwa])
 
   const canSubmit = useMemo(() => {
     if (!selected) return false
@@ -288,7 +291,7 @@ const styles = StyleSheet.create({
   },
   desc: {
     fontSize: 16,
-    lineHeight: 21,
+    lineHeight: 24,
     color: '#686F79',
     marginBottom: 34,
   },
