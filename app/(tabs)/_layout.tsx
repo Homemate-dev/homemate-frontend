@@ -1,7 +1,7 @@
 // app/(tabs)/_layout.tsx
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useQueryClient } from '@tanstack/react-query'
-import { router, Tabs } from 'expo-router'
+import { router, Tabs, usePathname } from 'expo-router'
 import { useEffect } from 'react'
 import { Image, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native'
 
@@ -65,6 +65,13 @@ export default function TabsLayout() {
   const replaceTab = useReplaceTab()
   const { user, verified } = useAuth()
   const qc = useQueryClient()
+
+  const pathname = usePathname()
+  const hideFab =
+    pathname.includes('mybadges') ||
+    pathname.includes('notifications') ||
+    pathname.includes('mypage/withdraw') ||
+    pathname.includes('recommend/space-chores')
 
   useEffect(() => {
     if (!verified || !user?.id) return
@@ -212,7 +219,7 @@ export default function TabsLayout() {
       </Tabs>
 
       {/* 중앙 + 버튼은 Tabs 밖에서 FAB로 */}
-      <CenterAddButton />
+      {!hideFab && <CenterAddButton />}
     </View>
   )
 }
