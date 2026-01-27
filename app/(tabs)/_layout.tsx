@@ -3,7 +3,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useQueryClient } from '@tanstack/react-query'
 import { router, Tabs, usePathname } from 'expo-router'
 import { useEffect } from 'react'
-import { Image, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 import { useAuth } from '@/contexts/AuthContext'
 import { getAcquiredBadges } from '@/libs/api/badge/getAcquiredBadges'
@@ -41,23 +41,6 @@ function CenterAddButton() {
         <Ionicons name="add" size={40} color="#fff" />
       </TouchableOpacity>
     </View>
-  )
-}
-
-/** 탭바 가운데 자리 확보용 더미 버튼 (터치 안 먹음) */
-function DummyTabButton(props: any) {
-  const { style, href, onPress, ...rest } = props // href/onPress 제거
-  return <Pressable {...rest} pointerEvents="none" style={[style, { height: TAB_BAR_HEIGHT }]} />
-}
-
-function TabButton({ props, onPress }: { props: any; onPress: () => void }) {
-  const { href: _href, onPress: _onPress, style, ...rest } = props as any
-  return (
-    <Pressable
-      {...rest}
-      onPress={onPress}
-      style={[style, { height: TAB_BAR_HEIGHT, justifyContent: 'center' }]}
-    />
   )
 }
 
@@ -103,7 +86,7 @@ export default function TabsLayout() {
             borderTopWidth: 0,
           },
 
-          // 배경 레이어가 터치 간섭하지 않게
+          // 배경 레이어 터치 간섭 방지
           tabBarBackground: () => <View pointerEvents="none" style={styles.tabBarBg} />,
 
           tabBarIcon: ({ focused }) => {
@@ -123,21 +106,23 @@ export default function TabsLayout() {
       >
         <Tabs.Screen
           name="home"
-          options={{
-            title: '홈',
-            tabBarButton: (props) => (
-              <TabButton props={props} onPress={() => replaceTab('/(tabs)/home')} />
-            ),
+          options={{ title: '홈' }}
+          listeners={{
+            tabPress: (e) => {
+              e.preventDefault()
+              replaceTab('/(tabs)/home')
+            },
           }}
         />
 
         <Tabs.Screen
           name="recommend/index"
-          options={{
-            title: '추천',
-            tabBarButton: (props) => (
-              <TabButton props={props} onPress={() => replaceTab('/(tabs)/recommend')} />
-            ),
+          options={{ title: '추천' }}
+          listeners={{
+            tabPress: (e) => {
+              e.preventDefault()
+              replaceTab('/(tabs)/recommend')
+            },
           }}
         />
 
@@ -150,34 +135,40 @@ export default function TabsLayout() {
           }}
         />
 
-        {/* 가운데 빈칸 1개 */}
+        {/* 가운데 슬롯용 더미 탭 (탭바에만 자리 차지, 클릭 방지) */}
         <Tabs.Screen
           name="__dummy__"
           options={{
             title: '',
             tabBarLabel: () => null,
             tabBarIcon: () => null,
-            tabBarButton: (props) => <DummyTabButton {...props} />,
+          }}
+          listeners={{
+            tabPress: (e) => {
+              e.preventDefault()
+            },
           }}
         />
 
         <Tabs.Screen
           name="mission"
-          options={{
-            title: '미션',
-            tabBarButton: (props) => (
-              <TabButton props={props} onPress={() => replaceTab('/(tabs)/mission')} />
-            ),
+          options={{ title: '미션' }}
+          listeners={{
+            tabPress: (e) => {
+              e.preventDefault()
+              replaceTab('/(tabs)/mission')
+            },
           }}
         />
 
         <Tabs.Screen
           name="mypage/index"
-          options={{
-            title: '마이페이지',
-            tabBarButton: (props) => (
-              <TabButton props={props} onPress={() => replaceTab('/(tabs)/mypage')} />
-            ),
+          options={{ title: '마이페이지' }}
+          listeners={{
+            tabPress: (e) => {
+              e.preventDefault()
+              replaceTab('/(tabs)/mypage')
+            },
           }}
         />
 
@@ -218,7 +209,6 @@ export default function TabsLayout() {
         />
       </Tabs>
 
-      {/* 중앙 + 버튼은 Tabs 밖에서 FAB로 */}
       {!hideFab && <CenterAddButton />}
     </View>
   )
@@ -229,14 +219,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // FAB: 화면 정중앙
+  // FAB: 화면 정중앙 (터치 영역이 새지 않도록 wrapper 크기 고정)
   fabWrap: {
     position: 'absolute',
     left: '50%',
     bottom: 15,
     transform: [{ translateX: -24 }],
     zIndex: 999,
-    pointerEvents: 'box-none',
+    width: 48,
+    height: 48,
   },
   fabBtn: {
     width: 48,
