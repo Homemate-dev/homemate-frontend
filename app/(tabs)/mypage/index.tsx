@@ -571,7 +571,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 12,
 
-    marginTop: 60,
+    marginTop: 50,
+    marginBottom: 20,
   },
 
   logoutBtn: { alignItems: 'center' },
