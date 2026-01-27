@@ -9,7 +9,7 @@ import { getBadgeDesc } from '@/libs/utils/getBadgeDesc'
 import { getNewlyAcquiredBadgeByTime } from '@/libs/utils/getNewlyAcquiredBadgeByTime'
 import { openAchievementModal } from '@/store/slices/achievementModalSlice'
 import { ResponseBadge } from '@/types/badge'
-import { RegisterChoreResponse, Space } from '@/types/recommend'
+import { RegisterChoreResponse } from '@/types/recommend'
 
 const missionIcon = require('../../../assets/images/icon/missionIcon.png')
 
@@ -19,16 +19,19 @@ export function useRegisterSpace() {
 
   const toast = useToast()
 
-  return useMutation<RegisterChoreResponse, unknown, { spaceChoreId: number; space: Space }>({
-    mutationFn: ({ spaceChoreId, space }: { spaceChoreId: number; space: Space }) =>
+  return useMutation<RegisterChoreResponse, unknown, { spaceChoreId: number; space: string }>({
+    mutationFn: ({ spaceChoreId, space }: { spaceChoreId: number; space: string }) =>
       postResisterSpaceChore(spaceChoreId, space),
     onSuccess: async (resp) => {
       qc.invalidateQueries({ queryKey: ['chore', 'calendar'], type: 'active' })
-      qc.invalidateQueries({ queryKey: ['chore', 'byDate', resp.data.startDate] })
+      qc.invalidateQueries({ queryKey: ['chore', 'byDate'] })
       qc.invalidateQueries({ queryKey: ['mission', 'monthly'] })
       qc.invalidateQueries({ queryKey: ['badge', 'acquired'] })
       qc.invalidateQueries({ queryKey: ['badge', 'top', 'three'] })
-      const title = resp?.data?.title
+      qc.invalidateQueries({ queryKey: ['recommend', 'monthly-chores'] })
+      qc.invalidateQueries({ queryKey: ['recommend', 'category-chores'] })
+      qc.invalidateQueries({ queryKey: ['recommend', 'season-chores'] })
+      const title = resp?.data?.titleSnapshot
 
       toast.show({
         message: title ?? '집안일이 추가됐어요',
