@@ -55,7 +55,6 @@ export default function CategoryOverviewSection() {
   // 카테고리 집안일 등록 핸들러
   const handleSubmit = async (selectedIds: number[]) => {
     if (!selectedIds.length || !selectedTarget) return
-    if (selectedTarget.type !== 'FIXED') return
 
     const selectedCategoryEnum = selectedTarget.category
     const selectedCategoryName = selectedTarget.name
@@ -75,7 +74,7 @@ export default function CategoryOverviewSection() {
       await Promise.all(
         selectedIds.map((categoryChoreId) => {
           // 선택한 집안일 찾기
-          const chore = fixedChores.find((item) => item.choreId === categoryChoreId)
+          const chore = modalChores.find((item) => item.choreId === categoryChoreId)
 
           // GA4 태깅
           trackEvent('task_created', {
