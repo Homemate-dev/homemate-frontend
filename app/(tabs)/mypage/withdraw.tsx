@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   },
   guideText: {
     fontSize: 16,
-    lineHeight: 21,
+    lineHeight: 24,
     color: '#000000',
     marginHorizontal: 4,
     marginBottom: 8,
@@ -329,7 +329,6 @@ const styles = StyleSheet.create({
 
   chipWrap: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 8,
   },
 
@@ -343,7 +342,7 @@ const styles = StyleSheet.create({
   },
 
   chipText: {
-    fontSize: 16,
+    fontSize: 14,
     lineHeight: 21,
     color: '#000000',
   },

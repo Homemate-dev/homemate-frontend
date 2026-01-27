@@ -162,7 +162,7 @@ export const WITHDRAW_REASONS: WithdrawReasonConfig[] = [
       {
         type: 'text',
         value: () =>
-          `어떤 기능이 필요하셨나요? 부족하거나 아쉬웠던 부분을\n알려 주시면 더 좋은 서비스로 발전해 있을게요!`,
+          `어떤 기능이 필요하셨나요?\n부족하거나 아쉬웠던 부분을 알려 주시면 더 좋은 서비스로 발전해 있을게요!`,
       },
     ],
     input: {
