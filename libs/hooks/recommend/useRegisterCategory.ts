@@ -21,11 +21,13 @@ export function useRegisterCategory() {
         postResisterCategoryChore(categoryChoreId, category),
       onSuccess: async (resp) => {
         qc.invalidateQueries({ queryKey: ['chore', 'calendar'], type: 'active' })
-        qc.invalidateQueries({ queryKey: ['chore', 'byDate', resp.data.startDate] })
+        qc.invalidateQueries({ queryKey: ['chore', 'byDate'] })
         qc.invalidateQueries({ queryKey: ['mission', 'monthly'] })
         qc.invalidateQueries({ queryKey: ['badge', 'acquired'] })
         qc.invalidateQueries({ queryKey: ['badge', 'top', 'three'] })
-
+        qc.invalidateQueries({ queryKey: ['recommend', 'monthly-chores'] })
+        qc.invalidateQueries({ queryKey: ['recommend', 'category-chores'] })
+        qc.invalidateQueries({ queryKey: ['recommend', 'season-chores'] })
         const completedMissions = resp.missionResults?.filter((m) => m.completed) ?? []
 
         completedMissions.forEach((mission) => {
