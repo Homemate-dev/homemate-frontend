@@ -71,7 +71,6 @@ function RootNavigator() {
 
   /** 로그인 완료 + 토큰 준비된 뒤에만 푸시 토큰 등록 */
   useEffect(() => {
-    console.log('[FCM] useEffect user/token/verified:', !!user, !!token, verified)
     if (!verified || !user || !token) return
     registerFCMToken(token)
   }, [user, token, verified])

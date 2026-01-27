@@ -9,6 +9,8 @@ import { useAuth } from '@/contexts/AuthContext'
 import { getAcquiredBadges } from '@/libs/api/badge/getAcquiredBadges'
 import { useReplaceTab } from '@/libs/hooks/tabs/useReplaceTab'
 
+const TAB_BAR_HEIGHT = 80
+
 const ICONS = {
   home: [
     require('../../assets/images/tabs/home.png'),
@@ -43,6 +45,19 @@ function CenterAddButton() {
   )
 }
 
+function TabButton({ props, onPress }: { props: any; onPress: () => void }) {
+  const { href: _href, onPress: _onPress, style, ...rest } = props as any
+
+  return (
+    <Pressable
+      {...rest}
+      onPress={onPress}
+      // 탭바 버튼 터치 영역이 위로 새지 않도록 높이 고정
+      style={[style, { height: TAB_BAR_HEIGHT, justifyContent: 'center' }]}
+    />
+  )
+}
+
 export default function TabsLayout() {
   const replaceTab = useReplaceTab()
   const { user, verified } = useAuth()
@@ -68,13 +83,13 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontSize: 12, fontWeight: 700, marginTop: 3 },
         sceneContainerStyle: { backgroundColor: '#F8F8FA' },
         tabBarStyle: {
-          height: 80,
+          height: TAB_BAR_HEIGHT,
           paddingBottom: 6,
           paddingTop: 10,
           elevation: 0, // Android 기본 그림자 제거
           shadowOpacity: 0, // iOS 기본 그림자 제거
           backgroundColor: '#F8F8FA',
-          position: 'absolute',
+          position: 'absolute', // 디자인 유지
           overflow: 'visible',
           borderTopWidth: 0,
         },
@@ -98,20 +113,19 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: '홈',
-          tabBarButton: (props) => {
-            const { href: _href, onPress: _onPress, ...rest } = props as any
-            return <Pressable {...rest} onPress={() => replaceTab('/(tabs)/home')} />
-          },
+          tabBarButton: (props) => (
+            <TabButton props={props} onPress={() => replaceTab('/(tabs)/home')} />
+          ),
         }}
       />
+
       <Tabs.Screen
         name="recommend/index"
         options={{
           title: '추천',
-          tabBarButton: (props) => {
-            const { href: _href, onPress: _onPress, ...rest } = props as any
-            return <Pressable {...rest} onPress={() => replaceTab('/(tabs)/recommend')} />
-          },
+          tabBarButton: (props) => (
+            <TabButton props={props} onPress={() => replaceTab('/(tabs)/recommend')} />
+          ),
         }}
       />
 
@@ -132,24 +146,24 @@ export default function TabsLayout() {
           tabBarButton: () => <CenterAddButton />,
         }}
       />
+
       <Tabs.Screen
         name="mission"
         options={{
           title: '미션',
-          tabBarButton: (props) => {
-            const { href: _href, onPress: _onPress, ...rest } = props as any
-            return <Pressable {...rest} onPress={() => replaceTab('/(tabs)/mission')} />
-          },
+          tabBarButton: (props) => (
+            <TabButton props={props} onPress={() => replaceTab('/(tabs)/mission')} />
+          ),
         }}
       />
+
       <Tabs.Screen
         name="mypage/index"
         options={{
           title: '마이페이지',
-          tabBarButton: (props) => {
-            const { href: _href, onPress: _onPress, ...rest } = props as any
-            return <Pressable {...rest} onPress={() => replaceTab('/(tabs)/mypage')} />
-          },
+          tabBarButton: (props) => (
+            <TabButton props={props} onPress={() => replaceTab('/(tabs)/mypage')} />
+          ),
         }}
       />
 
@@ -161,6 +175,7 @@ export default function TabsLayout() {
           headerShown: false,
         }}
       />
+
       <Tabs.Screen
         name="notifications"
         options={{
