@@ -38,11 +38,10 @@ export const CHORE_ENDPOINTS = {
   TOGGLE_COMPLETE: (choreInstanceId: number) => `/chore/${choreInstanceId}`, // PATCH
 
   /** 집안일 삭제 (인스턴스 단위, applyToAll 쿼리로 전체 적용 가능) */
-  DELETE: (choreInstanceId: number, applyToAll?: boolean) =>
-    `/chore/${choreInstanceId}${applyToAll !== undefined ? `?applyToAll=${applyToAll}` : ''}`, // DELETE
+  DELETE: (choreInstanceId: number) => `/chore/instance/${choreInstanceId}`, // DELETE
 
   /** 집안일 상세 조회 (수정을 위한 상세) */
-  DETAIL: (choreInstanceId: number) => `/chore/${choreInstanceId}`, // GET
+  DETAIL: (choreInstanceId: number) => `/chore/instance/${choreInstanceId}`, // GET
 
   /** 당일 집안일 리스트 조회 */
   LIST_BY_DATE: '/chore/instances', // GET ?date=YYYY-MM-DD
