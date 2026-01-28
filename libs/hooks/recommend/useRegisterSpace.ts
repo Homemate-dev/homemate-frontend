@@ -31,10 +31,10 @@ export function useRegisterSpace() {
       qc.invalidateQueries({ queryKey: ['recommend', 'monthly-chores'] })
       qc.invalidateQueries({ queryKey: ['recommend', 'category-chores'] })
       qc.invalidateQueries({ queryKey: ['recommend', 'season-chores'] })
-      const title = resp?.data?.titleSnapshot
+      const title = resp?.data?.title
 
       toast.show({
-        message: title ?? '집안일이 추가됐어요',
+        message: title ?? '집안일이 ',
         onPress: () => {
           router.replace('/(tabs)/home')
         },
