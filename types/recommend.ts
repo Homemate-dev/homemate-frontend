@@ -61,17 +61,22 @@ export interface MissionResult {
 export interface RegisterChoreResponse {
   data: {
     id: number
-    choreId: number
-    titleSnapshot: string
-    dueDate: string
+    choreId?: number
+    title: string
     notificationTime: string | null
     notificationYn?: boolean
+    startDate: string
+    endDate: string
+    isDeleted: boolean
+    space: string
+    registrationType: string
     choreStatus: string
     repeatType: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE' | 'YEARLY'
     repeatInterval: number
-    completedAt: string | null
+    completedAt?: string | null
     createdAt: string
     updatedAt: string
+    deleteAt: string | null
   }
   missionResults: MissionResult[]
 }

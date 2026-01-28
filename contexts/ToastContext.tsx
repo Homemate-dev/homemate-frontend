@@ -61,7 +61,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
     const duration = typeof options.duration === 'number' ? options.duration : DEFAULT_DURATION
     timer.current = setTimeout(() => {
-      animateOut(() => (timer.current = null))
+      animateOut(() => {
+        timer.current = null
+        setToast(null)
+      })
     }, duration)
   }
 
