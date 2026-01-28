@@ -47,7 +47,9 @@ export function SimpleToastProvider({ children }: { children: React.ReactNode })
 
   const hide = () => {
     clearTimer()
-    animateOut()
+    animateOut(() => {
+      setToast(null) // 애니메이션 끝나면 언마운트
+    })
   }
 
   const show = (options: SimpleToastOptions) => {
