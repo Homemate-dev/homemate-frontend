@@ -69,7 +69,10 @@ export function SimpleToastProvider({ children }: { children: React.ReactNode })
           : DEFAULT_DURATION
 
     timer.current = setTimeout(() => {
-      animateOut(() => (timer.current = null))
+      animateOut(() => {
+        timer.current = null
+        setToast(null)
+      })
     }, duration)
   }
 

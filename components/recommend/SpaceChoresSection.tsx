@@ -96,7 +96,7 @@ export default function SpaceChoreSection() {
             cycle: cycleLabel,
           })
 
-          spaRegister({ spaceChoreId: c.choreId, space: c.spaceName })
+          spaRegister({ spaceChoreId: c.choreId, space: c.spaceName! })
         }}
       />
 
