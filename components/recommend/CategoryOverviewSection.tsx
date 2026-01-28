@@ -100,6 +100,7 @@ export default function CategoryOverviewSection() {
       }
     } finally {
       setSubmitting(false)
+      setSelectedTarget(null)
     }
   }
 
@@ -189,7 +190,6 @@ export default function CategoryOverviewSection() {
         visible={isOpen}
         onClose={() => {
           setIsOpen(false)
-          setSelectedTarget(null)
         }}
         title={selectedTarget?.name ?? ''}
         chores={modalChores}

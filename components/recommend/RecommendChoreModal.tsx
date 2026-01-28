@@ -173,27 +173,39 @@ export default function RecommendChoreModal({
             onPress={() => {
               if (!hasSelection) return
 
-              // 중복 포함되면 확인 토스트 먼저 보여준 후 등록
-              if (duplicateSelectedIds.length > 0) {
+              const selectedIds = Array.from(selected)
+              const duplicateIds = duplicateSelectedIds
+
+              // 중복이 있는 경우
+              if (duplicateIds.length > 0) {
                 onClose()
+
                 simpleToast.show({
                   messageNode: (
                     <>
                       이미 등록된 집안일이{' '}
-                      <Text style={styles.highlight}>{duplicateSelectedIds.length}개</Text>에요
+                      <Text style={styles.highlight}>{duplicateIds.length}개</Text>에요
                     </>
                   ),
                   actionText: '무시하고 등록',
                   onActionPress: () => {
-                    onSubmit(Array.from(selected))
+                    onSubmit(selectedIds) // 중복 포함 즉시 등록
                   },
                 })
+
+                const idsWithoutDuplicate = selectedIds.filter((id) => !duplicateIds.includes(id))
+
+                if (idsWithoutDuplicate.length > 0) {
+                  setTimeout(() => {
+                    onSubmit(idsWithoutDuplicate) // 토스트 끝난 뒤 중복 제외 등록
+                  }, 4500)
+                }
 
                 return
               }
 
-              // 중복 없으면 바로 등록
-              onSubmit(Array.from(selected))
+              // 중복이 없으면 바로 등록
+              onSubmit(selectedIds)
             }}
             disabled={!hasSelection}
             style={[styles.addBtn, !hasSelection && styles.addBtnDisabled]}
