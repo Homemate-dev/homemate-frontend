@@ -36,13 +36,25 @@ export default function DeleteModal({
       <View style={styles.sheet}>
         <Text style={styles.sheetHandle} />
 
-        <View style={styles.banner}>
-          <Text style={styles.bannerText}>일정을 삭제하시겠습니까?</Text>
-        </View>
+        {noneRepeat ? (
+          <View style={styles.banner}>
+            <Text style={styles.bannerText}>일정을 삭제하시겠습니까?</Text>
+          </View>
+        ) : (
+          <Pressable onPress={onDeleteOnly} style={[styles.primaryBtn, styles.mb8]}>
+            <Text style={styles.primaryBtnText}>이 일정만 삭제</Text>
+          </Pressable>
+        )}
 
-        <Pressable onPress={onDeleteOnly} style={[styles.primaryBtn, styles.mb8]}>
-          <Text style={styles.primaryBtnText}>일정 삭제</Text>
-        </Pressable>
+        {noneRepeat ? (
+          <Pressable onPress={onDeleteOnly} style={[styles.primaryBtn, styles.mb8]}>
+            <Text style={styles.primaryBtnText}>일정 삭제</Text>
+          </Pressable>
+        ) : (
+          <Pressable onPress={onDeleteAll} style={[styles.primaryBtn, styles.mb8]}>
+            <Text style={styles.primaryBtnText}>향후 일정 삭제</Text>
+          </Pressable>
+        )}
 
         <Pressable onPress={onClose} style={styles.cancelBtn}>
           <Text style={styles.cancelBtnText}>취소</Text>
