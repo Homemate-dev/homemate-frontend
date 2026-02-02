@@ -12,7 +12,8 @@ export function useDeleteChore() {
   const qc = useQueryClient()
 
   return useMutation<void, unknown, deleteType>({
-    mutationFn: ({ choreInstanceId }) => deleteChore(choreInstanceId),
+    mutationFn: ({ choreInstanceId, applyToAfter = false }) =>
+      deleteChore(choreInstanceId, applyToAfter),
 
     onSuccess: (_data, { choreInstanceId }) => {
       // 해당 날짜 리스트 새로고침
