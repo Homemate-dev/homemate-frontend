@@ -21,9 +21,9 @@ export const BADGE_SECTION_MAP: Record<string, string> = {
   POWER_J: '집안일 등록',
 
   // 추천 집안일 등록
-  RECO_CHORE_FIRST: '추천 집안일 등록', // 집안일 탐색꾼
-  RECO_CHORE_SECOND: '추천 집안일 등록', // 집안일 모험가
-  RECO_CHORE_COLLECTOR: '추천 집안일 등록', // 집안일 콜렉터
+  RECOMMEND_EXPLORER: '추천 집안일 등록', // 집안일 탐색꾼
+  RECOMMEND_ADVENTURER: '추천 집안일 등록', // 집안일 모험가
+  RECOMMEND_COLLECTOR: '추천 집안일 등록', // 집안일 콜렉터
 
   // 미션 달성
   SEED_MISSION: '미션 달성',
