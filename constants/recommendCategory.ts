@@ -33,4 +33,10 @@ export const MONTHLY_CATEGORIES = [
   { id: 2, title: '슬기로운 집콕 생활' },
   { id: 3, title: '안전한 겨울나기' },
   { id: 4, title: '새해 집들이 준비하기' },
+
+  { id: 5, title: '연휴가 끝나면 이것부터' },
+  { id: 6, title: '주방 악취 제거하기' },
+  { id: 7, title: '돈 안 드는 집정리' },
+  { id: 8, title: '주기가 짧은 집안일' },
+  { id: 9, title: '연휴 전 안전 CHECK!' },
 ] as const
