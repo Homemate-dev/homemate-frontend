@@ -278,6 +278,22 @@ export default function MyPage() {
           </View>
         </View>
 
+        {/* 알림 권한 여부 */}
+        {isDeviceNotiDenied && (
+          <View style={styles.sectionNoti}>
+            <TouchableOpacity
+              onPress={() => Linking.openURL(NOTIFICATION_URL)}
+              style={styles.touchNoti}
+            >
+              <View style={styles.notiArea}>
+                <Image source={require('@/assets/images/bellOff.png')} style={styles.notiImage} />
+                <Text style={styles.notiText}>기기 알림이 꺼져 있어요</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* 알림 설정 */}
         <View style={styles.sectionWithDropdown}>
           <View style={styles.sectionHeader}>
@@ -315,6 +331,12 @@ export default function MyPage() {
                 if (v) setShowConfirm(true)
               }}
             />
+
+            <Text style={styles.alarmNotice}>
+              변경한 알림 시간은 이후 등록하는 집안일에만 적용됩니다. {'\n'}
+              이미 등록된 집안일의 알림 시간은 변경되지 않습니다.
+            </Text>
+
             {showConfirm && (
               <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
                 <Text style={styles.confirmText}>확인</Text>
@@ -322,22 +344,6 @@ export default function MyPage() {
             )}
           </View>
         </View>
-
-        {/* 알림 권한 여부 */}
-        {isDeviceNotiDenied && (
-          <View style={styles.sectionNoti}>
-            <TouchableOpacity
-              onPress={() => Linking.openURL(NOTIFICATION_URL)}
-              style={styles.touchNoti}
-            >
-              <View style={styles.notiArea}>
-                <Image source={require('@/assets/images/bellOff.png')} style={styles.notiImage} />
-                <Text style={styles.notiText}>기기 알림이 꺼져 있어요</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
-            </TouchableOpacity>
-          </View>
-        )}
 
         {/* 약관 / 개인정보 처리방침 */}
         <View style={styles.sectionBelow}>
@@ -554,6 +560,14 @@ const styles = StyleSheet.create({
   divider: { borderBottomWidth: 1, borderBottomColor: '#E6E7E9' },
 
   timeSetting: { marginTop: hp('1.5%') },
+
+  alarmNotice: {
+    color: '#9B9FA6',
+    fontSize: 12,
+    marginTop: 16,
+    lineHeight: 18,
+  },
+
   confirmBtn: {
     backgroundColor: '#57C9D0',
     borderRadius: 12,
