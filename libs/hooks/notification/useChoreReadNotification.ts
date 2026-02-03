@@ -1,10 +1,9 @@
-// libs/hooks/notification/usePatchChoreReadNotification.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { patchChoreReadNotification } from '@/libs/api/notification/patchChoreReadNotification'
 import { ChoreNotification, ReadNotification } from '@/types/notification'
 
-export function usePatchChoreReadNotification() {
+export function useChoreReadNotification() {
   const qc = useQueryClient()
 
   return useMutation({

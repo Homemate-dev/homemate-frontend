@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -11,8 +12,10 @@ import {
 } from 'react-native'
 
 import { useChoreNotifications } from '@/libs/hooks/notification/useChoreNotifications'
-import { usePatchChoreReadNotification } from '@/libs/hooks/notification/useChoreReadNotification'
+import { useChoreReadNotification } from '@/libs/hooks/notification/useChoreReadNotification'
 import { useNoticeNotifications } from '@/libs/hooks/notification/useNoticeNotifications'
+import { useNoticeReadNotification } from '@/libs/hooks/notification/useNoticeReadNotification'
+import { ChoreNotification, NoticeNotification } from '@/types/notification'
 
 // 화면 렌더 전용 타입
 type UiNotification = {
@@ -21,6 +24,7 @@ type UiNotification = {
   message: string
   time: string
   isRead: boolean
+  url?: string | null
 }
 
 export default function Notifications() {
@@ -49,7 +53,8 @@ export default function Notifications() {
   const choreUnread = useMemo(() => choreData.filter((n: any) => !n.isRead).length, [choreData])
   const noticeUnread = useMemo(() => noticeData.filter((n: any) => !n.isRead).length, [noticeData])
 
-  const raw = activeTab === 'chore' ? choreData : noticeData
+  const raw: (ChoreNotification | NoticeNotification)[] =
+    activeTab === 'chore' ? choreData : noticeData
   const isLoading = activeTab === 'chore' ? isChoreLoading : isNoticeLoading
 
   // API → UI 매핑
@@ -59,10 +64,13 @@ export default function Notifications() {
         id: item.id,
         title: item.title || '알림',
         message: item.message || '',
-        time: formatRelativeTime(item.scheduledAt ?? item.createdAt),
+        time: formatRelativeTime(
+          'scheduledAt' in item ? (item.scheduledAt ?? item.createdAt) : item.createdAt
+        ),
         isRead: !!item.isRead,
+        url: activeTab === 'notice' ? (item.url ?? null) : null,
       })),
-    [raw]
+    [raw, activeTab]
   )
 
   const visibleNotifications = notifications.slice(0, 30)
@@ -70,17 +78,24 @@ export default function Notifications() {
   const hasData = visibleNotifications.length > 0
 
   // 읽음 처리 훅
-  const patchChoreRead = usePatchChoreReadNotification()
-  const patchNoticeRead = usePatchChoreReadNotification()
+  const patchChoreRead = useChoreReadNotification()
+  const patchNoticeRead = useNoticeReadNotification()
 
-  const handlePressNotification = (id: number) => {
-    if (activeTab === 'chore') patchChoreRead.mutate(id)
-    else patchNoticeRead.mutate(id)
+  const handlePressNotification = (item: UiNotification) => {
+    // 1) 읽음 처리
+    if (activeTab === 'chore') patchChoreRead.mutate(item.id)
+    else patchNoticeRead.mutate(item.id)
+
+    // 2) 공지 탭이면 외부 링크 오픈
+    if (activeTab === 'notice') {
+      const url = item.url?.trim()
+      if (url) Linking.openURL(url)
+    }
   }
 
   const renderItem = ({ item }: { item: UiNotification }) => (
     <TouchableOpacity
-      onPress={() => handlePressNotification(item.id)}
+      onPress={() => handlePressNotification(item)}
       activeOpacity={0.8}
       style={[styles.card, item.isRead && styles.cardRead]}
     >
