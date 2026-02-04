@@ -38,6 +38,7 @@ export type UpdateAlertResp = {
   choreEnabled: boolean
   noticeEnabled: boolean
   updatedAt: string
+  newBadge: string | null
 }
 
 // 알림 시간 조회/설정 바디 응답

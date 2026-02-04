@@ -105,18 +105,35 @@ export default function MyPage() {
   // 기기 알림 권한 재확인
   useEffect(() => {
     if (Platform.OS !== 'web') return
-    if (typeof Notification === 'undefined') return
 
-    const checkPermission = () => {
-      const permission = Notification.permission
-      const isDenied = permission === 'denied'
+    let mounted = true
 
-      setIsDeviceNotiDenied(isDenied)
+    const checkPermission = async () => {
+      try {
+        // Notification / SW 없으면 알림 불가로 간주
+        if (typeof Notification === 'undefined' || !('serviceWorker' in navigator)) {
+          if (!mounted) return
+          setIsDeviceNotiDenied(true)
+          return
+        }
+        const permission = Notification.permission
 
-      if (isDenied) {
-        setIsMasterAlarm(false)
-        setIsChoreAlarm(false)
-        setIsNoticeAlarm(false)
+        // 권한이 granted가 아니면 알림 불가
+        if (permission !== 'granted') {
+          if (!mounted) return
+          setIsDeviceNotiDenied(true)
+          return
+        }
+
+        // granted라도 push 구독이 없으면 실제로 푸시 못 받음 -> 알림 불가로 처리
+        const reg = await navigator.serviceWorker.ready
+        const sub = await reg.pushManager.getSubscription()
+
+        if (!mounted) return
+        setIsDeviceNotiDenied(!sub)
+      } catch {
+        if (!mounted) return
+        setIsDeviceNotiDenied(false)
       }
     }
 
@@ -124,9 +141,19 @@ export default function MyPage() {
     checkPermission()
 
     // 서비스 복귀 시마다 재확인
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') checkPermission()
+    }
     window.addEventListener('focus', checkPermission)
+    window.addEventListener('pageshow', checkPermission)
+    document.addEventListener('visibilitychange', onVisible)
 
-    return () => window.removeEventListener('focus', checkPermission)
+    return () => {
+      mounted = false
+      window.removeEventListener('focus', checkPermission)
+      window.removeEventListener('pageshow', checkPermission)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [])
 
   // 드롭다운 열고 닫힐 때 부드러운 애니메이션
@@ -332,16 +359,16 @@ export default function MyPage() {
               }}
             />
 
-            <Text style={styles.alarmNotice}>
-              변경한 알림 시간은 이후 등록하는 집안일에만 적용됩니다. {'\n'}
-              이미 등록된 집안일의 알림 시간은 변경되지 않습니다.
-            </Text>
-
             {showConfirm && (
               <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
                 <Text style={styles.confirmText}>확인</Text>
               </TouchableOpacity>
             )}
+
+            <Text style={styles.alarmNotice}>
+              변경한 알림 시간은 이후 등록하는 집안일에만 적용됩니다. {'\n'}
+              이미 등록된 집안일의 알림 시간은 변경되지 않습니다.
+            </Text>
           </View>
         </View>
 
