@@ -3,6 +3,10 @@ import { ResponseBadge } from '@/types/badge'
 import { getBadgeSection, getBadgeTargetPhrase } from './badgeSectionMap'
 
 export function getBadgeDesc(badge: ResponseBadge, allBadges: ResponseBadge[]) {
+  if (badge.badgeType === 'ALARM_ALTER_START') {
+    return '알림 설정 변경을 1회 완료했어요!\n다른 알림 뱃지도 획득해 보세요'
+  }
+
   const section = getBadgeSection(badge.badgeType)
   const target = getBadgeTargetPhrase(section)
   const required = badge.requiredCount
