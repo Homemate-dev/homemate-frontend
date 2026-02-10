@@ -13,20 +13,20 @@ const TAB_BAR_HEIGHT = 80
 
 const ICONS = {
   home: [
-    require('../../assets/images/tabs/home.png'),
-    require('../../assets/images/tabs/home-active.png'),
+    require('../../assets/images/tabs/home.svg'),
+    require('../../assets/images/tabs/home-active.svg'),
   ],
   recommend: [
-    require('../../assets/images/tabs/recommend.png'),
-    require('../../assets/images/tabs/recommend-active.png'),
+    require('../../assets/images/tabs/recommend.svg'),
+    require('../../assets/images/tabs/recommend-active.svg'),
   ],
   mission: [
-    require('../../assets/images/tabs/mission.png'),
-    require('../../assets/images/tabs/mission-active.png'),
+    require('../../assets/images/tabs/mission.svg'),
+    require('../../assets/images/tabs/mission-active.svg'),
   ],
   mypage: [
-    require('../../assets/images/tabs/mypage.png'),
-    require('../../assets/images/tabs/mypage-active.png'),
+    require('../../assets/images/tabs/mypage.svg'),
+    require('../../assets/images/tabs/mypage-active.svg'),
   ],
 } as const
 

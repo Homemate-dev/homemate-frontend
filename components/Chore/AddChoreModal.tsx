@@ -568,7 +568,7 @@ export default function AddChoreModal() {
                       >
                         <View style={styles.resetContent}>
                           <Image
-                            source={require('../../assets/images/icon/refresh.png')}
+                            source={require('../../assets/images/icon/refresh.svg')}
                             style={{ width: 16, height: 16 }}
                             resizeMode="contain"
                           />

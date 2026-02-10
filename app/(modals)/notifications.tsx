@@ -112,8 +112,8 @@ export default function Notifications() {
       <View style={styles.headerContainer}>
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
           <Image
-            source={require('@/assets/images/arrow/chevron-left.png')}
-            style={{ width: 24, height: 24 }}
+            source={require('@/assets/images/arrow/chevron-left.svg')}
+            style={{ width: 6, height: 12 }}
           />
         </TouchableOpacity>
         <Text style={styles.header}>알림</Text>
@@ -166,7 +166,7 @@ export default function Notifications() {
         ) : (
           <View style={styles.emptyWrapper}>
             <Image
-              source={require('@/assets/images/no-alert.png')}
+              source={require('@/assets/images/no-alert.svg')}
               style={{ width: 72, height: 72 }}
             />
             <Text style={styles.emptyText}>아직 알림이 없어요</Text>

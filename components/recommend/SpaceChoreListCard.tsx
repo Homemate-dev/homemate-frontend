@@ -89,9 +89,9 @@ export default function SpaceChoreListCard({
                   }}
                 >
                   <Image
-                    source={require('../../assets/images/plus-square.png')}
+                    source={require('../../assets/images/plus-square.svg')}
                     resizeMode="contain"
-                    style={{ width: 20, height: 20 }}
+                    style={{ width: 18, height: 18 }}
                   />
                 </Pressable>
               </View>
