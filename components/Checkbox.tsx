@@ -1,7 +1,7 @@
 import { Image, Pressable } from 'react-native'
 
-const COMPLETED = require('../assets/images/checkbox/checkbox-checked.png')
-const PENDING = require('../assets/images/checkbox/checkbox-empty.png')
+const COMPLETED = require('../assets/images/checkbox/checkbox-checked.svg')
+const PENDING = require('../assets/images/checkbox/checkbox-empty.svg')
 
 type CheckboxProps = {
   checked: boolean

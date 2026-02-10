@@ -91,7 +91,7 @@ export function SimpleToastProvider({ children }: { children: React.ReactNode })
           <Pressable style={styles.toast} onPress={hide}>
             <View style={styles.message}>
               <Image
-                source={require('../assets/images/alert-circle.png')}
+                source={require('../assets/images/alert-circle.svg')}
                 resizeMode="contain"
                 style={{ width: 18, height: 18, marginRight: 6 }}
               />
