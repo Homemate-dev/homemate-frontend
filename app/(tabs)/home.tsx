@@ -253,7 +253,7 @@ export default function HomeScreen() {
                 </Text>
               </View>
               <Image
-                source={require('../../assets/images/card/card-img.png')}
+                source={require('../../assets/images/card/card-img.svg')}
                 style={{ width: 70, height: 70 }}
                 resizeMode="contain"
               />
