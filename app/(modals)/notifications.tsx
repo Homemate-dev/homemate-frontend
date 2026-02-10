@@ -1,3 +1,4 @@
+import { MaterialIcons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import { useMemo, useState } from 'react'
 import {
@@ -111,10 +112,7 @@ export default function Notifications() {
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
-          <Image
-            source={require('@/assets/images/arrow/chevron-left.svg')}
-            style={{ width: 6, height: 12 }}
-          />
+          <MaterialIcons name="chevron-left" size={24} color="#686F79" />
         </TouchableOpacity>
         <Text style={styles.header}>알림</Text>
       </View>
