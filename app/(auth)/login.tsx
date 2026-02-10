@@ -127,7 +127,7 @@ export default function Login() {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../../assets/images/logo/logo-white.png')}
+        source={require('../../assets/images/logo/logo-white.svg')}
         style={{ width: 208, height: 40, marginBottom: 24 }}
         resizeMode="contain"
       />

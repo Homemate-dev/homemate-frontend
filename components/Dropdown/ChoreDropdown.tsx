@@ -77,7 +77,7 @@ export default function ChoreDropdown({
             {value != null && value !== '' ? value : (placeholder ?? '선택')}
           </Text>
           <Image
-            source={require('../../assets/images/arrow/dropdown.png')}
+            source={require('../../assets/images/arrow/dropdown.svg')}
             style={styles.icon}
             resizeMode="contain"
           />

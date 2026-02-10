@@ -313,7 +313,7 @@ export default function MyPage() {
               style={styles.touchNoti}
             >
               <View style={styles.notiArea}>
-                <Image source={require('@/assets/images/bellOff.png')} style={styles.notiImage} />
+                <Image source={require('@/assets/images/bellOff2.svg')} style={styles.notiImage} />
                 <Text style={styles.notiText}>기기 알림이 꺼져 있어요</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
@@ -510,8 +510,8 @@ const styles = StyleSheet.create({
   },
 
   notiImage: {
-    width: 16,
-    height: 16,
+    width: 30,
+    height: 30,
     marginRight: 8,
   },
 

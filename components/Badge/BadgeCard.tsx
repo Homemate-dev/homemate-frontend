@@ -50,7 +50,10 @@ export default function BadgeCard({
                   { alignItems: 'center', justifyContent: 'center' },
                 ]}
               >
-                <Image source={require('@/assets/images/lock.png')} />
+                <Image
+                  source={require('@/assets/images/lock.svg')}
+                  style={{ width: 45, height: 45 }}
+                />
               </View>
             </>
           )}

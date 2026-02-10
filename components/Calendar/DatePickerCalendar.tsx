@@ -143,13 +143,13 @@ export default function DatePickerCalendar({ selectedDate, onSelect, isOpen }: P
         renderArrow={(direction) =>
           direction === 'left' ? (
             <Image
-              source={require('../../assets/images/arrow/left.png')}
+              source={require('../../assets/images/arrow/left.svg')}
               style={{ width: 14, height: 14 }}
               resizeMode="contain"
             />
           ) : (
             <Image
-              source={require('../../assets/images/arrow/right.png')}
+              source={require('../../assets/images/arrow/right.svg')}
               style={{ width: 14, height: 14 }}
               resizeMode="contain"
             />
