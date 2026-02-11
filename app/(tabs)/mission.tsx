@@ -13,7 +13,7 @@ import {
 } from 'react-native'
 
 import BadgeCard from '@/components/Badge/BadgeCard'
-import BadgeDetail from '@/components/BadgeDetail'
+import BadgeDetail from '@/components/Badge/BadgeDetail'
 import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import { useTopBadges } from '@/libs/hooks/badge/useTopBadges'
@@ -109,7 +109,7 @@ export default function Mission() {
               <View style={styles.tipInner}>
                 <Text style={styles.tipText}>추천 카테고리에서 추가해보세요!</Text>
                 <Image
-                  source={require('../../assets/images/arrow/right-inactive.png')}
+                  source={require('../../assets/images/arrow/right-inactive.svg')}
                   style={styles.tipArrow}
                   resizeMode="contain"
                 />
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   star: { marginRight: 4 },
   tipInner: { flexDirection: 'row', alignItems: 'center' },
   tipText: { fontSize: 12, color: '#686F79' },
-  tipArrow: { width: 16, height: 16 },
+  tipArrow: { width: 10, height: 10, marginLeft: 14 },
   badgeBox: { backgroundColor: '#FFFFFF', padding: 20, borderRadius: 12, marginBottom: 12 },
   badgeRow: { flexDirection: 'row', justifyContent: 'space-between' },
   badgeItem: { alignItems: 'center' },

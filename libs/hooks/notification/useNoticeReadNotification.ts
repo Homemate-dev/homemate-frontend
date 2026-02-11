@@ -1,4 +1,3 @@
-// libs/hooks/notification/usePatchNoticeReadNotification.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { patchNoticeReadNotification } from '@/libs/api/notification/patchNoticeReadNotification'

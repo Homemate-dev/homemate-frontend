@@ -4,6 +4,7 @@ export const AUTH_ENDPOINTS = {
   KAKAO_LOGIN: '/auth/login/kakao',
   REFRESH: '/auth/refresh',
   LOGOUT: '/auth/logout',
+  WITHDRAW: '/auth/withdraw',
 } as const
 
 export const MYPAGE_ENDPOINTS = {
@@ -38,10 +39,10 @@ export const CHORE_ENDPOINTS = {
 
   /** 집안일 삭제 (인스턴스 단위, applyToAll 쿼리로 전체 적용 가능) */
   DELETE: (choreInstanceId: number, applyToAll?: boolean) =>
-    `/chore/${choreInstanceId}${applyToAll !== undefined ? `?applyToAll=${applyToAll}` : ''}`, // DELETE
+    `/chore/instance/${choreInstanceId}${applyToAll !== undefined ? `?applyToAll=${applyToAll}` : ''}`, // DELETE
 
   /** 집안일 상세 조회 (수정을 위한 상세) */
-  DETAIL: (choreInstanceId: number) => `/chore/${choreInstanceId}`, // GET
+  DETAIL: (choreInstanceId: number) => `/chore/instance/${choreInstanceId}`, // GET
 
   /** 당일 집안일 리스트 조회 */
   LIST_BY_DATE: '/chore/instances', // GET ?date=YYYY-MM-DD
@@ -52,17 +53,21 @@ export const CHORE_ENDPOINTS = {
 
 export const RECOMMEND_ENDPOINTS = {
   /** 추천 화면 개요 조회 */
-  OVERVIEW: '/recommend/trend', // GET (query: ?limitTrending=number)
+  OVERVIEW: '/recommend/total', // GET (query: ?limitTrending=number)
 
   /** 카테고리 하위 집안일 목록 조회 */
-  CATEGORY_CHORES: (category: string) => `/recommend/categories/${category}/chores`, // GET
+  // 고정 카테고리 조회(미션 + 고정)
+  CATEGORY_CHORES: (category: string) => `/recommend/categories/fixed/${category}`, // GET
+
+  // 계절 카테고리 조회
+  SEASON_CATEGORY_CHORES: '/recommend/categories/season',
 
   /** 선택한 집안일 등록 (카테고리 기준) */
   REGISTER_CATEGORY: (categoryChoreId: number) =>
     `/recommend/categories/${categoryChoreId}/register`, // POST
 
   /** 공간별 하위 집안일 목록 조회 */
-  SPACE_CHORES: (space: string) => `/recommend/spaces/${space}/chores`, // GET
+  SPACE_CHORES: '/recommend/spaces/chores', // GET
 
   /** 선택한 집안일 등록 (공간 기준) */
   REGISTER_SPACE: (spaceChoreId: number) => `/recommend/spaces/${spaceChoreId}/register`, // POST
@@ -72,6 +77,10 @@ export const RECOMMEND_ENDPOINTS = {
 
   /** 카테고리 리스트 조회 */
   CATEGORIES: '/recommend/categories', // GET
+
+  /** 월간 카테고리 조회기능 설명 */
+  MONTHLY_CATEGORY_CHORES: (categoryId: number) =>
+    `/recommend/categories/monthly/${categoryId}/chores`,
 
   /** 랜덤 집안일 추천 조회 */
   RANDOM: '/recommend/random', // GET

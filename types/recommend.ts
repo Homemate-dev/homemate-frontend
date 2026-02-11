@@ -2,7 +2,6 @@ import { SpaceApi } from '@/libs/utils/space'
 
 import { RepeatType } from './chore'
 
-export type Space = 'KITCHEN' | 'BATHROOM' | 'BEDROOM' | 'PORCH' | 'ETC'
 // 추천 화면 개요
 export type Recommend = {
   name: string
@@ -36,25 +35,19 @@ export type ChoreCategory = {
 }
 
 // 집안일 리스트 조회
-export type RecommendChores = {
+export type ChoreItem = {
   choreId: number
   title: string
   frequency: string
-  categoryName: string
+  spaceName?: string
+  categoryName?: string
+  isDuplicate: boolean
 }
 
 // 공간 리스트 조회
 export type SpaceList = {
   spaceName: string
   space: SpaceApi
-}
-
-// 공간 집안일 정보
-export type SpaceChoreList = {
-  choreId: number
-  title: string
-  frequency: string
-  categoryName: string
 }
 
 export interface MissionResult {
@@ -68,18 +61,22 @@ export interface MissionResult {
 export interface RegisterChoreResponse {
   data: {
     id: number
+    choreId?: number
     title: string
-    notificationYn: boolean
     notificationTime: string | null
-    repeatType: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE' | 'YEARLY'
-    repeatInterval: number
+    notificationYn?: boolean
     startDate: string
     endDate: string
     isDeleted: boolean
-    space: 'KITCHEN' | 'BATHROOM' | 'BEDROOM' | 'PORCH' | 'ETC'
+    space: string
+    registrationType: string
+    choreStatus: string
+    repeatType: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE' | 'YEARLY'
+    repeatInterval: number
+    completedAt?: string | null
     createdAt: string
     updatedAt: string
-    deletedAt: string | null
+    deleteAt: string | null
   }
   missionResults: MissionResult[]
 }

@@ -236,7 +236,7 @@ export default function HomeScreen() {
       <TabSafeScroll contentContainerStyle={{ paddingTop: androidTop }}>
         <View style={styles.headerRow}>
           <Image
-            source={require('../../assets/images/logo/logo.png')}
+            source={require('../../assets/images/logo/logo.svg')}
             style={{ width: 125, height: 24 }}
             resizeMode="contain"
           />
@@ -253,7 +253,7 @@ export default function HomeScreen() {
                 </Text>
               </View>
               <Image
-                source={require('../../assets/images/card/card-img.png')}
+                source={require('../../assets/images/card/card-img.svg')}
                 style={{ width: 70, height: 70 }}
                 resizeMode="contain"
               />

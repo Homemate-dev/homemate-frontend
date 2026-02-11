@@ -11,6 +11,7 @@ export const api = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 })
 
 /** ─────────────────────────────────────────────────────────────
@@ -35,12 +36,9 @@ let refreshingPromise: Promise<string | null> | null = null
 export const setAccessToken = (token: string | null) => {
   accessToken = token
 }
-export const setRefreshToken = (token: string | null) => {
-  refreshToken = token
-}
+export const setRefreshToken = (_token: string | null) => {}
 export const clearAuthTokens = () => {
   accessToken = null
-  refreshToken = null
 }
 
 export const getAccessToken = () => accessToken
@@ -76,14 +74,10 @@ api.interceptors.request.use((config) => {
   }
 
   if (isRefreshCall) {
-    //  refresh 호출에는 refreshToken으로 Authorization 설정
-    if (!isBad(refreshToken)) {
-      headers.set('Authorization', `Bearer ${refreshToken}`)
-    } else {
-      headers.delete('Authorization')
-    }
+    // httpOnly 쿠키 방식: refresh는 쿠키로 처리 → Authorization 붙이지 않음
+    headers.delete('Authorization')
   } else {
-    //  그 외 모든 API에는 accessToken
+    // 그 외 모든 API에는 accessToken
     if (!isBad(accessToken)) {
       headers.set('Authorization', `Bearer ${accessToken}`)
     } else {
@@ -101,17 +95,9 @@ api.interceptors.request.use((config) => {
  *  ────────────────────────────────────────────────────────────*/
 
 async function refreshIfNeeded(): Promise<string | null> {
-  if (isBad(refreshToken)) return null
-
   if (!refreshingPromise) {
-    const USE_AUTH_HEADER = true // 서버가 헤더(Authorization: Bearer <refresh>) 받으면 true
-
     refreshingPromise = api
-      .post(
-        '/auth/refresh',
-        USE_AUTH_HEADER ? {} : { refreshToken }, // 바디 방식이면 여기
-        USE_AUTH_HEADER ? { headers: { Authorization: `Bearer ${refreshToken}` } } : undefined
-      )
+      .post('/auth/refresh', undefined, { withCredentials: true }) // httpOnly 쿠키 저장/전송 허용
       .then(async (res) => {
         // 스펙에 맞춰 파싱
         const data = res.data as {
@@ -123,14 +109,12 @@ async function refreshIfNeeded(): Promise<string | null> {
         }
 
         const newAccess = data.accessToken ?? null
-        const newRefresh = data.refreshToken ?? null
 
         if (newAccess) setAccessToken(newAccess)
-        if (newRefresh) setRefreshToken(newRefresh)
 
         // storage 동기화 콜백 호출
         if (newAccess) {
-          await onTokenRefreshed?.({ accessToken: newAccess, refreshToken: newRefresh })
+          await onTokenRefreshed?.({ accessToken: newAccess, refreshToken: null })
         }
 
         return newAccess

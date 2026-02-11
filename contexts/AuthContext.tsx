@@ -4,13 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { Platform } from 'react-native'
 
-import {
-  api,
-  setAccessToken,
-  setOnTokenRefreshed,
-  setOnUnauthorized,
-  setRefreshToken,
-} from '@/libs/api/axios'
+import { api, setAccessToken, setOnTokenRefreshed, setOnUnauthorized } from '@/libs/api/axios'
 
 /**
  * 로그인 응답에서 받는 토큰 타입
@@ -19,9 +13,7 @@ import {
  */
 type LoginTokens = {
   accessToken: string
-  refreshToken: string
   accessTokenExpiresIn?: number
-  refreshTokenExpiresIn?: number
 }
 
 /**
@@ -118,18 +110,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // refresh 실패하면 앱에서 강제 로그아웃 처리
     setOnUnauthorized(async () => {
-      await storage.multiRemove(['accessToken', 'refreshToken', 'user'])
+      await storage.multiRemove(['accessToken', 'user'])
       setAccessToken(null) // axios 메모리 토큰 제거
-      setRefreshToken(null) // axios 메모리 refresh 제거
       setToken(null) // React state 토큰 제거
       setUser(null) // 유저 제거
       setVerified(false) // 검증 상태 false
     })
 
     // refresh 성공하면 storage에도 최신 토큰을 저장
-    setOnTokenRefreshed(async ({ accessToken, refreshToken }) => {
+    setOnTokenRefreshed(async ({ accessToken }) => {
       await storage.setItem('accessToken', accessToken)
-      if (refreshToken) await storage.setItem('refreshToken', refreshToken)
     })
   }, [])
 
@@ -148,9 +138,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setVerified(false) // 시작할 때는 검증 전 상태로 초기화
 
         // 1️⃣ 저장소에서 기존 로그인 정보 로드
-        const [storedAccess, storedRefresh, storedUser] = await Promise.all([
+        const [storedAccess, storedUser] = await Promise.all([
           storage.getItem('accessToken'),
-          storage.getItem('refreshToken'),
           storage.getItem('user'),
         ])
 
@@ -164,15 +153,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
 
-        // 3️⃣ refreshToken을 axios 메모리에 먼저 세팅
-        // (/users/me 호출이 401이면 interceptor가 refresh를 돌릴 수 있어야 해서)
-        if (!isInvalid(storedRefresh)) {
-          setRefreshToken(storedRefresh as string)
-        } else {
-          setRefreshToken(null)
-        }
-
-        // 4️⃣ accessToken도 axios 메모리에 세팅
+        // 3️⃣ accessToken도 axios 메모리에 세팅
         // (있으면 우선 붙여서 /users/me를 시도)
         if (!isInvalid(storedAccess)) {
           setAccessToken(storedAccess as string)
@@ -189,7 +170,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
          * - accessToken이 만료되었으면: interceptor가 refresh 시도 → 성공하면 재시도 성공
          * - refresh도 실패하면: 여기서 최종 실패로 떨어짐 → 아래 catch에서 로그아웃 정리
          */
-        //5️⃣ 실제 인증 여부 판단은 /users/me
+        //4️⃣ 실제 인증 여부 판단은 /users/me
         const { data } = await api.get<User>('/users/me')
 
         // 여기까지 오면 "검증 완료된 로그인 상태"
@@ -197,9 +178,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setVerified(true)
       } catch {
         // 여기로 왔다는 건: access도 실패했고 refresh도 실패한 상황
-        await storage.multiRemove(['accessToken', 'refreshToken', 'user'])
+        await storage.multiRemove(['accessToken', 'user'])
         setAccessToken(null)
-        setRefreshToken(null)
         setToken(null)
         setUser(null)
         setVerified(false)
@@ -221,11 +201,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
    */
   const login = async (tokens: LoginTokens, userData: User) => {
     await storage.setItem('accessToken', tokens.accessToken)
-    await storage.setItem('refreshToken', tokens.refreshToken)
     await storage.setItem('user', JSON.stringify(userData))
 
     setAccessToken(tokens.accessToken)
-    setRefreshToken(tokens.refreshToken)
 
     setToken(tokens.accessToken)
     setUser(userData)
@@ -253,14 +231,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
    * - storage 토큰 제거
    */
   const logout = async () => {
-    setToken(null)
-    setUser(null)
-    setVerified(false)
+    try {
+      // 서버에서 refresh_token 쿠키 만료 처리
+      await api.post('/auth/logout', undefined, { withCredentials: true })
+    } catch {
+      // 실패해도 일단 로컬 상태는 정리
+    } finally {
+      setToken(null)
+      setUser(null)
+      setVerified(false)
 
-    setAccessToken(null)
-    setRefreshToken(null)
-
-    await storage.multiRemove(['accessToken', 'refreshToken', 'user'])
+      setAccessToken(null)
+      await storage.multiRemove(['accessToken', 'user'])
+    }
   }
 
   return (

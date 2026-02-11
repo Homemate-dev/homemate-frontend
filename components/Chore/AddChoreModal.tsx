@@ -45,8 +45,8 @@ import { openAchievementModal } from '@/store/slices/achievementModalSlice'
 import { ResponseBadge } from '@/types/badge'
 import { RandomChoreList } from '@/types/recommend'
 
-import DeleteModal from '../DeleteModal'
-import UpdateModal from '../UpdateModal'
+import DeleteModal from './DeleteModal'
+import UpdateModal from './UpdateModal'
 
 // 이모지(특수문자) 불가
 const EMOJI_RE = /[\p{Extended_Pictographic}]/u
@@ -568,7 +568,7 @@ export default function AddChoreModal() {
                       >
                         <View style={styles.resetContent}>
                           <Image
-                            source={require('../../assets/images/icon/refresh.png')}
+                            source={require('../../assets/images/icon/refresh.svg')}
                             style={{ width: 16, height: 16 }}
                             resizeMode="contain"
                           />

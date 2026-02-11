@@ -226,7 +226,7 @@ export default function OnboardingScreen() {
       {/* 로고 */}
       <View style={styles.logoRow}>
         <Image
-          source={require('../../assets/images/logo/logo.png')}
+          source={require('../../assets/images/logo/logo.svg')}
           style={{ width: 148, height: 42 }}
           resizeMode="contain"
         />

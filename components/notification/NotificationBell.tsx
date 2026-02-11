@@ -24,7 +24,7 @@ export default function NotificationBell() {
       hitSlop={8}
     >
       <Image
-        source={require('@/assets/images/notification.png')}
+        source={require('@/assets/images/notification.svg')}
         style={{ width: 24, height: 24 }}
         resizeMode="contain"
       />

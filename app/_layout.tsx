@@ -14,6 +14,7 @@ import { Provider } from 'react-redux'
 import AchievementModal from '@/components/AchievementModal'
 import WebFCMListener from '@/components/notification/WebFCMListener'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { SimpleToastProvider } from '@/contexts/SimpleToastContext'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { registerFCMToken } from '@/libs/firebase/fcm'
 import { store } from '@/store'
@@ -70,7 +71,6 @@ function RootNavigator() {
 
   /** 로그인 완료 + 토큰 준비된 뒤에만 푸시 토큰 등록 */
   useEffect(() => {
-    console.log('[FCM] useEffect user/token/verified:', !!user, !!token, verified)
     if (!verified || !user || !token) return
     registerFCMToken(token)
   }, [user, token, verified])
@@ -81,16 +81,14 @@ function RootNavigator() {
 
     const seg0 = segments[0] // "(auth)" | "(tabs)" | undefined
     const isAuthed = verified && !!token
-
-    const protectedGroups = ['(tabs)', '(modals)'] as const
-    const isInProtected = protectedGroups.includes(seg0 as any)
+    const isWithdrawComplete = segments.join('/').includes('withdraw-complete')
 
     if (isAuthed) {
       if (seg0 === '(auth)' || !seg0) router.replace('/(tabs)/home')
       return
     }
 
-    if (seg0 !== '(auth)') router.replace('/(auth)')
+    if (!isWithdrawComplete && seg0 !== '(auth)') router.replace('/(auth)')
   }, [loading, loaded, isCodeHandled, verified, token, segments, router])
 
   // 아직 준비 안됐으면(폰트 로딩, auth 로딩, code 처리 전) → 스택 렌더하지 말고 로딩만
@@ -105,7 +103,8 @@ function RootNavigator() {
   const isLoggedIn = verified && !!user
 
   return (
-    <Stack key={isLoggedIn ? 'app' : 'auth'} screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="withdraw-complete" />
       {isLoggedIn ? (
         <>
           <Stack.Screen name="(tabs)" />
@@ -134,10 +133,12 @@ export default function RootLayout() {
             <QueryClientProvider client={queryClient}>
               <WebFCMListener />
               <ToastProvider>
-                <AuthProvider>
-                  <RootNavigator />
-                  <AchievementModal />
-                </AuthProvider>
+                <SimpleToastProvider>
+                  <AuthProvider>
+                    <RootNavigator />
+                    <AchievementModal />
+                  </AuthProvider>
+                </SimpleToastProvider>
               </ToastProvider>
             </QueryClientProvider>
           </SafeAreaView>
