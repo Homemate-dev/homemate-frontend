@@ -17,6 +17,6 @@ export function getSteps(): GuideStepData[] | null {
   const deviceType = getDeviceType()
   const browserType = getBrowserType()
 
-  console.log(deviceType, browserType)
+  // console.log(deviceType, browserType)
   return GUIDE_STEPS[deviceType]?.[browserType] ?? null
 }

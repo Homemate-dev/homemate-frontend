@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
+    maxHeight: '100%',
   },
   video: {
     flex: 1,
