@@ -30,6 +30,7 @@ import { trackEvent } from '@/libs/utils/ga4'
 import { styleFromRepeatColor, toRepeatLabel2 } from '@/libs/utils/repeat'
 import { toHHmm, toHHmmParts } from '@/libs/utils/time'
 
+import { getSteps, STORAGE_KEY } from '@/components/installGuide'
 import HomeCalendar from '../../components/Calendar/HomeCalendar'
 
 export default function HomeScreen() {
@@ -103,6 +104,16 @@ export default function HomeScreen() {
       window.history.replaceState(null, '', newUrl)
     }
   }, [user?.id])
+
+  // 첫 방문 시 웹앱 설치 안내 모달 표시
+  useEffect(() => {
+    if (Platform.OS !== 'web') return
+    const steps = getSteps()
+    if (!steps?.length) return
+    if (localStorage.getItem(STORAGE_KEY)) return
+    router.push('/(modals)/installGuide')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // iOS PWA 판별 함수
   const isIosPwa = () => {

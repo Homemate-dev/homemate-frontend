@@ -17,6 +17,12 @@ export default function ModalsLayout() {
           presentation: Platform.select({ ios: 'fullScreenModal', android: 'card' }),
         }}
       />
+      <Stack.Screen
+        name="installGuide"
+        options={{
+          presentation: Platform.select({ ios: 'fullScreenModal', android: 'card' }),
+        }}
+      ></Stack.Screen>
     </Stack>
   )
 }
