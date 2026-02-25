@@ -14,16 +14,25 @@ export default function GuideVideo({ currentStep, getVideoSource }: Props) {
   const player = useVideoPlayer(initialSource, (p) => {
     p.loop = false
     p.muted = true
-    p.play()
   })
 
+  // statusChange 리스너: readyToPlay 되면 자동재생
+  useEffect(() => {
+    const subscription = player.addListener('statusChange', ({ status }) => {
+      if (status === 'readyToPlay') {
+        player.play()
+      }
+    })
+    return () => subscription.remove()
+  }, [player])
+
+  // 스텝 변경 시 소스 교체 (play는 statusChange에서 처리)
   useEffect(() => {
     const source = getVideoSource(currentStep)
     if (source != null) {
       player.replace(source)
       player.loop = false
       player.muted = true
-      player.play()
     }
   }, [currentStep, player, getVideoSource])
 
@@ -37,6 +46,8 @@ export default function GuideVideo({ currentStep, getVideoSource }: Props) {
             style={styles.video}
             nativeControls={false}
             contentFit="cover"
+            playsInline={true}
+            pointerEvents="none"
           />
         ) : (
           <View style={styles.imagePlaceholder}>
