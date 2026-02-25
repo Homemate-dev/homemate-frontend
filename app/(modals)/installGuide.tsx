@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { Platform } from 'react-native'
 
@@ -7,11 +7,12 @@ import InstallGuide from '@/components/installGuide/ui/InstallGuide'
 
 export default function InstallGuideScreen() {
   const router = useRouter()
+  const { from } = useLocalSearchParams<{ from: string }>()
   const steps = getSteps()
 
   useEffect(() => {
     if (!steps?.length) {
-      router.back()
+      router.replace((from as string) || '/(tabs)/home')
     }
   }, [])
 
@@ -19,7 +20,7 @@ export default function InstallGuideScreen() {
     if (Platform.OS === 'web') {
       localStorage.setItem(STORAGE_KEY, 'true')
     }
-    router.back()
+    router.replace((from as string) || '/(tabs)/home')
   }
 
   if (!steps?.length) return null
