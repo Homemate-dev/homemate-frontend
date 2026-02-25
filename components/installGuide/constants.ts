@@ -1,13 +1,3 @@
-import iosWhale01 from '../../assets/video/installGuide/ios/ios_whale_01.mp4'
-import iosWhale02 from '../../assets/video/installGuide/ios/ios_whale_02.mp4'
-import iosWhale03 from '../../assets/video/installGuide/ios/ios_whale_03.mp4'
-import iosWhale04 from '../../assets/video/installGuide/ios/ios_whale_04.mp4'
-import iosWhale05 from '../../assets/video/installGuide/ios/ios_whale_05.mp4'
-import iosEdge01 from '../../assets/video/installGuide/ios/ios_edge_01.mp4'
-import iosEdge02 from '../../assets/video/installGuide/ios/ios_edge_02.mp4'
-import iosEdge03 from '../../assets/video/installGuide/ios/ios_edge_03.mp4'
-import iosEdge04 from '../../assets/video/installGuide/ios/ios_edge_04.mp4'
-import iosEdge05 from '../../assets/video/installGuide/ios/ios_edge_05.mp4'
 import andChrome01 from '../../assets/video/installGuide/android/and_chrome_01.mp4'
 import andChrome02 from '../../assets/video/installGuide/android/and_chrome_02.mp4'
 import andChrome03 from '../../assets/video/installGuide/android/and_chrome_03.mp4'
@@ -17,6 +7,21 @@ import andSamsung01 from '../../assets/video/installGuide/android/and_samsung_01
 import andSamsung02 from '../../assets/video/installGuide/android/and_samsung_02.mp4'
 import andSamsung03 from '../../assets/video/installGuide/android/and_samsung_03.mp4'
 import andSamsung04 from '../../assets/video/installGuide/android/and_samsung_04.mp4'
+import iosChrome01 from '../../assets/video/installGuide/ios/ios_chrome_01.mp4'
+import iosChrome02 from '../../assets/video/installGuide/ios/ios_chrome_02.mp4'
+import iosChrome03 from '../../assets/video/installGuide/ios/ios_chrome_03.mp4'
+import iosChrome04 from '../../assets/video/installGuide/ios/ios_chrome_04.mp4'
+import iosChrome05 from '../../assets/video/installGuide/ios/ios_chrome_05.mp4'
+import iosEdge01 from '../../assets/video/installGuide/ios/ios_edge_01.mp4'
+import iosEdge02 from '../../assets/video/installGuide/ios/ios_edge_02.mp4'
+import iosEdge03 from '../../assets/video/installGuide/ios/ios_edge_03.mp4'
+import iosEdge04 from '../../assets/video/installGuide/ios/ios_edge_04.mp4'
+import iosEdge05 from '../../assets/video/installGuide/ios/ios_edge_05.mp4'
+import iosWhale01 from '../../assets/video/installGuide/ios/ios_whale_01.mp4'
+import iosWhale02 from '../../assets/video/installGuide/ios/ios_whale_02.mp4'
+import iosWhale03 from '../../assets/video/installGuide/ios/ios_whale_03.mp4'
+import iosWhale04 from '../../assets/video/installGuide/ios/ios_whale_04.mp4'
+import iosWhale05 from '../../assets/video/installGuide/ios/ios_whale_05.mp4'
 import { BrowserType } from './utils/getBrowserType'
 import { DeviceType } from './utils/getDeviceType'
 
@@ -61,6 +66,38 @@ export const GUIDE_STEPS: Partial<
         description: '홈 화면에 앱이 추가되었어요.\n아이콘을 탭해서 바로 시작하세요.',
         placeholderLabel: 'Whale iOS Step 5\n홈 화면 아이콘',
         video: iosWhale05,
+      },
+    ],
+    chrome: [
+      {
+        title: '하단 공유 버튼 탭',
+        description: '하단의 공유(□↑) 버튼을 눌러주세요.',
+        placeholderLabel: 'Chrome iOS Step 1\n공유 버튼',
+        video: iosChrome01,
+      },
+      {
+        title: '홈 화면에 추가 선택',
+        description: '메뉴에서 "홈 화면에 추가"를\n선택하세요.',
+        placeholderLabel: 'Chrome iOS Step 2\n홈 화면에 추가',
+        video: iosChrome02,
+      },
+      {
+        title: '추가 확인',
+        description: '앱 이름을 확인하고\n"추가" 버튼을 눌러주세요.',
+        placeholderLabel: 'Chrome iOS Step 3\n추가 확인',
+        video: iosChrome03,
+      },
+      {
+        title: '홈 화면 이동',
+        description: '홈 화면으로 이동해주세요.',
+        placeholderLabel: 'Chrome iOS Step 4\n홈 화면 이동',
+        video: iosChrome04,
+      },
+      {
+        title: '설치 완료!',
+        description: '홈 화면에 앱이 추가되었어요.\n아이콘을 탭해서 바로 시작하세요.',
+        placeholderLabel: 'Chrome iOS Step 5\n홈 화면 아이콘',
+        video: iosChrome05,
       },
     ],
     edge: [
