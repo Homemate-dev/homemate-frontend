@@ -40,5 +40,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: '#F8F8FA',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 })

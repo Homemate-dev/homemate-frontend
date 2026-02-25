@@ -111,7 +111,7 @@ export default function HomeScreen() {
     const steps = getSteps()
     if (!steps?.length) return
     if (localStorage.getItem(STORAGE_KEY)) return
-    router.push('/(modals)/installGuide')
+    router.replace({ pathname: '/(modals)/installGuide', params: { from: '/(tabs)/home' } })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

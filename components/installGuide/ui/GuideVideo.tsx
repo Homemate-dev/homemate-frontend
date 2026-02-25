@@ -50,11 +50,13 @@ export default function GuideVideo({ currentStep, getVideoSource }: Props) {
 
 const styles = StyleSheet.create({
   imageSection: {
-    flex: 1.6,
+    width: '100%',
+    aspectRatio: 9 / 16,
     backgroundColor: '#F8F8FA',
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
+    maxHeight: '100%',
   },
   video: {
     flex: 1,
