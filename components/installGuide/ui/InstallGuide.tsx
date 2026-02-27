@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { GuideStepData } from '../constants'
 import GuideNavigation from './GuideNavigation'
@@ -29,10 +30,10 @@ export default function InstallGuide({ steps, onDismiss }: Props) {
   }
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
       <GuideVideo currentStep={currentStep} getVideoSource={getVideoSource} />
       <GuideNavigation goNext={goNext} goPrev={goPrev} />
-    </View>
+    </SafeAreaView>
   )
 }
 
