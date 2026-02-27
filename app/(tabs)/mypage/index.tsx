@@ -17,6 +17,7 @@ import {
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen'
 
 import TimeDropdown from '@/components/Dropdown/TimeDropdown'
+import { getSteps } from '@/components/installGuide'
 import NotificationBell from '@/components/notification/NotificationBell'
 import TabSafeScroll from '@/components/TabSafeScroll'
 import Toggle from '@/components/Toggle'
@@ -64,7 +65,7 @@ export default function MyPage() {
 
   //  기기 알림 권한 허용 여부 체크
   const [isDeviceNotiDenied, setIsDeviceNotiDenied] = useState(false)
-
+  const hasTotorialGuide = getSteps()
   //회원탈퇴 화면 가기
   const goWithdrawScreen = () => {
     closeWithdraw()
@@ -374,7 +375,28 @@ export default function MyPage() {
 
         {/* 약관 / 개인정보 처리방침 */}
         <View style={styles.sectionBelow}>
-          <TouchableOpacity style={styles.settingBelowTop} onPress={() => Linking.openURL(FAQ_URL)}>
+          {hasTotorialGuide && (
+            <>
+              <TouchableOpacity
+                style={styles.settingBelowTop}
+                onPress={() => {
+                  router.replace({
+                    pathname: '/(modals)/installGuide',
+                    params: { from: '/(tabs)/mypage' },
+                  })
+                }}
+              >
+                <Text style={styles.settingText}>홈 화면 추가 튜토리얼 다시보기</Text>
+                <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
+              </TouchableOpacity>
+              <View style={styles.divider} />
+            </>
+          )}
+
+          <TouchableOpacity
+            style={hasTotorialGuide ? styles.settingBelowMiddle : styles.settingBelowTop}
+            onPress={() => Linking.openURL(FAQ_URL)}
+          >
             <Text style={styles.settingText}>FAQ</Text>
             <Ionicons name="chevron-forward" size={18} color="#B4B7BC" />
           </TouchableOpacity>
