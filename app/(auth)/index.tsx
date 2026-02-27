@@ -6,7 +6,6 @@ import {
   Image,
   ImageSourcePropType,
   ImageStyle,
-  Linking,
   NativeScrollEvent,
   NativeSyntheticEvent,
   StyleSheet,
@@ -142,14 +141,9 @@ export default function OnboardingScreen() {
     }
   }
 
-  const handleSkip = () => {
+  const handleStart = () => {
     // 온보딩 스킵 시 로그인 화면으로 이동
     router.replace('/(auth)/login')
-  }
-
-  const handleAddToHome = () => {
-    // 홈화면에 추가 클릭 시 노션 페이지로 이동
-    Linking.openURL(ADD_HOME_URL)
   }
 
   const renderItem = ({ item }: { item: Slide }) => (
@@ -258,14 +252,9 @@ export default function OnboardingScreen() {
 
       {/* 버튼 */}
       {isLastSlide ? (
-        <View style={styles.btnArea}>
-          <TouchableOpacity onPress={handleSkip} style={styles.btnSkip}>
-            <Text style={styles.btnSkipText}>스킵</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleAddToHome} style={styles.btnAddHome}>
-            <Text style={styles.btnAddHomeText}>홈화면에 추가하기</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={handleStart} style={styles.button}>
+          <Text style={styles.buttonText}>시작하기</Text>
+        </TouchableOpacity>
       ) : (
         <TouchableOpacity style={styles.button} onPress={handleNext}>
           <Text style={styles.buttonText}>계속</Text>
