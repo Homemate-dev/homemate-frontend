@@ -102,15 +102,6 @@ export default function OnboardingScreen() {
         },
       ],
     },
-
-    {
-      id: 4,
-      title: '홈메이트를 홈화면에 추가해보세요',
-      subtitle: '홈화면에 추가하면 \n  생각 날때마다 찾기 쉬우실 거에요',
-      image: require('../../assets/images/card/ironing5.png'),
-      showQuote: false,
-      imageStyle: { width: 270, height: 380, position: 'absolute', right: -15, top: 0 },
-    },
   ]
 
   const isLastSlide = activeIndex === slides.length - 1
