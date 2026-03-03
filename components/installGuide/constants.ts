@@ -23,7 +23,6 @@ import iosSafari01 from '../../assets/video/installGuide/ios/ios_safari_01.mp4'
 import iosSafari02 from '../../assets/video/installGuide/ios/ios_safari_02.mp4'
 import iosSafari03 from '../../assets/video/installGuide/ios/ios_safari_03.mp4'
 import iosSafari04 from '../../assets/video/installGuide/ios/ios_safari_04.mp4'
-import iosSafari05 from '../../assets/video/installGuide/ios/ios_safari_05.mp4'
 import iosWhale01 from '../../assets/video/installGuide/ios/ios_whale_01.mp4'
 import iosWhale02 from '../../assets/video/installGuide/ios/ios_whale_02.mp4'
 import iosWhale03 from '../../assets/video/installGuide/ios/ios_whale_03.mp4'
@@ -168,38 +167,6 @@ export const GUIDE_STEPS: Partial<
         description: '홈 화면에 앱이 추가되었어요.\n아이콘을 탭해서 바로 시작하세요.',
         placeholderLabel: 'Safari iOS Step 5\n홈 화면 아이콘',
         video: elseLast,
-      },
-    ],
-    safari: [
-      {
-        title: '하단 공유 버튼 탭',
-        description: '하단의 공유(□↑) 버튼을 눌러주세요.',
-        placeholderLabel: 'Safari iOS Step 1\n공유 버튼',
-        video: iosSafari01,
-      },
-      {
-        title: '홈 화면에 추가 선택',
-        description: '메뉴에서 "홈 화면에 추가"를\n선택하세요.',
-        placeholderLabel: 'Safari iOS Step 2\n홈 화면에 추가',
-        video: iosSafari02,
-      },
-      {
-        title: '추가 확인',
-        description: '앱 이름을 확인하고\n"추가" 버튼을 눌러주세요.',
-        placeholderLabel: 'Safari iOS Step 3\n추가 확인',
-        video: iosSafari03,
-      },
-      {
-        title: '홈 화면 이동',
-        description: '홈 화면으로 이동해주세요.',
-        placeholderLabel: 'Safari iOS Step 4\n홈 화면 이동',
-        video: iosSafari04,
-      },
-      {
-        title: '설치 완료!',
-        description: '홈 화면에 앱이 추가되었어요.\n아이콘을 탭해서 바로 시작하세요.',
-        placeholderLabel: 'Safari iOS Step 5\n홈 화면 아이콘',
-        video: iosSafari05,
       },
     ],
   },
