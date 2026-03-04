@@ -34,7 +34,7 @@ export default function GuideVideo({ currentStep, getVideoSource }: Props) {
     }, 300)
     return () => clearTimeout(timer)
   }, [player, initialSource])
-  
+
   return (
     <>
       {/* 상단 영상 영역 */}
