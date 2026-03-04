@@ -31,7 +31,7 @@ export default function InstallGuide({ steps, onDismiss }: Props) {
 
   return (
     <SafeAreaView style={styles.screen}>
-      <GuideVideo currentStep={currentStep} getVideoSource={getVideoSource} />
+      <GuideVideo key={step} currentStep={currentStep} getVideoSource={getVideoSource} />
       <GuideNavigation goNext={goNext} goPrev={goPrev} />
     </SafeAreaView>
   )
