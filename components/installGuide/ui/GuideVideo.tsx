@@ -26,22 +26,14 @@ export default function GuideVideo({ currentStep, getVideoSource }: Props) {
     return () => subscription.remove()
   }, [player])
 
-  // 스텝 변경 시 소스 교체
+  // Android Edge 등 일부 브라우저에서 statusChange가 발생하지 않는 경우 fallback play
   useEffect(() => {
-    const source = getVideoSource(currentStep)
-    if (source != null) {
-      player.replace(source)
-      player.loop = false
-      player.muted = true
-
-      // Android Edge 등 일부 브라우저에서 replace() 후 statusChange 이벤트가
-      // 발생하지 않는 경우를 대비한 fallback play
-      const timer = setTimeout(() => {
-        player.play()
-      }, 300)
-      return () => clearTimeout(timer)
-    }
-  }, [currentStep, player, getVideoSource])
+    if (initialSource == null) return
+    const timer = setTimeout(() => {
+      player.play()
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [player, initialSource])
 
   return (
     <>
