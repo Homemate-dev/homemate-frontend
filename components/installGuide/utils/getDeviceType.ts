@@ -9,7 +9,7 @@ export function getDeviceType(): DeviceType {
 
   console.log(ua)
   if (/iPhone|iPad|iPod/i.test(ua)) return 'ios'
-  if (/Android/i.test(ua)) return 'android'
+  // if (/Android/i.test(ua)) return 'android'
 
   return 'other'
 }
