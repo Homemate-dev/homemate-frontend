@@ -80,3 +80,8 @@ export interface RegisterChoreResponse {
   }
   missionResults: MissionResult[]
 }
+
+export interface MonthlyNameList {
+  categoriesId: number
+  categoryName: string
+}
