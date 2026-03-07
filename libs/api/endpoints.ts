@@ -87,6 +87,9 @@ export const RECOMMEND_ENDPOINTS = {
 
   /** 랜덤 집안일 추천 정보 가져오기 */
   RANDOM_CHORES: (spaceChoreId: number) => `/recommend/spaces/${spaceChoreId}`, // GET
+
+  /** 월간 카테고리 목록 조회 */
+  MONTHLY_NAME_LIST: '/recommend/monthly', // GET
 } as const
 
 export const NOTIFICATION_ENDPOINTS = {
